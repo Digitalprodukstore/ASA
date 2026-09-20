@@ -3,54 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Self Photobooth AI App</title>
+  <title>Self Photobooth AI Premium Pro</title>
+  
+  <!-- LIBRARIES -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- MediaPipe Selfie Segmentation AI -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+
   <style id="dynamic-styles">
     :root {
-      --bg-color: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-color: #1f2937;
-      --primary-color: #4f46e5;
-      --font-family: 'Segoe UI', Roboto, sans-serif;
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent-color: #f43f5e;
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); }
-    body { background: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .container { background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 900px; padding: 24px; text-align: center; position: relative; }
+    body { background: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+    
+    .container { 
+      background: var(--card-bg); 
+      border-radius: 20px; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+      width: 100%; 
+      max-width: 960px; 
+      padding: 28px; 
+      text-align: center; 
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
     .screen { display: none; }
     .screen.active { display: block; }
-    h2 { margin-bottom: 12px; }
-    .btn { background: var(--primary-color); color: #fff; border: none; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; margin: 6px; transition: 0.2s; }
-    .btn:hover { opacity: 0.9; }
-    .btn-secondary { background: #e5e7eb; color: #374151; }
-    .card { border: 2px solid #e5e7eb; border-radius: 10px; padding: 16px; margin: 10px 0; cursor: pointer; text-align: left; }
-    .card.selected { border-color: var(--primary-color); background: #eef2ff; }
+    
+    h2 { margin-bottom: 16px; font-weight: 700; letter-spacing: -0.5px; }
+    h3 { margin-bottom: 12px; font-size: 1.1rem; color: #cbd5e1; }
+    
+    .btn { 
+      background: var(--primary-color); 
+      color: #fff; 
+      border: none; 
+      padding: 14px 24px; 
+      font-size: 16px; 
+      font-weight: 600; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      margin: 6px; 
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: #334155; color: #f8fafc; }
+    .btn-danger { background: var(--accent-color); }
+    
+    .card { 
+      border: 2px solid #334155; 
+      border-radius: 12px; 
+      padding: 18px; 
+      margin: 12px 0; 
+      cursor: pointer; 
+      text-align: left; 
+      background: rgba(255,255,255,0.02);
+      transition: 0.2s;
+    }
+    .card.selected { border-color: var(--primary-color); background: rgba(99, 102, 241, 0.15); }
     
     /* LAYOUT TAKE FOTO */
-    .photo-session-layout { display: flex; gap: 16px; margin-top: 12px; }
-    .main-camera-box { flex: 2; }
-    #webcam-view { width: 100%; height: 360px; background: #000; border-radius: 10px; object-fit: cover; transform: scaleX(-1); }
-    .sidebar-photos { flex: 1; display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
-    .sidebar-item { position: relative; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; height: 95px; cursor: move; }
+    .photo-session-layout { display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+    .main-camera-box { flex: 2; min-width: 300px; position: relative; }
+    
+    #webcam-view { 
+      width: 100%; 
+      height: 380px; 
+      background: #000; 
+      border-radius: 14px; 
+      object-fit: cover; 
+      transform: scaleX(-1); 
+      border: 2px solid #334155;
+    }
+    
+    .sidebar-photos { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      max-height: 440px; 
+      overflow-y: auto; 
+      min-width: 180px;
+    }
+    
+    /* IMPROVED RETAKE BUTTON UX */
+    .sidebar-item { 
+      position: relative; 
+      border: 2px solid #334155; 
+      border-radius: 10px; 
+      overflow: hidden; 
+      background: #0f172a; 
+      height: 100px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .sidebar-item img { width: 100%; height: 100%; object-fit: cover; }
-    .btn-retake-mini { position: absolute; top: 4px; right: 4px; font-size: 10px; padding: 2px 6px; background: rgba(220, 38, 38, 0.85); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-retake-touch { 
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      width: 100%; 
+      padding: 6px 0; 
+      font-size: 12px; 
+      font-weight: 700; 
+      background: rgba(244, 63, 94, 0.95); 
+      color: #fff; 
+      border: none; 
+      cursor: pointer; 
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-    .timer-display { font-size: 36px; font-weight: bold; color: #dc2626; margin: 6px 0; }
-    .qr-container { display: flex; justify-content: center; margin: 16px 0; }
-    .frame-selection { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-    .frame-option { border: 2px solid #ccc; border-radius: 8px; padding: 8px; min-width: 100px; cursor: pointer; }
-    .frame-option.selected { border-color: var(--primary-color); background: #eef2ff; }
+    .timer-display { 
+      position: absolute; 
+      top: 20px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      font-size: 72px; 
+      font-weight: 800; 
+      color: #fff; 
+      text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+    
+    .qr-container { display: flex; justify-content: center; margin: 20px 0; background: #fff; padding: 16px; border-radius: 12px; width: fit-content; margin-left: auto; margin-right: auto; }
+    
+    .frame-selection { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; }
+    .frame-option { border: 2px solid #334155; border-radius: 10px; padding: 10px; min-width: 110px; cursor: pointer; text-align: center; }
+    .frame-option.selected { border-color: var(--primary-color); background: rgba(99, 102, 241, 0.2); }
 
     /* EDIT PASFOTO / BG FORMAL */
-    .color-swatch-group { display: flex; gap: 10px; margin-top: 6px; }
-    .color-swatch { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; }
+    .color-swatch-group { display: flex; gap: 12px; margin-top: 8px; justify-content: center; }
+    .color-swatch { width: 42px; height: 42px; border-radius: 50%; border: 3px solid #334155; cursor: pointer; transition: 0.2s; }
+    .color-swatch:hover { transform: scale(1.1); }
     .swatch-red { background: #dc2626; }
     .swatch-blue { background: #2563eb; }
     .swatch-green { background: #16a34a; }
     .swatch-white { background: #ffffff; }
 
+    .camera-select-box { margin-bottom: 12px; text-align: left; }
+    .camera-select-box select { width: 100%; padding: 10px; border-radius: 8px; background: #0f172a; color: #fff; border: 1px solid #334155; }
+
     /* DASHBOARD OWNER */
-    #owner-dashboard { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center; }
-    .dashboard-content { background: #fff; padding: 24px; border-radius: 12px; max-width: 500px; width: 90%; text-align: left; max-height: 90vh; overflow-y: auto; }
+    #owner-dashboard { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; }
+    .dashboard-content { background: #1e293b; padding: 28px; border-radius: 16px; max-width: 520px; width: 90%; text-align: left; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
 
     @media print {
       body * { visibility: hidden; }
@@ -64,101 +170,111 @@
 
 <div class="container">
 
-  <h2 id="app-title" onclick="handleTitleClick()" style="cursor: pointer;">Aelf Photobooth AI</h2>
+  <h2 id="app-title" onclick="handleTitleClick()" style="cursor: pointer;">📸 Self Photobooth AI Studio Pro</h2>
 
   <!-- SCREEN 1: FRAME & PAKET -->
   <div id="screen-package" class="screen active">
-    <h3>1. Pilih Frame / Latar</h3>
+    <h3>1. Pilih Frame / Tema Strips</h3>
     <div class="frame-selection" id="frame-list">
       <div class="frame-option selected" onclick="selectFrame('none', this)">
-        <div style="height:80px; display:flex; align-items:center; justify-content:center; background:#eee;">Polos</div>
-        <p style="font-size:12px; margin-top:4px;">Tanpa Frame</p>
+        <div style="height:70px; display:flex; align-items:center; justify-content:center; background:#334155; border-radius:6px; font-size:12px;">Classic White</div>
+        <p style="font-size:12px; margin-top:6px;">Polos</p>
       </div>
     </div>
 
-    <h3 style="margin-top: 16px;">2. Pilih Paket Foto</h3>
-    <div class="card" onclick="selectPackage('Paket Basic', 30000, 1, this)">
-      <strong>Paket Basic - Rp 30.000</strong>
-      <p style="font-size:13px;">4 Sesi Foto + Softfile Cloud + 1x Cetak</p>
+    <h3 style="margin-top: 20px;">2. Pilih Paket Foto</h3>
+    <div class="card" onclick="selectPackage('Paket Unlimited AI', 35000, 1, this)">
+      <strong>Paket Premium AI - Rp 35.000</strong>
+      <p style="font-size:13px; color:#94a3b8; margin-top:4px;">4 Sesi Foto + AI Background Removal + Softfile Cloud + 1x Print</p>
     </div>
 
-    <button class="btn" style="width: 100%; margin-top: 16px;" onclick="goToPayment()">Bayar & Mulai Sesi</button>
+    <button class="btn" style="width: 100%; margin-top: 16px;" onclick="goToPayment()">Lanjut Pembayaran</button>
   </div>
 
   <!-- SCREEN 2: PEMBAYARAN -->
   <div id="screen-payment" class="screen">
     <h3>Pembayaran QRIS</h3>
+    <p style="font-size:13px; color:#94a3b8;">Scan kode QR dibawah ini untuk memulai sesi</p>
     <div class="qr-container" id="payment-qr"></div>
-    <button class="btn" onclick="simulasiBayarLunas()">[Simulasi] Bayar Lunas</button>
+    <button class="btn" onclick="simulasiBayarLunas()">[Simulasi] Konfirmasi Bayar Lunas</button>
   </div>
 
   <!-- SCREEN 3: SESI FOTO -->
   <div id="screen-photo" class="screen">
-    <div style="font-weight:600;">Ambil Foto (<span id="current-session-num">1</span>/4) - Sisa Retake: <span id="retake-count">3</span></div>
+    <div class="camera-select-box">
+      <label style="font-size:12px; color:#94a3b8;">Pilih Kamera / Source (DSLR / USB Webcam / HP Camera):</label>
+      <select id="camera-selector" onchange="changeCamera()"></select>
+    </div>
+
+    <div style="font-weight:600; margin-bottom:8px;">
+      Sesi Ke: <span id="current-session-num" style="color:var(--primary-color);">1</span> / 4 
+      | Sisa Retake: <span id="retake-count" style="color:var(--accent-color);">3</span>
+    </div>
     
     <div class="photo-session-layout">
       <div class="main-camera-box">
-        <video id="webcam-view" autoplay playsinline></video>
-        <div class="timer-display" id="timer-display">5</div>
-        <button id="btn-start-session" class="btn" onclick="startTimer()">Mulai Foto</button>
+        <video id="webcam-view" autoplay playsinline muted></video>
+        <div class="timer-display" id="timer-display" style="display:none;">5</div>
+        <button id="btn-start-session" class="btn" style="width:100%; margin-top:10px;" onclick="startTimer()">Ambil Foto</button>
       </div>
 
       <div class="sidebar-photos">
-        <div class="sidebar-item" id="slot-0"><span style="font-size:11px; color:#94a3b8;">Sesi 1</span></div>
-        <div class="sidebar-item" id="slot-1"><span style="font-size:11px; color:#94a3b8;">Sesi 2</span></div>
-        <div class="sidebar-item" id="slot-2"><span style="font-size:11px; color:#94a3b8;">Sesi 3</span></div>
-        <div class="sidebar-item" id="slot-3"><span style="font-size:11px; color:#94a3b8;">Sesi 4</span></div>
+        <div class="sidebar-item" id="slot-0"><span style="font-size:11px; color:#64748b;">Foto 1</span></div>
+        <div class="sidebar-item" id="slot-1"><span style="font-size:11px; color:#64748b;">Foto 2</span></div>
+        <div class="sidebar-item" id="slot-2"><span style="font-size:11px; color:#64748b;">Foto 3</span></div>
+        <div class="sidebar-item" id="slot-3"><span style="font-size:11px; color:#64748b;">Foto 4</span></div>
       </div>
     </div>
 
-    <button class="btn" id="btn-to-editor" style="margin-top: 16px; display: none;" onclick="goToEditor()">Lanjut ke Editor Foto</button>
+    <button class="btn" id="btn-to-editor" style="margin-top: 20px; width: 100%; display: none;" onclick="goToEditor()">Proses AI & Edit Foto</button>
   </div>
 
-  <!-- SCREEN 4: EDITOR FOTO (EFEK + BG FORMAL & AI) -->
+  <!-- SCREEN 4: EDITOR FOTO (AI REMOVE BG & FORMAL) -->
   <div id="screen-editor" class="screen">
-    <h3>Edit Foto & Latar Belakang</h3>
+    <h3>Studio Editor & AI Background</h3>
+    <p id="ai-processing-notice" style="font-size:13px; color:#f59e0b; margin-bottom:10px;">Sedang memproses AI Background Removal...</p>
     
-    <div style="text-align: center; margin: 12px 0;">
-      <canvas id="editor-canvas" style="max-width: 220px; border-radius: 8px; border: 1px solid #ccc;"></canvas>
+    <div style="text-align: center; margin: 16px 0;">
+      <canvas id="editor-canvas" style="max-width: 240px; border-radius: 12px; border: 2px solid #334155; box-shadow:0 10px 30px rgba(0,0,0,0.5);"></canvas>
     </div>
 
-    <div style="text-align: left; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+    <div style="text-align: left; background: #0f172a; padding: 16px; border-radius: 12px; margin-bottom: 16px; border:1px solid #334155;">
       <!-- PILIHAN WARNA BACKGROUND FORMAL -->
-      <label style="font-size:13px; font-weight:600;">Pilih Warna Latar Formal (Pasfoto):</label>
+      <label style="font-size:13px; font-weight:600;">Warna Latar Pasfoto / Formal:</label>
       <div class="color-swatch-group">
-        <div class="color-swatch swatch-white" title="Putih / Transparan" onclick="setFormalBg('transparent')"></div>
+        <div class="color-swatch swatch-white" title="Asli / Putih" onclick="setFormalBg('transparent')"></div>
         <div class="color-swatch swatch-red" title="Latar Merah" onclick="setFormalBg('#dc2626')"></div>
         <div class="color-swatch swatch-blue" title="Latar Biru" onclick="setFormalBg('#2563eb')"></div>
         <div class="color-swatch swatch-green" title="Green Screen" onclick="setFormalBg('#16a34a')"></div>
       </div>
 
       <!-- FITUR AI GENERATE BACKGROUND -->
-      <div style="margin-top: 12px; border-top: 1px solid #ddd; padding-top: 8px;">
-        <label style="font-size:13px; font-weight:600;">Buat Latar Unik dengan AI:</label>
-        <div style="display:flex; gap:6px; margin-top:4px;">
-          <input type="text" id="ai-prompt-editor" placeholder="Contoh: vintage floral background" style="flex:1; padding:8px;">
-          <button class="btn" style="padding:8px 12px; font-size:12px;" onclick="generateAiBackgroundEditor()">Buat AI</button>
+      <div style="margin-top: 16px; border-top: 1px solid #334155; padding-top: 12px;">
+        <label style="font-size:13px; font-weight:600;">Generate AI Background (Hugging Face):</label>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <input type="text" id="ai-prompt-editor" placeholder="Contoh: luxury neon city, vintage room" style="flex:1; padding:10px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155;">
+          <button class="btn" style="padding:10px 16px; font-size:13px;" onclick="generateAiBackgroundEditor()">Generate</button>
         </div>
-        <span id="ai-status" style="font-size:11px; color:#d97706;"></span>
+        <span id="ai-status" style="font-size:11px; color:#f59e0b; display:block; margin-top:4px;"></span>
       </div>
 
       <!-- FILTER FOTO -->
-      <label style="font-size:13px; font-weight:600; margin-top:12px; display:block;">Pilih Filter Foto:</label>
-      <select id="filter-select" style="width:100%; padding:8px; margin-top:4px;" onchange="updateCanvasPreview()">
-        <option value="none">Normal (Asli)</option>
-        <option value="bw">Hitam Putih (B&W)</option>
-        <option value="sepia">Sepia Vintage</option>
-        <option value="bright">Terang / Bright</option>
+      <label style="font-size:13px; font-weight:600; margin-top:16px; display:block;">Pilih Filter Foto:</label>
+      <select id="filter-select" style="width:100%; padding:10px; margin-top:6px; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #334155;" onchange="renderFinalCanvas()">
+        <option value="none">Normal (Color)</option>
+        <option value="bw">B&W Film Classic</option>
+        <option value="sepia">Warm Sepia</option>
+        <option value="bright">Soft Brightness</option>
       </select>
     </div>
 
-    <button class="btn" style="width:100%;" onclick="finishEditing()">Cetak & Simpan</button>
+    <button class="btn" style="width:100%;" onclick="finishEditing()">Cetak & Upload Cloud</button>
   </div>
 
   <!-- SCREEN 5: FINAL -->
   <div id="screen-final" class="screen">
-    <h3>Selesai! Scan Softfile Anda</h3>
-    <p id="upload-status" style="font-size:13px; color:#d97706; margin-bottom:8px;">Mengunggah ke Cloudinary...</p>
+    <h3>Selesai! Scan untuk Softfile</h3>
+    <p id="upload-status" style="font-size:13px; color:#f59e0b; margin-bottom:12px;">Mengunggah hasil ke Cloudinary...</p>
     <div class="qr-container" id="download-qr"></div>
     <button class="btn" onclick="location.reload()">Selesai & Sesi Baru</button>
   </div>
@@ -171,20 +287,17 @@
 <!-- DASHBOARD OWNER -->
 <div id="owner-dashboard">
   <div class="dashboard-content">
-    <h3>Dashboard Owner & AI Settings</h3>
+    <h3>Owner & System Dashboard</h3>
     <br>
-    <label style="font-size: 13px;">API Key Hugging Face (Gratis untuk AI Background):</label>
-    <input type="password" id="hf-api-key" placeholder="hf_..." style="width:100%; padding:8px; margin-top:4px;">
+    <label style="font-size: 13px;">API Key Hugging Face (AI Image Gen):</label>
+    <input type="password" id="hf-api-key" placeholder="hf_..." style="width:100%; padding:10px; margin-top:6px; border-radius:8px; background:#0f172a; color:#fff; border:1px solid #334155;">
     <br><br>
-    <label style="font-size: 13px;">Warna Background Aplikasi Photobooth:</label>
-    <input type="color" id="owner-bg-color" value="#f3f4f6" onchange="updateTheme()">
-    <br><br>
-    <button class="btn" onclick="closeDashboard()">Simpan & Tutup</button>
+    <button class="btn" style="width:100%;" onclick="closeDashboard()">Simpan & Tutup</button>
   </div>
 </div>
 
 <script>
-  // CONFIGURATION CLOUDINARY
+  // KONFIGURASI CLOUDINARY
   const CLOUDINARY_CLOUD_NAME = "risakil1";
   const CLOUDINARY_UPLOAD_PRESET = "risakil";
 
@@ -192,13 +305,19 @@
   let currentSession = 0;
   let retakeLeft = 3;
   let capturedPhotos = [null, null, null, null];
+  let processedCutoutPhotos = [null, null, null, null];
   let selectedFormalBg = 'transparent';
   let aiCustomBgUrl = null;
   let titleClickCount = 0;
   let finalImageBase64 = null;
-
-  // HUGGING FACE API FOR FREE AI IMAGE GENERATION
+  let currentStream = null;
   let HUGGING_FACE_KEY = "";
+
+  // MEDIAPIPE AI SEGMENTATION SETUP
+  const selfieSegmentation = new SelfieSegmentation({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+  });
+  selfieSegmentation.setOptions({ modelSelection: 1 });
 
   function handleTitleClick() {
     titleClickCount++;
@@ -211,9 +330,6 @@
     HUGGING_FACE_KEY = document.getElementById('hf-api-key').value;
     document.getElementById('owner-dashboard').style.display = 'none';
   }
-  function updateTheme() {
-    document.documentElement.style.setProperty('--bg-color', document.getElementById('owner-bg-color').value);
-  }
 
   function selectFrame(f, el) {
     document.querySelectorAll('.frame-option').forEach(x => x.classList.remove('selected'));
@@ -225,77 +341,158 @@
     selectedPackage = { name: n, price: p, printQty: q };
   }
   function goToPayment() {
-    if (!selectedPackage) return alert("Pilih paket dulu!");
-    new QRCode(document.getElementById('payment-qr'), { text: `PAY-${selectedPackage.price}`, width: 150, height: 150 });
+    if (!selectedPackage) return alert("Pilih paket terlebih dahulu!");
+    document.getElementById('payment-qr').innerHTML = "";
+    new QRCode(document.getElementById('payment-qr'), { text: `PAY-${selectedPackage.price}`, width: 160, height: 160 });
     switchScreen('screen-payment');
   }
   function simulasiBayarLunas() {
     switchScreen('screen-photo');
-    initCamera();
+    initCameraDevices();
   }
 
-  async function initCamera() {
+  // MULTI CAMERA ENGINE (DSLR/CAPTURE CARD, WEBCAM, PHONE)
+  async function initCameraDevices() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
-      document.getElementById('webcam-view').srcObject = stream;
-    } catch (e) { alert("Kamera gagal."); }
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      const selector = document.getElementById('camera-selector');
+      selector.innerHTML = "";
+      
+      videoDevices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Kamera ${index + 1}`;
+        selector.appendChild(option);
+      });
+
+      if (videoDevices.length > 0) {
+        startCameraStream(videoDevices[0].deviceId);
+      }
+    } catch (e) { alert("Gagal mendeteksi kamera."); }
+  }
+
+  async function startCameraStream(deviceId) {
+    if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
+    try {
+      const constraints = { video: { deviceId: deviceId ? { exact: deviceId } : undefined, width: { ideal: 1280 }, height: { ideal: 720 } } };
+      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+      document.getElementById('webcam-view').srcObject = currentStream;
+    } catch (e) { alert("Tidak dapat membuka stream kamera."); }
+  }
+
+  function changeCamera() {
+    const selectedId = document.getElementById('camera-selector').value;
+    startCameraStream(selectedId);
   }
 
   function startTimer() {
     document.getElementById('btn-start-session').style.display = 'none';
+    const timerElem = document.getElementById('timer-display');
+    timerElem.style.display = 'block';
     let count = 5;
-    document.getElementById('timer-display').innerText = count;
+    timerElem.innerText = count;
+
     const t = setInterval(() => {
       count--;
-      document.getElementById('timer-display').innerText = count;
-      if (count <= 0) { clearInterval(t); capturePhoto(); }
+      timerElem.innerText = count;
+      if (count <= 0) { 
+        clearInterval(t); 
+        timerElem.style.display = 'none';
+        capturePhoto(); 
+      }
     }, 1000);
   }
 
   function capturePhoto() {
     const video = document.getElementById('webcam-view');
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
     const ctx = canvas.getContext('2d');
-    ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+    
+    ctx.translate(canvas.width, 0); 
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const dataUrl = canvas.toDataURL('image/jpeg');
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
     capturedPhotos[currentSession] = dataUrl;
 
     const slot = document.getElementById(`slot-${currentSession}`);
-    slot.innerHTML = `<img src="${dataUrl}"><button class="btn-retake-mini" onclick="retakeSession(${currentSession})">Retake</button>`;
+    slot.innerHTML = `<img src="${dataUrl}"><button class="btn-retake-touch" onclick="retakeSession(${currentSession})">Retake</button>`;
 
     if (currentSession < 3) {
       currentSession++;
       document.getElementById('current-session-num').innerText = currentSession + 1;
-      document.getElementById('btn-start-session').style.display = 'inline-block';
+      document.getElementById('btn-start-session').style.display = 'block';
     } else {
       document.getElementById('btn-to-editor').style.display = 'block';
     }
   }
 
   function retakeSession(idx) {
-    if (retakeLeft <= 0) return alert("Retake habis!");
+    if (retakeLeft <= 0) return alert("Kuota Retake telah habis!");
     retakeLeft--;
     document.getElementById('retake-count').innerText = retakeLeft;
     currentSession = idx;
     document.getElementById('current-session-num').innerText = idx + 1;
-    startTimer();
+    document.getElementById('btn-start-session').style.display = 'block';
+  }
+
+  async function goToEditor() {
+    switchScreen('screen-editor');
+    document.getElementById('ai-processing-notice').style.display = 'block';
+    await processAiBackgroundRemovalAll();
+    document.getElementById('ai-processing-notice').style.display = 'none';
+    renderFinalCanvas();
+  }
+
+  // AI BACKGROUND REMOVAL PROCESSOR VIA MEDIAPIPE
+  function removeBackgroundSingle(imageSrc) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = imageSrc;
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        selfieSegmentation.onResults((results) => {
+          tempCtx.save();
+          tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.drawImage(results.segmentationMask, 0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.globalCompositeOperation = 'source-in';
+          tempCtx.drawImage(results.image, 0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.restore();
+          resolve(tempCanvas.toDataURL('image/png'));
+        });
+
+        selfieSegmentation.send({ image: img });
+      };
+    });
+  }
+
+  async function processAiBackgroundRemovalAll() {
+    for (let i = 0; i < capturedPhotos.length; i++) {
+      if (capturedPhotos[i]) {
+        processedCutoutPhotos[i] = await removeBackgroundSingle(capturedPhotos[i]);
+      }
+    }
   }
 
   function setFormalBg(color) {
     selectedFormalBg = color;
     aiCustomBgUrl = null;
-    updateCanvasPreview();
+    renderFinalCanvas();
   }
 
   async function generateAiBackgroundEditor() {
     const prompt = document.getElementById('ai-prompt-editor').value;
-    if (!prompt) return alert("Masukkan deskripsi gambar AI!");
+    if (!prompt) return alert("Masukkan prompt deskripsi!");
     
-    document.getElementById('ai-status').innerText = "Sedang memproses AI...";
+    document.getElementById('ai-status').innerText = "Generating AI Background...";
     try {
       const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1", {
         headers: { Authorization: `Bearer ${HUGGING_FACE_KEY || 'hf_dummy'}` },
@@ -304,75 +501,87 @@
       });
       const blob = await response.blob();
       aiCustomBgUrl = URL.createObjectURL(blob);
-      document.getElementById('ai-status').innerText = "Berhasil membuat Latar AI!";
-      updateCanvasPreview();
+      document.getElementById('ai-status').innerText = "AI Background siap!";
+      renderFinalCanvas();
     } catch (err) {
-      document.getElementById('ai-status').innerText = "Gagal memproses AI. Pastikan API Key diisi.";
+      document.getElementById('ai-status').innerText = "Gagal memproses AI. Periksa API Key.";
     }
   }
 
-  function goToEditor() {
-    switchScreen('screen-editor');
-    updateCanvasPreview();
+  // CANVAS STRIP RENDERER
+  function loadImage(src) {
+    return new Promise((res) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.src = src;
+    });
   }
 
-  function updateCanvasPreview() {
+  async function renderFinalCanvas() {
     const canvas = document.getElementById('editor-canvas');
-    canvas.width = 400; canvas.height = 1200;
+    canvas.width = 600; 
+    canvas.height = 1800;
     const ctx = canvas.getContext('2d');
 
+    // 1. DRAW BACKGROUND
     if (aiCustomBgUrl) {
-      const bgImg = new Image();
-      bgImg.src = aiCustomBgUrl;
-      bgImg.onload = () => { ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height); drawPhotosAndFilters(ctx, canvas); };
+      const bgImg = await loadImage(aiCustomBgUrl);
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     } else {
       ctx.fillStyle = selectedFormalBg === 'transparent' ? '#ffffff' : selectedFormalBg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drawPhotosAndFilters(ctx, canvas);
     }
-  }
 
-  function drawPhotosAndFilters(ctx, canvas) {
+    // 2. APPLY FILTER TO SUBJECTS
     const filterVal = document.getElementById('filter-select').value;
     if (filterVal === 'bw') ctx.filter = 'grayscale(100%)';
     else if (filterVal === 'sepia') ctx.filter = 'sepia(80%)';
-    else if (filterVal === 'bright') ctx.filter = 'brightness(120%)';
+    else if (filterVal === 'bright') ctx.filter = 'brightness(115%)';
     else ctx.filter = 'none';
 
-    let loaded = 0;
-    capturedPhotos.forEach((src, i) => {
-      if (!src) return;
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        ctx.drawImage(img, 20, 20 + (i * 270), 360, 250);
-        loaded++;
-        if (loaded === 4) {
-          ctx.filter = 'none';
-          finalImageBase64 = canvas.toDataURL('image/jpeg');
-        }
-      };
-    });
+    // 3. DRAW CUTOUT FOTOS
+    for (let i = 0; i < 4; i++) {
+      const photoSrc = selectedFormalBg === 'transparent' && !aiCustomBgUrl ? capturedPhotos[i] : processedCutoutPhotos[i];
+      if (photoSrc) {
+        const photoImg = await loadImage(photoSrc);
+        ctx.drawImage(photoImg, 30, 30 + (i * 430), 540, 400);
+      }
+    }
+
+    ctx.filter = 'none';
+    finalImageBase64 = canvas.toDataURL('image/jpeg', 0.95);
   }
 
   function finishEditing() {
     switchScreen('screen-final');
     document.getElementById('print-image-tag').src = finalImageBase64;
-    setTimeout(() => window.print(), 500);
+    setTimeout(() => window.print(), 600);
     uploadToCloudinary();
   }
 
+  // UPLOAD SOFTFILE KE CLOUDINARY
   async function uploadToCloudinary() {
     try {
       const formData = new FormData();
       formData.append('file', finalImageBase64);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+      
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { 
+        method: 'POST', 
+        body: formData 
+      });
       const data = await res.json();
-      document.getElementById('upload-status').innerText = "Softfile Siap Diunduh!";
-      document.getElementById('download-qr').innerHTML = "";
-      new QRCode(document.getElementById('download-qr'), { text: data.secure_url, width: 160, height: 160 });
-    } catch (e) { document.getElementById('upload-status').innerText = "Gagal upload ke Cloudinary."; }
+      
+      if (data.secure_url) {
+        document.getElementById('upload-status').innerText = "Softfile Siap Diunduh!";
+        document.getElementById('download-qr').innerHTML = "";
+        new QRCode(document.getElementById('download-qr'), { text: data.secure_url, width: 180, height: 180 });
+      } else {
+        document.getElementById('upload-status').innerText = "Gagal mengunggah: " + (data.error ? data.error.message : "Preset/Cloud name tidak valid");
+      }
+    } catch (e) { 
+      document.getElementById('upload-status').innerText = "Gagal unggah ke Cloudinary."; 
+    }
   }
 
   function switchScreen(id) {
