@@ -3,60 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Self Photobooth App</title>
+  <title>Self Photobooth AI App</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-    body { background: #f3f4f6; color: #1f2937; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .container { background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 650px; padding: 24px; text-align: center; position: relative; }
+  <style id="dynamic-styles">
+    :root {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --primary-color: #4f46e5;
+      --font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); }
+    body { background: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .container { background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 900px; padding: 24px; text-align: center; position: relative; }
     .screen { display: none; }
     .screen.active { display: block; }
-    h2 { margin-bottom: 12px; color: #111827; }
-    .btn { background: #4f46e5; color: #fff; border: none; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; margin: 6px; transition: 0.2s; }
-    .btn:hover { background: #4338ca; }
-    .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+    h2 { margin-bottom: 12px; }
+    .btn { background: var(--primary-color); color: #fff; border: none; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; margin: 6px; transition: 0.2s; }
+    .btn:hover { opacity: 0.9; }
     .btn-secondary { background: #e5e7eb; color: #374151; }
-    .btn-secondary:hover { background: #d1d5db; }
     .card { border: 2px solid #e5e7eb; border-radius: 10px; padding: 16px; margin: 10px 0; cursor: pointer; text-align: left; }
-    .card.selected { border-color: #4f46e5; background: #eef2ff; }
+    .card.selected { border-color: var(--primary-color); background: #eef2ff; }
     
-    /* Mirror Kamera Live Preview */
-    #webcam-view { width: 100%; height: 340px; background: #000; border-radius: 10px; object-fit: cover; transform: scaleX(-1); margin-bottom: 12px; }
-    
-    .timer-display { font-size: 40px; font-weight: bold; color: #dc2626; margin: 8px 0; }
-    .timer-editor { font-size: 18px; font-weight: bold; color: #d97706; background: #fef3c7; padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
+    /* LAYOUT TAKE FOTO */
+    .photo-session-layout { display: flex; gap: 16px; margin-top: 12px; }
+    .main-camera-box { flex: 2; }
+    #webcam-view { width: 100%; height: 360px; background: #000; border-radius: 10px; object-fit: cover; transform: scaleX(-1); }
+    .sidebar-photos { flex: 1; display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+    .sidebar-item { position: relative; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; height: 95px; cursor: move; }
+    .sidebar-item img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-retake-mini { position: absolute; top: 4px; right: 4px; font-size: 10px; padding: 2px 6px; background: rgba(220, 38, 38, 0.85); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+
+    .timer-display { font-size: 36px; font-weight: bold; color: #dc2626; margin: 6px 0; }
     .qr-container { display: flex; justify-content: center; margin: 16px 0; }
-    .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; }
-    .photo-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e5e7eb; }
-    .photo-item img { width: 100%; height: 120px; object-fit: cover; }
-    .photo-item .btn-retake-single { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 4px 8px; }
-    
-    .editor-controls { text-align: left; background: #f9fafb; padding: 16px; border-radius: 8px; margin: 12px 0; }
-    .editor-controls label { font-size: 14px; font-weight: 600; display: block; margin-top: 8px; }
-    .editor-controls input, .editor-controls select { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 6px; }
-    
-    .extra-print-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 10px; margin-top: 20px; text-align: left; }
+    .frame-selection { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+    .frame-option { border: 2px solid #ccc; border-radius: 8px; padding: 8px; min-width: 100px; cursor: pointer; }
+    .frame-option.selected { border-color: var(--primary-color); background: #eef2ff; }
 
-    /* ELEMEN TERSEMBUNYI UNTUK PENCETAKAN PRINTER */
-    #printable-area { display: none; }
+    /* EDIT PASFOTO / BG FORMAL */
+    .color-swatch-group { display: flex; gap: 10px; margin-top: 6px; }
+    .color-swatch { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ccc; cursor: pointer; }
+    .swatch-red { background: #dc2626; }
+    .swatch-blue { background: #2563eb; }
+    .swatch-green { background: #16a34a; }
+    .swatch-white { background: #ffffff; }
 
-    /* STYLESHEET KHUSUS CETAK PRINTER (@MEDIA PRINT) */
+    /* DASHBOARD OWNER */
+    #owner-dashboard { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center; }
+    .dashboard-content { background: #fff; padding: 24px; border-radius: 12px; max-width: 500px; width: 90%; text-align: left; max-height: 90vh; overflow-y: auto; }
+
     @media print {
       body * { visibility: hidden; }
       #printable-area, #printable-area * { visibility: visible; }
-      #printable-area {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        text-align: center;
-      }
-      #printable-area img {
-        width: 100%;
-        max-width: 4in; /* Ukuran standar foto strip photobooth 4x6 inch */
-        height: auto;
-      }
+      #printable-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; text-align: center; }
+      #printable-area img { width: 100%; max-width: 4in; height: auto; }
     }
   </style>
 </head>
@@ -64,304 +64,291 @@
 
 <div class="container">
 
-  <!-- SCREEN 1: PILIH PAKET -->
+  <h2 id="app-title" onclick="handleTitleClick()" style="cursor: pointer;">Aelf Photobooth AI</h2>
+
+  <!-- SCREEN 1: FRAME & PAKET -->
   <div id="screen-package" class="screen active">
-    <h2>Pilih Paket Photobooth</h2>
+    <h3>1. Pilih Frame / Latar</h3>
+    <div class="frame-selection" id="frame-list">
+      <div class="frame-option selected" onclick="selectFrame('none', this)">
+        <div style="height:80px; display:flex; align-items:center; justify-content:center; background:#eee;">Polos</div>
+        <p style="font-size:12px; margin-top:4px;">Tanpa Frame</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 16px;">2. Pilih Paket Foto</h3>
     <div class="card" onclick="selectPackage('Paket Basic', 30000, 1, this)">
-      <h3>Paket Basic</h3>
-      <p>4 Sesi Foto - Softfile Cloud + 1x Cetak Strip</p>
-      <strong>Rp 30.000</strong>
-    </div>
-    <div class="card" onclick="selectPackage('Paket Double', 45000, 2, this)">
-      <h3>Paket Double</h3>
-      <p>4 Sesi Foto - Softfile Cloud + 2x Cetak Strip</p>
-      <strong>Rp 45.000</strong>
+      <strong>Paket Basic - Rp 30.000</strong>
+      <p style="font-size:13px;">4 Sesi Foto + Softfile Cloud + 1x Cetak</p>
     </div>
 
-    <div style="margin-top: 16px; text-align: left;">
-      <p style="font-weight: 600;">Mode Sesi Foto:</p>
-      <label><input type="radio" name="mode" value="manual" checked> Manual (Klik tombol per sesi)</label><br>
-      <label><input type="radio" name="mode" value="auto"> Otomatis (Lanjut tanpa jeda)</label>
-    </div>
-
-    <button class="btn" style="margin-top: 20px; width: 100%;" onclick="goToPayment()">Lanjut ke Pembayaran</button>
+    <button class="btn" style="width: 100%; margin-top: 16px;" onclick="goToPayment()">Bayar & Mulai Sesi</button>
   </div>
 
-  <!-- SCREEN 2: PEMBAYARAN UTAMA -->
+  <!-- SCREEN 2: PEMBAYARAN -->
   <div id="screen-payment" class="screen">
-    <h2>Pembayaran Paket</h2>
-    <p>Silakan scan QRIS untuk memulai foto</p>
+    <h3>Pembayaran QRIS</h3>
     <div class="qr-container" id="payment-qr"></div>
-    <p id="payment-status" style="font-weight: 600; color: #4f46e5;">Menunggu Pembayaran...</p>
-    <button class="btn" onclick="simulasiBayarLunas()">[Simulasi] Konfirmasi Lunas</button>
+    <button class="btn" onclick="simulasiBayarLunas()">[Simulasi] Bayar Lunas</button>
   </div>
 
-  <!-- SCREEN 3: TAKE FOTO (4 SESI) -->
+  <!-- SCREEN 3: SESI FOTO -->
   <div id="screen-photo" class="screen">
-    <div style="font-weight:600; margin-bottom: 8px;">Sesi Foto <span id="current-session-num">1</span> dari 4</div>
-    <video id="webcam-view" autoplay playsinline></video>
-    <div class="timer-display" id="timer-display">5</div>
-    <button id="btn-start-session" class="btn" onclick="startTimer()">Mulai Ambil Foto</button>
-  </div>
-
-  <!-- SCREEN 4: PREVIEW 4 FOTO & RETAKE -->
-  <div id="screen-retake" class="screen">
-    <h2>Hasil 4 Sesi Foto</h2>
-    <p>Sisa Kesempatan Retake: <strong id="retake-count" style="color:#dc2626;">3</strong>/3</p>
-    <div class="photo-grid" id="preview-grid"></div>
-    <button class="btn" onclick="goToEditor()">Lanjut ke Edit Foto</button>
-  </div>
-
-  <!-- SCREEN 5: EDITOR FOTO (TIMER 30 DETIK) -->
-  <div id="screen-editor" class="screen">
-    <h2>Edit Foto & Filter</h2>
-    <div class="timer-editor">Waktu Edit Sisa: <span id="editor-timer">30</span> Detik</div>
+    <div style="font-weight:600;">Ambil Foto (<span id="current-session-num">1</span>/4) - Sisa Retake: <span id="retake-count">3</span></div>
     
-    <div style="text-align: center; margin-bottom: 12px;">
-      <canvas id="editor-canvas" style="max-width: 200px; border-radius: 8px; border: 1px solid #ccc;"></canvas>
+    <div class="photo-session-layout">
+      <div class="main-camera-box">
+        <video id="webcam-view" autoplay playsinline></video>
+        <div class="timer-display" id="timer-display">5</div>
+        <button id="btn-start-session" class="btn" onclick="startTimer()">Mulai Foto</button>
+      </div>
+
+      <div class="sidebar-photos">
+        <div class="sidebar-item" id="slot-0"><span style="font-size:11px; color:#94a3b8;">Sesi 1</span></div>
+        <div class="sidebar-item" id="slot-1"><span style="font-size:11px; color:#94a3b8;">Sesi 2</span></div>
+        <div class="sidebar-item" id="slot-2"><span style="font-size:11px; color:#94a3b8;">Sesi 3</span></div>
+        <div class="sidebar-item" id="slot-3"><span style="font-size:11px; color:#94a3b8;">Sesi 4</span></div>
+      </div>
     </div>
 
-    <div class="editor-controls">
-      <label>Pilih Filter Warna:</label>
-      <select id="filter-select" onchange="updateCanvasPreview()">
+    <button class="btn" id="btn-to-editor" style="margin-top: 16px; display: none;" onclick="goToEditor()">Lanjut ke Editor Foto</button>
+  </div>
+
+  <!-- SCREEN 4: EDITOR FOTO (EFEK + BG FORMAL & AI) -->
+  <div id="screen-editor" class="screen">
+    <h3>Edit Foto & Latar Belakang</h3>
+    
+    <div style="text-align: center; margin: 12px 0;">
+      <canvas id="editor-canvas" style="max-width: 220px; border-radius: 8px; border: 1px solid #ccc;"></canvas>
+    </div>
+
+    <div style="text-align: left; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+      <!-- PILIHAN WARNA BACKGROUND FORMAL -->
+      <label style="font-size:13px; font-weight:600;">Pilih Warna Latar Formal (Pasfoto):</label>
+      <div class="color-swatch-group">
+        <div class="color-swatch swatch-white" title="Putih / Transparan" onclick="setFormalBg('transparent')"></div>
+        <div class="color-swatch swatch-red" title="Latar Merah" onclick="setFormalBg('#dc2626')"></div>
+        <div class="color-swatch swatch-blue" title="Latar Biru" onclick="setFormalBg('#2563eb')"></div>
+        <div class="color-swatch swatch-green" title="Green Screen" onclick="setFormalBg('#16a34a')"></div>
+      </div>
+
+      <!-- FITUR AI GENERATE BACKGROUND -->
+      <div style="margin-top: 12px; border-top: 1px solid #ddd; padding-top: 8px;">
+        <label style="font-size:13px; font-weight:600;">Buat Latar Unik dengan AI:</label>
+        <div style="display:flex; gap:6px; margin-top:4px;">
+          <input type="text" id="ai-prompt-editor" placeholder="Contoh: vintage floral background" style="flex:1; padding:8px;">
+          <button class="btn" style="padding:8px 12px; font-size:12px;" onclick="generateAiBackgroundEditor()">Buat AI</button>
+        </div>
+        <span id="ai-status" style="font-size:11px; color:#d97706;"></span>
+      </div>
+
+      <!-- FILTER FOTO -->
+      <label style="font-size:13px; font-weight:600; margin-top:12px; display:block;">Pilih Filter Foto:</label>
+      <select id="filter-select" style="width:100%; padding:8px; margin-top:4px;" onchange="updateCanvasPreview()">
         <option value="none">Normal (Asli)</option>
         <option value="bw">Hitam Putih (B&W)</option>
         <option value="sepia">Sepia Vintage</option>
         <option value="bright">Terang / Bright</option>
       </select>
-
-      <label>Tambahkan Teks Event (Opsional):</label>
-      <input type="text" id="custom-text" placeholder="Contoh: Happy Birthday / 2026" oninput="updateCanvasPreview()" maxlength="25">
     </div>
 
-    <button class="btn" onclick="finishEditing()">Cetak & Simpan Foto</button>
+    <button class="btn" style="width:100%;" onclick="finishEditing()">Cetak & Simpan</button>
   </div>
 
-  <!-- SCREEN 6: DOWNLOAD SOFTFILE & EXTRA PRINT -->
+  <!-- SCREEN 5: FINAL -->
   <div id="screen-final" class="screen">
-    <h2>Selesai! Terima Kasih</h2>
-    <p>Scan QR Code di bawah untuk mendownload Softfile Anda:</p>
+    <h3>Selesai! Scan Softfile Anda</h3>
+    <p id="upload-status" style="font-size:13px; color:#d97706; margin-bottom:8px;">Mengunggah ke Cloudinary...</p>
     <div class="qr-container" id="download-qr"></div>
-    <div id="upload-status" style="font-weight: 600; margin-bottom: 12px;">Mengunggah ke Cloudinary...</div>
-
-    <!-- FITUR CETAK ULANG/MANUAL -->
-    <button class="btn btn-secondary" onclick="triggerAutoPrint()">🖨️ Cetak Ulang Foto Ini</button>
-
-    <!-- FITUR TAMBAHAN CETAK -->
-    <div class="extra-print-box">
-      <h3>Ingin Tambah Cetakan Foto?</h3>
-      <p style="font-size: 13px; color: #4b5563; margin-bottom: 8px;">Harga: <strong>Rp <span id="price-per-print">10000</span></strong> / cetak tambahan</p>
-      
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-        <label>Jumlah Cetak:</label>
-        <input type="number" id="extra-print-qty" value="1" min="1" max="10" style="width: 60px; padding: 6px; border-radius: 4px; border: 1px solid #ccc;" onchange="updateExtraPrintPrice()">
-        <span>Total: <strong id="extra-print-total">Rp 10.000</strong></span>
-      </div>
-
-      <button class="btn btn-secondary" onclick="generateExtraPrintQR()">Bayar Tambahan Cetak</button>
-
-      <div id="extra-payment-section" style="display: none; margin-top: 12px; text-align: center;">
-        <p style="font-size: 13px; font-weight: 600;">Scan QR untuk Bayar Cetak Tambahan:</p>
-        <div class="qr-container" id="extra-qr"></div>
-        <button class="btn" onclick="simulasiBayarExtraLunas()">[Simulasi] Lunas & Print Sekarang</button>
-      </div>
-    </div>
-
-    <br>
-    <button class="btn" style="width: 100%; margin-top: 10px;" onclick="resetApp()">Selesai & Sesi Baru</button>
+    <button class="btn" onclick="location.reload()">Selesai & Sesi Baru</button>
   </div>
 
 </div>
 
-<!-- AREA CETAK KHUSUS PRINTER -->
-<div id="printable-area">
-  <img id="print-image-tag" src="" alt="Photobooth Printout">
+<!-- AREA PRINT -->
+<div id="printable-area"><img id="print-image-tag" src=""></div>
+
+<!-- DASHBOARD OWNER -->
+<div id="owner-dashboard">
+  <div class="dashboard-content">
+    <h3>Dashboard Owner & AI Settings</h3>
+    <br>
+    <label style="font-size: 13px;">API Key Hugging Face (Gratis untuk AI Background):</label>
+    <input type="password" id="hf-api-key" placeholder="hf_..." style="width:100%; padding:8px; margin-top:4px;">
+    <br><br>
+    <label style="font-size: 13px;">Warna Background Aplikasi Photobooth:</label>
+    <input type="color" id="owner-bg-color" value="#f3f4f6" onchange="updateTheme()">
+    <br><br>
+    <button class="btn" onclick="closeDashboard()">Simpan & Tutup</button>
+  </div>
 </div>
 
 <script>
-  // ================= CLOUDINARY CONFIG =================
+  // CONFIGURATION CLOUDINARY
   const CLOUDINARY_CLOUD_NAME = "risakil1";
   const CLOUDINARY_UPLOAD_PRESET = "risakil";
 
-  // ================= PENGATURAN HARGA =================
-  const EXTRA_PRINT_PRICE = 10000;
-
-  // ================= STATE SYSTEM =================
   let selectedPackage = null;
-  let isAutomaticMode = false;
-  let currentSession = 1;
+  let currentSession = 0;
   let retakeLeft = 3;
-  let capturedPhotos = [];
-  let targetRetakeIndex = null;
-  
-  let editorTimer = 30;
-  let editorInterval = null;
+  let capturedPhotos = [null, null, null, null];
+  let selectedFormalBg = 'transparent';
+  let aiCustomBgUrl = null;
+  let titleClickCount = 0;
   let finalImageBase64 = null;
 
-  document.getElementById('price-per-print').innerText = EXTRA_PRINT_PRICE.toLocaleString('id-ID');
+  // HUGGING FACE API FOR FREE AI IMAGE GENERATION
+  let HUGGING_FACE_KEY = "";
 
-  // 1. PILIH PAKET
-  function selectPackage(name, price, printQty, elem) {
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    elem.classList.add('selected');
-    selectedPackage = { name, price, printQty };
+  function handleTitleClick() {
+    titleClickCount++;
+    if (titleClickCount >= 3) {
+      document.getElementById('owner-dashboard').style.display = 'flex';
+      titleClickCount = 0;
+    }
+  }
+  function closeDashboard() {
+    HUGGING_FACE_KEY = document.getElementById('hf-api-key').value;
+    document.getElementById('owner-dashboard').style.display = 'none';
+  }
+  function updateTheme() {
+    document.documentElement.style.setProperty('--bg-color', document.getElementById('owner-bg-color').value);
   }
 
+  function selectFrame(f, el) {
+    document.querySelectorAll('.frame-option').forEach(x => x.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function selectPackage(n, p, q, el) {
+    document.querySelectorAll('.card').forEach(x => x.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPackage = { name: n, price: p, printQty: q };
+  }
   function goToPayment() {
-    if (!selectedPackage) return alert("Pilih paket foto terlebih dahulu!");
-    isAutomaticMode = document.querySelector('input[name="mode"]:checked').value === 'auto';
-    
-    document.getElementById('payment-qr').innerHTML = "";
-    new QRCode(document.getElementById('payment-qr'), { text: `PAY-${selectedPackage.name}-${selectedPackage.price}`, width: 160, height: 160 });
+    if (!selectedPackage) return alert("Pilih paket dulu!");
+    new QRCode(document.getElementById('payment-qr'), { text: `PAY-${selectedPackage.price}`, width: 150, height: 150 });
     switchScreen('screen-payment');
   }
-
   function simulasiBayarLunas() {
     switchScreen('screen-photo');
     initCamera();
   }
 
-  // 2. KAMERA MIRROR & FOTO
   async function initCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
       document.getElementById('webcam-view').srcObject = stream;
-    } catch (err) {
-      alert("Kamera tidak dapat diakses.");
-    }
+    } catch (e) { alert("Kamera gagal."); }
   }
 
   function startTimer() {
     document.getElementById('btn-start-session').style.display = 'none';
     let count = 5;
     document.getElementById('timer-display').innerText = count;
-
     const t = setInterval(() => {
       count--;
       document.getElementById('timer-display').innerText = count;
-      if (count <= 0) {
-        clearInterval(t);
-        captureSinglePhoto();
-      }
+      if (count <= 0) { clearInterval(t); capturePhoto(); }
     }, 1000);
   }
 
-  function captureSinglePhoto() {
+  function capturePhoto() {
     const video = document.getElementById('webcam-view');
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
     const ctx = canvas.getContext('2d');
-
-    // SAMAKAN DENGAN DISPLAY LAYAR (MIRROR FLIP)
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const dataUrl = canvas.toDataURL('image/jpeg');
+    capturedPhotos[currentSession] = dataUrl;
 
-    if (targetRetakeIndex !== null) {
-      capturedPhotos[targetRetakeIndex] = dataUrl;
-      targetRetakeIndex = null;
-      renderRetakeGrid();
-      switchScreen('screen-retake');
-      return;
-    }
+    const slot = document.getElementById(`slot-${currentSession}`);
+    slot.innerHTML = `<img src="${dataUrl}"><button class="btn-retake-mini" onclick="retakeSession(${currentSession})">Retake</button>`;
 
-    capturedPhotos.push(dataUrl);
-
-    if (currentSession < 4) {
+    if (currentSession < 3) {
       currentSession++;
-      document.getElementById('current-session-num').innerText = currentSession;
-      if (isAutomaticMode) {
-        setTimeout(startTimer, 1500);
-      } else {
-        document.getElementById('btn-start-session').style.display = 'inline-block';
-      }
+      document.getElementById('current-session-num').innerText = currentSession + 1;
+      document.getElementById('btn-start-session').style.display = 'inline-block';
     } else {
-      renderRetakeGrid();
-      switchScreen('screen-retake');
+      document.getElementById('btn-to-editor').style.display = 'block';
     }
   }
 
-  // 3. RETAKE 4 FOTO
-  function renderRetakeGrid() {
-    const grid = document.getElementById('preview-grid');
-    grid.innerHTML = "";
-    document.getElementById('retake-count').innerText = retakeLeft;
-
-    capturedPhotos.forEach((src, idx) => {
-      grid.innerHTML += `
-        <div class="photo-item">
-          <img src="${src}">
-          <button class="btn btn-secondary btn-retake-single" 
-            onclick="triggerSingleRetake(${idx})" ${retakeLeft <= 0 ? 'disabled' : ''}>
-            Retake Sesi ${idx + 1}
-          </button>
-        </div>
-      `;
-    });
-  }
-
-  function triggerSingleRetake(index) {
-    if (retakeLeft <= 0) return;
+  function retakeSession(idx) {
+    if (retakeLeft <= 0) return alert("Retake habis!");
     retakeLeft--;
-    targetRetakeIndex = index;
-    document.getElementById('current-session-num').innerText = index + 1;
-    switchScreen('screen-photo');
-    document.getElementById('btn-start-session').style.display = 'inline-block';
+    document.getElementById('retake-count').innerText = retakeLeft;
+    currentSession = idx;
+    document.getElementById('current-session-num').innerText = idx + 1;
+    startTimer();
   }
 
-  // 4. EDITOR FOTO & TIMER 30 DETIK
+  function setFormalBg(color) {
+    selectedFormalBg = color;
+    aiCustomBgUrl = null;
+    updateCanvasPreview();
+  }
+
+  async function generateAiBackgroundEditor() {
+    const prompt = document.getElementById('ai-prompt-editor').value;
+    if (!prompt) return alert("Masukkan deskripsi gambar AI!");
+    
+    document.getElementById('ai-status').innerText = "Sedang memproses AI...";
+    try {
+      const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1", {
+        headers: { Authorization: `Bearer ${HUGGING_FACE_KEY || 'hf_dummy'}` },
+        method: "POST",
+        body: JSON.stringify({ inputs: prompt }),
+      });
+      const blob = await response.blob();
+      aiCustomBgUrl = URL.createObjectURL(blob);
+      document.getElementById('ai-status').innerText = "Berhasil membuat Latar AI!";
+      updateCanvasPreview();
+    } catch (err) {
+      document.getElementById('ai-status').innerText = "Gagal memproses AI. Pastikan API Key diisi.";
+    }
+  }
+
   function goToEditor() {
     switchScreen('screen-editor');
     updateCanvasPreview();
-    
-    editorTimer = 30;
-    document.getElementById('editor-timer').innerText = editorTimer;
-    
-    editorInterval = setInterval(() => {
-      editorTimer--;
-      document.getElementById('editor-timer').innerText = editorTimer;
-      if (editorTimer <= 0) {
-        clearInterval(editorInterval);
-        finishEditing();
-      }
-    }, 1000);
   }
 
   function updateCanvasPreview() {
     const canvas = document.getElementById('editor-canvas');
-    canvas.width = 400;
-    canvas.height = 1200;
+    canvas.width = 400; canvas.height = 1200;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (aiCustomBgUrl) {
+      const bgImg = new Image();
+      bgImg.src = aiCustomBgUrl;
+      bgImg.onload = () => { ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height); drawPhotosAndFilters(ctx, canvas); };
+    } else {
+      ctx.fillStyle = selectedFormalBg === 'transparent' ? '#ffffff' : selectedFormalBg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawPhotosAndFilters(ctx, canvas);
+    }
+  }
 
+  function drawPhotosAndFilters(ctx, canvas) {
     const filterVal = document.getElementById('filter-select').value;
     if (filterVal === 'bw') ctx.filter = 'grayscale(100%)';
     else if (filterVal === 'sepia') ctx.filter = 'sepia(80%)';
     else if (filterVal === 'bright') ctx.filter = 'brightness(120%)';
     else ctx.filter = 'none';
 
-    let loadedCount = 0;
+    let loaded = 0;
     capturedPhotos.forEach((src, i) => {
+      if (!src) return;
       const img = new Image();
       img.src = src;
       img.onload = () => {
         ctx.drawImage(img, 20, 20 + (i * 270), 360, 250);
-        loadedCount++;
-
-        if (loadedCount === 4) {
+        loaded++;
+        if (loaded === 4) {
           ctx.filter = 'none';
-          const txt = document.getElementById('custom-text').value;
-          if (txt) {
-            ctx.fillStyle = '#1f2937';
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(txt, canvas.width / 2, 1150);
-          }
           finalImageBase64 = canvas.toDataURL('image/jpeg');
         }
       };
@@ -369,75 +356,28 @@
   }
 
   function finishEditing() {
-    clearInterval(editorInterval);
     switchScreen('screen-final');
-    
-    // Set gambar ke elemen cetak
     document.getElementById('print-image-tag').src = finalImageBase64;
-
-    // Jalankan auto print
-    triggerAutoPrint();
-
-    // Upload ke Cloudinary
+    setTimeout(() => window.print(), 500);
     uploadToCloudinary();
   }
 
-  // FUNGSI PRINT OTOMATIS
-  function triggerAutoPrint() {
-    setTimeout(() => {
-      window.print(); // Memanggil dialog cetak sistem browser
-    }, 500);
-  }
-
-  // 5. CLOUDINARY & EXTRA PRINT
   async function uploadToCloudinary() {
     try {
       const formData = new FormData();
       formData.append('file', finalImageBase64);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: 'POST',
-        body: formData
-      });
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
-
-      document.getElementById('upload-status').innerText = "Softfile Berhasil Diunggah!";
+      document.getElementById('upload-status').innerText = "Softfile Siap Diunduh!";
       document.getElementById('download-qr').innerHTML = "";
-      new QRCode(document.getElementById('download-qr'), { text: data.secure_url, width: 180, height: 180 });
-    } catch (e) {
-      document.getElementById('upload-status').innerText = "Gagal upload softfile. Periksa Cloudinary config.";
-    }
+      new QRCode(document.getElementById('download-qr'), { text: data.secure_url, width: 160, height: 160 });
+    } catch (e) { document.getElementById('upload-status').innerText = "Gagal upload ke Cloudinary."; }
   }
 
-  function updateExtraPrintPrice() {
-    const qty = parseInt(document.getElementById('extra-print-qty').value) || 1;
-    const total = qty * EXTRA_PRINT_PRICE;
-    document.getElementById('extra-print-total').innerText = "Rp " + total.toLocaleString('id-ID');
-  }
-
-  function generateExtraPrintQR() {
-    const qty = document.getElementById('extra-print-qty').value;
-    const total = qty * EXTRA_PRINT_PRICE;
-    document.getElementById('extra-payment-section').style.display = 'block';
-    document.getElementById('extra-qr').innerHTML = "";
-    new QRCode(document.getElementById('extra-qr'), { text: `EXTRA-PRINT-${qty}-${total}`, width: 150, height: 150 });
-  }
-
-  function simulasiBayarExtraLunas() {
-    alert("Pembayaran Berhasil! Mencetak tambahan...");
-    document.getElementById('extra-payment-section').style.display = 'none';
-    triggerAutoPrint(); // Jalankan print lagi setelah bayar cetakan ekstra
-  }
-
-  // UTILS
   function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-  }
-
-  function resetApp() {
-    location.reload();
   }
 </script>
 
