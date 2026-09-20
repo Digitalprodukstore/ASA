@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoothPro - Kiosk Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .mirror { transform: scaleX(-1); }
+    </style>
+</head>
+<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between overflow-hidden">
+
+    <!-- Top Header -->
+    <header class="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wider text-indigo-400">BOOTHPRO <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded">KIOSK ENGINE</span></h1>
+        <div id="status-cloud" class="text-xs text-green-400 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span> Engine Ready
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col md:flex-row items-center justify-center p-4 gap-6">
+        
+        <!-- Live Viewport & Frame Overlay -->
+        <div class="relative w-full max-w-2xl bg-black rounded-2xl overflow-hidden border-2 border-gray-800 aspect-video flex items-center justify-center shadow-2xl">
+            <video id="webcam" autoplay playsinline class="w-full h-full object-cover mirror"></video>
+            
+            <!-- Frame Live Preview (PNG Transparan) -->
+            <img id="frame-overlay" class="absolute inset-0 w-full h-full object-contain pointer-events-none hidden" src="" alt="Frame Overlay">
+
+            <!-- Countdown Overlay -->
+            <div id="countdown" class="absolute inset-0 flex items-center justify-center text-9xl font-black text-yellow-400 drop-shadow-2xl hidden">3</div>
+
+            <!-- Processing Canvas (Hidden) -->
+            <canvas id="photo-canvas" class="hidden"></canvas>
+        </div>
+
+        <!-- Controls Side Panel -->
+        <div class="w-full md:w-80 bg-gray-900 p-6 rounded-2xl border border-gray-800 flex flex-col gap-4">
+            <h2 class="text-md font-semibold text-gray-300 border-b border-gray-800 pb-2">Konfigurasi Sesi</h2>
+            
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Pilih Layout Bingkai (Frame PNG)</label>
+                <select id="frame-select" class="w-full bg-gray-800 text-xs text-white p-2.5 rounded-lg border border-gray-700 focus:outline-none focus:border-indigo-500">
+                    <option value="">Tanpa Frame (Foto Polosan)</option>
+                    <option value="https://via.placeholder.com/1280x720/00000000/FFFFFF?text=Sample+Frame+PNG">Sample Overlay 4R (PNG)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">Filter Warna Real-time</label>
+                <select id="filter-select" class="w-full bg-gray-800 text-xs text-white p-2.5 rounded-lg border border-gray-700 focus:outline-none focus:border-indigo-500">
+                    <option value="none">Normal Color</option>
+                    <option value="grayscale(100%)">Monochrome / B&W</option>
+                    <option value="sepia(80%)">Vintage Warm</option>
+                    <option value="contrast(130%) brightness(110%)">Vibrant Pro</option>
+                </select>
+            </div>
+
+            <button id="snap-btn" onclick="startCaptureSequence()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-95 text-lg">
+                📸 AMBIL FOTO
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal Output & QR Code -->
+    <div id="result-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-gray-900 p-6 rounded-2xl max-w-lg w-full flex flex-col items-center gap-4 border border-gray-800">
+            <h3 class="text-lg font-bold text-white">Sesi Foto Berhasil!</h3>
+            
+            <img id="output-image" class="w-64 rounded-lg border border-gray-700 shadow-xl" src="" alt="Captured Photo">
+            
+            <div class="bg-white p-3 rounded-xl flex flex-col items-center shadow-inner">
+                <div id="qrcode"></div>
+                <span id="qr-status" class="text-[10px] text-gray-700 mt-1 font-bold">Scan QR untuk Download</span>
+            </div>
+
+            <div class="flex gap-2 w-full mt-2">
+                <button onclick="window.print()" class="flex-1 bg-green-600 hover:bg-green-500 py-2.5 rounded-lg font-semibold text-sm transition">🖨️ Cetak Direct</button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-semibold text-sm transition">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panggil File Modul Upload Kamu -->
+    <script src="cloud-config.js"></script>
+    <script>
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('photo-canvas');
+        const countdownEl = document.getElementById('countdown');
+        const filterSelect = document.getElementById('filter-select');
+        const frameSelect = document.getElementById('frame-select');
+        const frameOverlay = document.getElementById('frame-overlay');
+        const outputImg = document.getElementById('output-image');
+        const resultModal = document.getElementById('result-modal');
+
+        // Init Kamera Native WebRTC
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Kamera tidak ditemukan / izin ditolak!");
+            }
+        }
+
+        filterSelect.addEventListener('change', (e) => video.style.filter = e.target.value);
+        frameSelect.addEventListener('change', (e) => {
+            if(e.target.value) {
+                frameOverlay.src = e.target.value;
+                frameOverlay.classList.remove('hidden');
+            } else {
+                frameOverlay.classList.add('hidden');
+            }
+        });
+
+        function startCaptureSequence() {
+            let count = 3;
+            countdownEl.innerText = count;
+            countdownEl.classList.remove('hidden');
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.innerText = count;
+                } else {
+                    clearInterval(timer);
+                    countdownEl.classList.add('hidden');
+                    captureAndComposite();
+                }
+            }, 1000);
+        }
+
+        // Logic Canvas Composite
+        async function captureAndComposite() {
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
+
+            // 1. Gambar Stream Kamera + Filter
+            ctx.filter = filterSelect.value;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 2. Gambar Frame PNG jika ada
+            if (frameSelect.value) {
+                const frameImg = new Image();
+                frameImg.crossOrigin = "anonymous";
+                frameImg.src = frameSelect.value;
+                await new Promise((resolve) => {
+                    frameImg.onload = () => {
+                        ctx.filter = "none";
+                        ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+                        resolve();
+                    };
+                });
+            }
+
+            const imageDataUrl = canvas.toDataURL('image/png');
+            outputImg.src = imageDataUrl;
+            resultModal.classList.remove('hidden');
+
+            // 3. Panggil fungsi upload dari cloud-config.js (bagian kamu)
+            if (typeof handleCustomUpload === 'function') {
+                handleCustomUpload(imageDataUrl);
+            }
+        }
+
+        function closeModal() {
+            resultModal.classList.add('hidden');
+        }
+
+        document.body.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && resultModal.classList.contains('hidden')) startCaptureSequence();
+        });
+
+        initCamera();
+    </script>
+</body>
+</html>
