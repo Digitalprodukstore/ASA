@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Master SaaS & Security Dashboard - Photobooth</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Photobooth Pro - Dashboard & Control Panel</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #07090e; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-btn.active { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
-        .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); }
+        body { background-color: #07090e; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; padding-bottom: 90px; }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        .nav-item.active { color: #6366f1; }
+        .nav-item.active .nav-icon { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
-    <!-- KEAMANAN: SISTEM PROTEKSI PIN ADMIN -->
+    <!-- KEAMANAN: PROTEKSI PIN ADMIN -->
     <script>
         (function() {
-            const isAuth = sessionStorage.getItem('admin_authenticated');
-            if (isAuth !== 'true') {
-                // PIN Keamanan Default (Bisa diubah di bawah)
-                const securePin = "2026"; 
-                const inputPin = prompt("🔒 PROTEKSI KEAMANAN PRO:\nMasukkan PIN Admin untuk mengakses Dashboard:");
+            if (sessionStorage.getItem('admin_authenticated') !== 'true') {
+                const securePin = "2026"; // Ubah PIN sesuai keinginan Anda
+                const inputPin = prompt("🔒 KEAMANAN DASHBOARD:\nMasukkan PIN Admin:");
                 if (inputPin === securePin) {
                     sessionStorage.setItem('admin_authenticated', 'true');
                 } else {
@@ -35,250 +32,221 @@
         })();
     </script>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen p-4 max-w-xl mx-auto">
 
-    <!-- SIDEBAR NAVIGASI PRO -->
-    <aside class="w-full lg:w-72 glass-card border-r border-slate-800 p-4 lg:p-6 flex flex-col justify-between shrink-0">
+    <!-- HEADER STATUS -->
+    <div class="glass-card p-4 rounded-2xl mb-4 flex justify-between items-center">
         <div>
-            <!-- Branding SaaS Pro -->
-            <div class="flex items-center gap-3 mb-8 px-2">
-                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl text-white shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-shield-halved text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-sm tracking-wider text-white">PHOTOBOOTH PRO</h1>
-                    <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Secure SaaS Edition</p>
-                </div>
-            </div>
-
-            <!-- Status Sistem & Hardware Health -->
-            <div class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 mb-6 space-y-2">
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-400">Server Status:</span>
-                    <span class="flex items-center gap-1.5 text-emerald-400 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Aman (SSL)</span>
-                </div>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-400">Kamera / Printer:</span>
-                    <span class="text-indigo-300 font-mono font-bold">Connected</span>
-                </div>
-            </div>
-
-            <!-- Menu Tab Navigasi -->
-            <nav class="space-y-1.5">
-                <button onclick="switchTab('tab-analytics')" id="btn-tab-analytics" class="nav-btn active w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
-                    <i class="fa-solid fa-chart-pie text-emerald-400 w-5"></i> Analisis & Recap Omset
-                </button>
-                <button onclick="switchTab('tab-tenants')" id="btn-tab-tenants" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
-                    <i class="fa-solid fa-users-gear text-indigo-400 w-5"></i> Kelola Vendor / Cabang
-                </button>
-                <button onclick="switchTab('tab-finance')" id="btn-tab-finance" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
-                    <i class="fa-solid fa-qrcode text-emerald-400 w-5"></i> QRIS & Harga Paket
-                </button>
-                <button onclick="switchTab('tab-vouchers')" id="btn-tab-vouchers" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
-                    <i class="fa-solid fa-ticket text-orange-400 w-5"></i> Voucher & Diskon
-                </button>
-            </nav>
+            <h1 class="font-extrabold text-sm text-white tracking-wide">PHOTOBOOTH STUDIO PRO</h1>
+            <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5 mt-0.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sinkronisasi Otomatis Real-time Aktif
+            </p>
         </div>
+        <a href="index.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700">Kiosk</a>
+    </div>
 
-        <!-- Tombol Keluar / Kiosk -->
-        <div class="mt-8 pt-4 border-t border-slate-800">
-            <a href="index.html" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs text-center border border-slate-800 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-desktop"></i> Kembali ke Kiosk Utama
-            </a>
-        </div>
-    </aside>
-
-    <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
-
-        <!-- HEADER TOP BAR -->
-        <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
-            <div>
-                <h2 id="tab-title" class="text-xl md:text-2xl font-black text-white">Analisis Keuangan & Omset</h2>
-                <p class="text-xs md:text-sm text-slate-400">Pantau pemasukan riil QRIS vs transaksi voucher non-QR</p>
-            </div>
-            <button onclick="syncData()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 text-xs md:text-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-rotate"></i> Sinkronisasi Data
+    <!-- ==========================================
+         1. TAB HOME (BERANDA & GATEWAY)
+         ========================================== -->
+    <div id="section-home" class="tab-section active space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-qrcode text-indigo-400 mr-2"></i>Atur Pembayaran Sesi & Mulai Event Photobooth</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">Pengunjung dapat melakukan scan QRIS merchant atau memasukkan tiket/voucher sebelum memilih template foto. Dana QRIS langsung masuk ke rekening merchant Anda secara realtime[cite: 5].</p>
+            <button onclick="alert('Membuka Pengaturan Gateway & Voucher...')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-sliders"></i> Atur Gateway & Voucher
             </button>
-        </header>
+        </div>
 
-        <!-- ====================================================
-             TAB 1: ANALISIS, INSIGHT & RECAP OMSET
-             ==================================================== -->
-        <section id="tab-analytics" class="tab-content active space-y-6">
+        <div class="glass-card p-5 rounded-2xl space-y-3 border-l-4 border-indigo-500">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-300">Aplikasi Desktop / Mobile</span>
+                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded font-bold">PWA Ready</span>
+            </div>
+            <p class="text-xs text-slate-400">Instal aplikasi photobooth ini langsung ke perangkat Anda agar dapat berjalan lancar secara offline/online.</p>
+            <button onclick="alert('Aplikasi siap diinstal ke layar utama!')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-bold rounded-xl border border-slate-700 transition">
+                <i class="fa-solid fa-download mr-1.5"></i> Install Aplikasi Photobooth
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         2. TAB TEMPLATE
+         ========================================== -->
+    <div id="section-template" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-image text-indigo-400 mr-2"></i>Manajemen Tag & Template</h2>
             
-            <!-- 4 SUMMARY CARDS METRICS -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="glass-card p-4 rounded-2xl">
-                    <p class="text-xs text-slate-400 mb-1">Total Sesi Foto</p>
-                    <h3 class="text-xl md:text-2xl font-black text-white">1,248 <span class="text-xs text-emerald-400 font-semibold">+12%</span></h3>
-                    <p class="text-[10px] text-slate-500 mt-1">Pengunjung Kiosk Aktif</p>
-                </div>
-
-                <div class="glass-card p-4 rounded-2xl">
-                    <p class="text-xs text-slate-400 mb-1">Total Omset Kotor</p>
-                    <h3 class="text-xl md:text-2xl font-black text-amber-400">Rp 28.450.000</h3>
-                    <p class="text-[10px] text-slate-500 mt-1">Gabungan QRIS & Voucher</p>
-                </div>
-
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
-                    <p class="text-xs text-slate-400 mb-1">Uang Masuk (QRIS Riil)</p>
-                    <h3 class="text-xl md:text-2xl font-black text-emerald-400">Rp 22.150.000</h3>
-                    <p class="text-[10px] text-emerald-500 mt-1">77.8% Pendapatan Utama</p>
-                </div>
-
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-orange-500">
-                    <p class="text-xs text-slate-400 mb-1">Non-QR (Voucher Promo)</p>
-                    <h3 class="text-xl md:text-2xl font-black text-orange-400">Rp 6.300.000</h3>
-                    <p class="text-[10px] text-orange-500 mt-1">22.2% (180 Sesi Promo)</p>
+            <div>
+                <label class="text-xs text-slate-400 mb-1 block">Nama Tag Baru</label>
+                <div class="flex gap-2">
+                    <input type="text" id="tagName" placeholder="Contoh: Wedding, Graduation" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                    <button onclick="alert('Tag berhasil ditambahkan!')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Tambah</button>
                 </div>
             </div>
 
-            <!-- GRAFIK STATISTIK -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-card lg:col-span-2 p-5 rounded-2xl">
-                    <h3 class="font-bold text-slate-200 text-sm mb-4"><i class="fa-solid fa-chart-area mr-2 text-indigo-400"></i>Grafik Perkembangan Omset Bulanan</h3>
-                    <div class="w-full h-64"><canvas id="omsetChart"></canvas></div>
-                </div>
+            <hr class="border-slate-800">
 
-                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-200 text-sm mb-4"><i class="fa-solid fa-chart-pie mr-2 text-amber-400"></i>Komposisi Pembayaran</h3>
-                        <div class="w-full h-48"><canvas id="paymentChart"></canvas></div>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-800 text-xs space-y-2">
-                        <div class="flex justify-between"><span class="text-slate-400">QRIS Merchant</span><span class="font-bold text-emerald-400">Rp 22.150.000</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Voucher / Non-QR</span><span class="font-bold text-orange-400">Rp 6.300.000</span></div>
-                    </div>
+            <div class="space-y-3">
+                <label class="text-xs text-slate-400 block font-bold">Upload Template Frame (PNG Transparan 4R/Strip)</label>
+                <input type="text" placeholder="Nama Template (opsional)" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                <select class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-slate-300">
+                    <option>-- Pilih Tag --</option>
+                    <option>Wedding</option>
+                    <option>Graduation</option>
+                </select>
+                <button onclick="alert('Template berhasil diunggah!')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Template (.PNG)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         3. TAB BOOTH (KAMERA & TIMER)
+         ========================================== -->
+    <div id="section-booth" class="tab-section space-y-4">
+        <!-- Sumber Kamera -->
+        <div class="glass-card p-4 rounded-2xl space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-camera mr-2"></i>Sumber Perangkat Kamera</h3>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-indigo-500/40 flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-white">Kamera Kabel / Eksternal (USB / DSLR)</p>
+                    <p class="text-[10px] text-slate-400">Gunakan kamera USB, Camlink DSLR, atau Webcam.</p>
+                </div>
+                <input type="radio" name="cam" checked class="accent-indigo-500">
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-white">Kamera HP Wireless (WebRTC Live)</p>
+                    <p class="text-[10px] text-slate-400">Gunakan iPhone/Android sebagai kamera tanpa kabel.</p>
+                </div>
+                <input type="radio" name="cam" class="accent-indigo-500">
+            </div>
+        </div>
+
+        <!-- Live Monitor Preview -->
+        <div class="glass-card p-4 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400 font-bold">Live Monitor Preview Kamera</span>
+                <span class="text-[10px] text-indigo-300 font-mono bg-indigo-950 px-2 py-0.5 rounded">Mode: USB / Webcam</span>
+            </div>
+            <div class="w-full h-36 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-2 left-2 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold animate-pulse">● LIVE PREVIEW</div>
+                <i class="fa-solid fa-video text-3xl text-slate-700 mb-1"></i>
+                <p class="text-[10px] text-slate-500">Kamera Siap Terhubung</p>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[11px] text-slate-400">Zoom Lensa: <span id="zoomVal" class="text-white font-bold">1.0x</span></label>
+                <input type="range" min="1" max="3" step="0.1" value="1" oninput="document.getElementById('zoomVal').innerText=this.value+'x'" class="w-full accent-indigo-500">
+            </div>
+        </div>
+
+        <!-- Pengaturan Timer -->
+        <div class="glass-card p-4 rounded-2xl space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-stopwatch mr-2"></i>Timer Hitung Mundur</h3>
+            <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                <button class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold">Off</button>
+                <button class="py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-md">3s</button>
+                <button class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold">5s</button>
+                <button class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold">10s</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         4. TAB BAYAR SESI (PAYMENT & PRICING)
+         ========================================== -->
+    <div id="section-bayar" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-credit-card text-emerald-400 mr-2"></i>Pengaturan Tarif & QRIS Sesi</h2>
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Harga per Sesi Cetak (Rp)</label>
+                <input type="text" value="15.000" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
+            </div>
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Nama Merchant (Tampil di QRIS & Struk)</label>
+                <input type="text" value="Photobooth Pro Studio" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+            </div>
+            <button onclick="alert('Pengaturan pembayaran berhasil disimpan!')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl">
+                Simpan Konfigurasi Pembayaran
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         5. TAB LAINNYA (SETTINGS & MENU LANJUTAN)
+         ========================================== -->
+    <div id="section-lainnya" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-gear text-indigo-400 mr-2"></i>Menu & Pengaturan Booth</h2>
+            
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="alert('Menu List Frame')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
+                    <i class="fa-solid fa-border-all text-indigo-400 mr-2"></i> List Frame
+                </button>
+                <button onclick="alert('Menu Select Filter')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-2"></i> Select Filter
+                </button>
+                <button onclick="alert('Menu Result')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
+                    <i class="fa-solid fa-images text-emerald-400 mr-2"></i> Result Photos
+                </button>
+                <button onclick="alert('Menu Splash & BG')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
+                    <i class="fa-solid fa-palette text-violet-400 mr-2"></i> Splash & BG
+                </button>
+            </div>
+
+            <hr class="border-slate-800 my-3">
+
+            <div class="space-y-2">
+                <label class="text-xs text-slate-400 block font-bold">Orientasi Layar Booth Studio</label>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button class="py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-md">Mode Landscape</button>
+                    <button class="py-2.5 bg-slate-900 border border-slate-700 text-slate-300 font-bold rounded-xl">Mode Portrait</button>
                 </div>
             </div>
-        </section>
 
-        <!-- ====================================================
-             TAB 2: KELOLA VENDOR & SAAS SUBSCRIPTION
-             ==================================================== -->
-        <section id="tab-tenants" class="tab-content space-y-6">
-            <div class="glass-card p-5 rounded-2xl">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <div>
-                        <h3 class="font-bold text-indigo-400 text-sm"><i class="fa-solid fa-store mr-2"></i>Daftar Mitra / Vendor Berlangganan (SaaS)</h3>
-                        <p class="text-xs text-slate-400">Kontrol masa aktif sewa bulanan sistem photobooth mitra Anda</p>
-                    </div>
-                    <button onclick="addVendor()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Tambah Mitra Baru
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs md:text-sm">
-                        <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] font-bold">
-                            <tr>
-                                <th class="p-3 rounded-l-xl">Nama Vendor / Studio</th>
-                                <th class="p-3">Paket Sewa</th>
-                                <th class="p-3">Masa Aktif Berakhir</th>
-                                <th class="p-3">Omset Cabang</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 rounded-r-xl text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800/60">
-                            <tr>
-                                <td class="p-3 font-bold text-white">Studio Foto Mahakarya<br><span class="text-[10px] text-slate-500">mahakarya.photobooth.app</span></td>
-                                <td class="p-3">Pro Monthly (Rp 350.000)</td>
-                                <td class="p-3 font-mono text-slate-300">28 Nov 2026</td>
-                                <td class="p-3 font-bold text-emerald-400">Rp 8.400.000</td>
-                                <td class="p-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">PAID</span></td>
-                                <td class="p-3 text-right">
-                                    <button onclick="alert('Lisensi Diperpanjang!')" class="text-indigo-400 font-bold mr-2 hover:underline">Perpanjang</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 font-bold text-white">Event Organizer Happy<br><span class="text-[10px] text-slate-500">happy.photobooth.app</span></td>
-                                <td class="p-3">Event Pass (Rp 200.000)</td>
-                                <td class="p-3 font-mono text-amber-400">Pending Konfirmasi</td>
-                                <td class="p-3 font-bold text-emerald-400">Rp 2.100.000</td>
-                                <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">PENDING</span></td>
-                                <td class="p-3 text-right">
-                                    <button onclick="alert('Vendor diaktifkan!')" class="text-emerald-400 font-bold mr-2 hover:underline">Konfirmasi</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="pt-2">
+                <a href="index.html" class="block text-center w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold rounded-xl text-xs transition">
+                    <i class="fa-solid fa-right-from-bracket mr-2"></i> Keluar ke Kiosk Utama
+                </a>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- ====================================================
-             TAB 3 & 4 (FINANCE & VOUCHERS PLACEHOLDER)
-             ==================================================== -->
-        <section id="tab-finance" class="tab-content space-y-6">
-            <div class="glass-card p-6 rounded-2xl">
-                <h3 class="font-bold text-emerald-400 text-base mb-2"><i class="fa-solid fa-qrcode mr-2"></i>Pengaturan QRIS & Rekening</h3>
-                <p class="text-xs text-slate-400 mb-4">Ganti NMID atau unggah QRIS statis toko Anda di sini.</p>
-                <input type="text" value="ID1029384756102" class="w-full max-w-md px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs mb-3 font-mono">
-                <br><button onclick="alert('Disimpan!')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
-            </div>
-        </section>
+    <!-- BOTTOM NAVIGATION BAR (FIXED MOBILE STYLE) -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto glass-card border-t border-slate-800 px-4 py-2 flex justify-around items-center z-50">
+        <button onclick="switchTab('home')" id="nav-home" class="nav-item active flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-house"></i></div>
+            Home
+        </button>
+        <button onclick="switchTab('template')" id="nav-template" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-image"></i></div>
+            Template
+        </button>
+        <button onclick="switchTab('booth')" id="nav-booth" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-camera"></i></div>
+            Booth
+        </button>
+        <button onclick="switchTab('bayar')" id="nav-bayar" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-qrcode"></i></div>
+            Bayar Sesi
+        </button>
+        <button onclick="switchTab('lainnya')" id="nav-lainnya" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-sliders"></i></div>
+            Lainnya
+        </button>
+    </nav>
 
-        <section id="tab-vouchers" class="tab-content space-y-6">
-            <div class="glass-card p-6 rounded-2xl">
-                <h3 class="font-bold text-orange-400 text-base mb-2"><i class="fa-solid fa-ticket mr-2"></i>Manajemen Kode Voucher</h3>
-                <p class="text-xs text-slate-400">Buat voucher diskon atau akses gratis sesi foto.</p>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- SCRIPT CONTROLLER & CHART -->
+    <!-- SCRIPT TAB CONTROLLER -->
     <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById(`btn-${tabId}`).classList.add('active');
+            document.getElementById('section-' + tabName).classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function syncData() {
-            alert('Sinkronisasi data berhasil! Cloud terhubung.');
-        }
-
-        function addVendor() {
-            const name = prompt("Masukkan Nama Vendor/Cabang Baru:");
-            if (name) alert(`Vendor "${name}" berhasil ditambahkan.`);
-        }
-
-        window.onload = function() {
-            // Grafik Omset
-            new Chart(document.getElementById('omsetChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
-                    datasets: [{
-                        label: 'Omset (Rp)',
-                        data: [4500000, 8200000, 14000000, 28450000],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            // Grafik Perbandingan Pembayaran
-            new Chart(document.getElementById('paymentChart').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['QRIS (Riil)', 'Voucher (Non-QR)'],
-                    datasets: [{
-                        data: [22150000, 6300000],
-                        backgroundColor: ['#10b981', '#f97316']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        };
     </script>
 </body>
 </html>
