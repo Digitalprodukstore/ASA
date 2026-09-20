@@ -3,707 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobooth Studio Universal</title>
+    <title>Pro Master SaaS & Security Dashboard - Photobooth</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QRCode.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CSS UNIVERSAL RESPONSIVE (HP, TABLET, PC) */
-        html, body {
-            min-height: 100vh;
-            background-color: #0f172a;
-            color: #ffffff;
-            font-family: ui-sans-serif, system-ui, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        @media (min-width: 1024px) {
-            html, body {
-                height: 100vh;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
-
-        .screen { display: none; }
-        .screen.active { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            min-height: 100%;
-        }
-
-        /* Frame Preview Styles */
-        .frame-white { border: 12px solid #ffffff; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
-        .frame-cream { border: 12px solid #fdfbf7; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
-        .frame-none { border: none; }
+        body { background-color: #07090e; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+        .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); }
     </style>
-</head>
-<body class="p-2 sm:p-4 md:p-6 flex items-center justify-center">
-
-    <!-- CONTAINER UTAMA -->
-    <div class="w-full max-w-5xl lg:h-[880px] bg-slate-800 rounded-2xl md:rounded-3xl shadow-2xl overflow-y-auto lg:overflow-hidden border border-slate-700 flex flex-col justify-between">
-        
-        <!-- HEADER -->
-        <div class="bg-slate-900/90 px-4 py-3 sm:px-6 sm:py-4 flex justify-between items-center border-b border-slate-700 shrink-0 sticky top-0 z-50">
-            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="openDashboardAccess()">
-                <i class="fa-solid fa-camera-retro text-amber-400 text-xl sm:text-2xl"></i>
-                <span class="font-black text-sm sm:text-xl tracking-wider text-amber-400">PHOTOBOOTH STUDIO</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <a href="dashboard.html" class="text-[10px] sm:text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white px-2.5 py-1 rounded-lg border border-indigo-500/40 transition">
-                    <i class="fa-solid fa-sliders mr-1"></i> Admin
-                </a>
-                <div class="text-xs sm:text-sm font-semibold bg-slate-800 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-slate-300 border border-slate-700">
-                    Langkah <span id="step-number" class="text-amber-400 font-bold">1</span>/5
-                </div>
-            </div>
-        </div>
-
-        <!-- ==========================================
-             HALAMAN 1: HALAMAN AWAL (PILIH BG FRAME)
-             ========================================== -->
-        <div id="screen-1" class="screen active p-4 sm:p-8 flex-1">
-            <div class="text-center my-auto py-2 sm:py-6">
-                <h1 class="text-2xl sm:text-4xl font-extrabold mb-2 sm:mb-3 text-amber-400">Selamat Datang di Photobooth!</h1>
-                <p class="text-slate-300 text-xs sm:text-lg mb-6 sm:mb-10">Pilih tampilan latar frame awal sebelum memulai sesi foto</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mb-4">
-                    <button onclick="selectInitialFrame('white')" id="btn-frame-white" class="frame-opt-btn bg-slate-700 p-4 sm:p-6 rounded-2xl border-2 sm:border-4 border-amber-400 hover:bg-slate-600 transition flex flex-col items-center">
-                        <div class="w-16 h-16 sm:w-24 sm:h-24 bg-white rounded-xl mb-2 sm:mb-4 border border-slate-300 shadow-md"></div>
-                        <span class="font-bold text-sm sm:text-lg">Frame Polos Putih</span>
-                    </button>
-                    <button onclick="selectInitialFrame('cream')" id="btn-frame-cream" class="frame-opt-btn bg-slate-700 p-4 sm:p-6 rounded-2xl border-2 sm:border-4 border-transparent hover:bg-slate-600 transition flex flex-col items-center">
-                        <div class="w-16 h-16 sm:w-24 sm:h-24 bg-[#fdfbf7] rounded-xl mb-2 sm:mb-4 border border-slate-300 shadow-md"></div>
-                        <span class="font-bold text-sm sm:text-lg">Frame Polos Cream</span>
-                    </button>
-                    <button onclick="selectInitialFrame('none')" id="btn-frame-none" class="frame-opt-btn bg-slate-700 p-4 sm:p-6 rounded-2xl border-2 sm:border-4 border-transparent hover:bg-slate-600 transition flex flex-col items-center">
-                        <div class="w-16 h-16 sm:w-24 sm:h-24 bg-slate-900 rounded-xl mb-2 sm:mb-4 border-2 border-dashed border-slate-500 flex items-center justify-center text-slate-400">
-                            <i class="fa-solid fa-eye text-xl sm:text-3xl"></i>
-                        </div>
-                        <span class="font-bold text-sm sm:text-lg">Tanpa Frame</span>
-                    </button>
-                </div>
-            </div>
-
-            <button onclick="goToScreen(2)" class="w-full py-3.5 sm:py-5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold rounded-2xl text-base sm:text-xl shadow-xl transition shrink-0 my-2">
-                Lanjut ke Pilih Paket <i class="fa-solid fa-arrow-right ml-2"></i>
-            </button>
-        </div>
-
-        <!-- ==========================================
-             HALAMAN 2: PILIHAN PAKET & PEMBAYARAN
-             ========================================== -->
-        <div id="screen-2" class="screen p-4 sm:p-6 flex-1">
-            <div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-center mb-1">Pilih Paket Foto</h2>
-                <p class="text-slate-400 text-xs sm:text-sm text-center mb-4 sm:mb-6">Bundling lengkap dengan soft file</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                    <div onclick="selectPackage(15000, 'Paket 1 Print (4 Foto)')" id="pkg-1" class="pkg-card bg-slate-700 border-2 sm:border-4 border-amber-400 p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-400 transition">
-                        <div class="flex justify-between items-start mb-2 sm:mb-3">
-                            <div>
-                                <h3 class="text-base sm:text-xl font-bold text-amber-400">Paket Single</h3>
-                                <p class="text-xs sm:text-sm text-slate-300">1x Print (4 Foto)</p>
-                            </div>
-                            <span class="text-lg sm:text-2xl font-black">Rp 15.000</span>
-                        </div>
-                        <ul class="text-xs sm:text-sm text-slate-300 space-y-1">
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>1 Lembar Cetak Foto</li>
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Berisi 4 Foto</li>
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Gratis Soft File & GIF/Video</li>
-                        </ul>
-                    </div>
-
-                    <div onclick="selectPackage(35000, 'Paket 2 Strip (2x @ 2 Foto)')" id="pkg-2" class="pkg-card bg-slate-700 border-2 sm:border-4 border-transparent p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-amber-400 transition">
-                        <div class="flex justify-between items-start mb-2 sm:mb-3">
-                            <div>
-                                <h3 class="text-base sm:text-xl font-bold text-amber-400">Paket Duo Strip</h3>
-                                <p class="text-xs sm:text-sm text-slate-300">2 Strip Foto (Otomatis)</p>
-                            </div>
-                            <span class="text-lg sm:text-2xl font-black">Rp 35.000</span>
-                        </div>
-                        <ul class="text-xs sm:text-sm text-slate-300 space-y-1">
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>2 Strip Foto (Dipotong)</li>
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Masing-masing Strip 2 Foto</li>
-                            <li><i class="fa-solid fa-check text-green-400 mr-2"></i>Gratis Soft File & GIF/Video</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/80 p-4 sm:p-5 rounded-2xl border border-slate-700">
-                    <h3 class="font-bold text-sm sm:text-lg mb-3 text-slate-200">Metode Pembayaran</h3>
-                    <div class="flex gap-2 sm:gap-4 mb-3">
-                        <button onclick="setPaymentMethod('qris')" id="btn-pay-qris" class="flex-1 py-2 bg-amber-500 text-slate-900 font-bold rounded-xl text-xs sm:text-sm border-2 border-amber-400">
-                            <i class="fa-solid fa-qrcode mr-1"></i>QRIS
-                        </button>
-                        <button onclick="setPaymentMethod('voucher')" id="btn-pay-voucher" class="flex-1 py-2 bg-slate-700 text-slate-300 font-bold rounded-xl text-xs sm:text-sm border-2 border-slate-600">
-                            <i class="fa-solid fa-ticket mr-1"></i>Kode Voucher
-                        </button>
-                    </div>
-
-                    <div id="pay-box-qris" class="flex flex-col items-center py-1">
-                        <div class="bg-white p-2 rounded-xl mb-1 shadow-md">
-                            <div id="qris-code"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-400">Scan QRIS menggunakan E-Wallet</p>
-                        <button onclick="simulatePaymentSuccess()" class="mt-2 text-[11px] bg-slate-800 text-slate-400 py-1 px-3 rounded-lg border border-slate-700">
-                            (Simulasi Bayar Berhasil)
-                        </button>
-                    </div>
-
-                    <div id="pay-box-voucher" class="hidden py-1">
-                        <label class="block text-xs sm:text-sm text-slate-300 mb-1">Masukkan Kode Voucher:</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="voucher-input" placeholder="Contoh: FOTO2026" class="flex-1 px-3 py-2 text-xs sm:text-sm bg-slate-800 border border-slate-600 rounded-xl text-white font-mono uppercase focus:outline-none focus:border-amber-400">
-                            <button onclick="validateVoucher()" class="px-4 py-2 bg-amber-500 text-slate-900 font-bold text-xs sm:text-sm rounded-xl">
-                                Gunakan
-                            </button>
-                        </div>
-                        <p id="voucher-msg" class="text-xs mt-1 hidden"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-2 sm:gap-4 mt-4 shrink-0">
-                <button onclick="goToScreen(1)" class="w-1/3 py-3 bg-slate-700 rounded-xl font-bold text-xs sm:text-base">Kembali</button>
-                <button id="btn-start-photo" onclick="goToScreen(3)" disabled class="w-2/3 py-3 bg-slate-600 text-slate-400 font-extrabold rounded-xl text-xs sm:text-base cursor-not-allowed">
-                    Mulai Sesi Foto <i class="fa-solid fa-camera ml-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ==========================================
-             HALAMAN 3: TAKE FOTO, GRID, RETAKE & TIMER
-             ========================================== -->
-        <div id="screen-3" class="screen p-4 sm:p-6 flex-1">
-            <div class="bg-slate-900/90 p-2 sm:p-3 rounded-2xl border border-slate-700 mb-3 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-stopwatch text-amber-400 text-base sm:text-xl"></i>
-                    <span class="text-xs sm:text-sm font-semibold text-slate-300">Waktu Sesi:</span>
-                    <span id="photo-session-timer" class="text-base sm:text-xl font-black text-amber-400 font-mono">05:00</span>
-                </div>
-                <div class="bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg">
-                    <span class="text-[11px] sm:text-xs text-slate-300">Sisa Retake: <strong id="retake-count-display" class="text-amber-400 font-bold">3</strong>x</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
-                <div class="lg:col-span-2 flex flex-col items-center justify-center bg-black rounded-2xl relative overflow-hidden min-h-[260px] sm:min-h-[350px]">
-                    <video id="webcam" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
-                    
-                    <div id="countdown-overlay" class="absolute inset-0 bg-black/60 flex items-center justify-center text-6xl sm:text-8xl font-black text-amber-400 hidden">
-                        3
-                    </div>
-
-                    <div id="camera-frame-overlay" class="absolute inset-0 pointer-events-none frame-white"></div>
-
-                    <button onclick="startCaptureProcess()" id="btn-capture" class="absolute bottom-4 bg-amber-500 text-slate-900 font-extrabold px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-full shadow-2xl flex items-center gap-2 border-2 border-white text-sm sm:text-lg">
-                        <i class="fa-solid fa-camera"></i> Ambil Foto (<span id="photo-count">0</span>/4)
-                    </button>
-                </div>
-
-                <div class="bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-700 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-xs sm:text-base text-slate-200 mb-1 flex justify-between items-center">
-                            <span>Galeri Foto</span>
-                            <span id="gallery-counter" class="text-[11px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">0 / 4 Foto</span>
-                        </h3>
-                        <p class="text-[11px] text-slate-400 mb-2">Hapus & retake maks 3x</p>
-
-                        <div id="photo-grid" class="grid grid-cols-2 lg:grid-cols-1 gap-2 max-h-[180px] lg:max-h-[320px] overflow-y-auto">
-                        </div>
-                    </div>
-
-                    <p id="retake-limit-msg" class="text-[11px] text-red-400 font-semibold text-center mt-1 hidden">
-                        Batas retake (3x) habis!
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-700 shrink-0">
-                <button onclick="goToScreen(2)" class="px-4 py-2 bg-slate-700 rounded-xl text-xs sm:text-sm font-semibold">Ubah Paket</button>
-                <button id="btn-to-edit" onclick="goToScreen(4)" disabled class="px-6 py-2.5 bg-slate-600 text-slate-400 font-extrabold rounded-xl text-xs sm:text-sm cursor-not-allowed">
-                    Lanjut Editing <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ==========================================
-             HALAMAN 4: EDITING & CETAK
-             ========================================== -->
-        <div id="screen-4" class="screen p-4 sm:p-6 flex-1">
-            <div class="bg-amber-500/10 border border-amber-500/30 p-2 sm:p-3 rounded-2xl mb-3 flex justify-between items-center shrink-0">
-                <span class="text-amber-400 font-semibold text-xs sm:text-sm"><i class="fa-solid fa-clock mr-1"></i>Waktu Editing</span>
-                <span class="text-xl sm:text-2xl font-black text-amber-400 font-mono"><span id="timer-display">20</span>s</span>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
-                <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-3 flex items-center justify-center border border-slate-700">
-                    <div id="final-print-preview" class="bg-white p-3 text-slate-900 shadow-2xl rounded-xl max-w-xs w-full">
-                        <div id="preview-frame-container" class="grid grid-cols-2 gap-2 border-4 border-slate-900 p-2 bg-white">
-                        </div>
-                        <div class="text-center text-[10px] tracking-widest mt-2 font-black text-slate-500">PHOTOBOOTH STUDIO</div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/60 p-3 sm:p-4 rounded-2xl border border-slate-700 flex flex-col gap-3">
-                    <h3 class="font-bold text-xs sm:text-base text-slate-200">Pilihan Frame Cetak</h3>
-
-                    <div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="applyFrameStyle('classic')" class="py-2 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold">Classic Black</button>
-                            <button onclick="applyFrameStyle('white')" class="py-2 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold">Clean White</button>
-                        </div>
-                    </div>
-
-                    <button onclick="applyAIFrame()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Frame AI
-                    </button>
-
-                    <button onclick="applyFrameStyle('none')" class="w-full py-2 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold">
-                        Polos Tanpa Frame
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex justify-end mt-3 pt-3 border-t border-slate-700 shrink-0">
-                <button onclick="finishEditingAndPrint()" class="px-6 py-2.5 sm:px-8 sm:py-3.5 bg-amber-500 text-slate-900 font-extrabold rounded-xl text-xs sm:text-base">
-                    Cetak Sekarang <i class="fa-solid fa-print ml-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ==========================================
-             HALAMAN 5: PRINT EXTRA & SOFT FILE EFISIEN
-             ========================================== -->
-        <div id="screen-5" class="screen p-4 sm:p-8 flex-1 text-center">
-            <div>
-                <div class="inline-block p-3 bg-green-500/10 text-green-400 rounded-full mb-1">
-                    <i class="fa-solid fa-check-circle text-3xl sm:text-5xl"></i>
-                </div>
-                <h2 class="text-xl sm:text-3xl font-extrabold mb-1">Foto Sedang Dicetak!</h2>
-                <p class="text-slate-400 text-xs sm:text-sm mb-4">Silakan ambil hasil cetakan Anda di tray printer.</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-3xl border border-slate-700">
-                    <div class="flex flex-col items-center justify-center p-2 border-r-0 sm:border-r border-slate-700">
-                        <h3 class="font-bold text-amber-400 text-xs sm:text-sm mb-1">Download Soft File</h3>
-                        <p id="upload-cloud-status" class="text-[11px] text-amber-400 font-semibold mb-2">Mengunggah ke Cloudinary...</p>
-                        
-                        <div class="bg-white p-2 rounded-xl mb-2 shadow-lg">
-                            <div id="softfile-qrcode"></div>
-                        </div>
-                        <span class="text-[10px] text-slate-500 font-mono">Cloud: risakil1 / Preset: risakil</span>
-                    </div>
-
-                    <div class="flex flex-col justify-between p-2">
-                        <div>
-                            <h3 class="font-bold text-amber-400 text-xs sm:text-sm mb-1">Print Tambahan (Rp 10.000)</h3>
-                            
-                            <div class="bg-slate-800 p-2 rounded-2xl border border-slate-700 mb-2 flex flex-col items-center">
-                                <div class="bg-white p-2 rounded-xl mb-2">
-                                    <div id="extra-print-qris"></div>
-                                </div>
-                                <button onclick="processExtraPrintPayment()" class="w-full py-2 bg-amber-500 text-slate-900 font-extrabold text-xs rounded-xl">
-                                    Bayar & Cetak Lagi
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4 shrink-0">
-                <button onclick="resetApp()" class="w-full py-3 bg-slate-700 text-white font-bold rounded-2xl text-xs sm:text-base">
-                    Selesai & Sesi Baru <i class="fa-solid fa-rotate-right ml-1"></i>
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- KEAMANAN: SISTEM PROTEKSI PIN ADMIN -->
     <script>
-        // CONFIG CLOUDINARY (Sesuai Akun Anda)
-        const CLOUDINARY_CLOUD_NAME = "risakil1";
-        const CLOUDINARY_UPLOAD_PRESET = "risakil";
-
-        let currentScreen = 1;
-        let selectedInitialFrame = 'white';
-        let selectedPackagePrice = 15000;
-        let selectedPackageName = 'Paket 1 Print (4 Foto)';
-        let isPaid = false;
-        let capturedPhotos = [];
-        let finalImageBase64 = null;
-        
-        let timerInterval = null;
-        let timeLeft = 20;
-
-        let sessionTimerInterval = null;
-        let sessionTimeLeft = 300; 
-        let retakeQuota = 3;
-
-        const VALID_VOUCHERS = ["FOTO2026", "VIPFREE", "RISAKIL2026"];
-        const webcam = document.getElementById('webcam');
-
-        function openDashboardAccess() {
-            window.location.href = 'dashboard.html';
-        }
-
-        function goToScreen(screenNum) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(`screen-${screenNum}`).classList.add('active');
-            currentScreen = screenNum;
-            document.getElementById('step-number').innerText = screenNum;
-
-            if (screenNum === 3) {
-                startWebcam();
-                startPhotoSessionTimer();
-            } else {
-                if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-            }
-
-            if (screenNum === 4) startEditingTimer();
-            if (screenNum === 5) processFinalPrintAndUpload();
-            
-            window.scrollTo(0, 0);
-        }
-
-        function selectInitialFrame(style) {
-            selectedInitialFrame = style;
-            document.querySelectorAll('.frame-opt-btn').forEach(btn => btn.classList.replace('border-amber-400', 'border-transparent'));
-            document.getElementById(`btn-frame-${style}`).classList.replace('border-transparent', 'border-amber-400');
-            
-            const overlay = document.getElementById('camera-frame-overlay');
-            overlay.className = `absolute inset-0 pointer-events-none frame-${style}`;
-        }
-
-        function selectPackage(price, name) {
-            selectedPackagePrice = price;
-            selectedPackageName = name;
-            
-            document.querySelectorAll('.pkg-card').forEach(card => card.classList.replace('border-amber-400', 'border-transparent'));
-            if(price === 15000) document.getElementById('pkg-1').classList.replace('border-transparent', 'border-amber-400');
-            else document.getElementById('pkg-2').classList.replace('border-transparent', 'border-amber-400');
-
-            generateQRIS('qris-code', selectedPackagePrice);
-        }
-
-        function setPaymentMethod(method) {
-            const btnQris = document.getElementById('btn-pay-qris');
-            const btnVoucher = document.getElementById('btn-pay-voucher');
-            const boxQris = document.getElementById('pay-box-qris');
-            const boxVoucher = document.getElementById('pay-box-voucher');
-
-            if (method === 'qris') {
-                btnQris.className = "flex-1 py-2 bg-amber-500 text-slate-900 font-bold rounded-xl border-2 border-amber-400 text-xs sm:text-sm";
-                btnVoucher.className = "flex-1 py-2 bg-slate-700 text-slate-300 font-bold rounded-xl border-2 border-slate-600 text-xs sm:text-sm";
-                boxQris.classList.remove('hidden');
-                boxVoucher.classList.add('hidden');
-            } else {
-                btnVoucher.className = "flex-1 py-2 bg-amber-500 text-slate-900 font-bold rounded-xl border-2 border-amber-400 text-xs sm:text-sm";
-                btnQris.className = "flex-1 py-2 bg-slate-700 text-slate-300 font-bold rounded-xl border-2 border-slate-600 text-xs sm:text-sm";
-                boxVoucher.classList.remove('hidden');
-                boxQris.classList.add('hidden');
-            }
-        }
-
-        function generateQRIS(elementId, price) {
-            const el = document.getElementById(elementId);
-            el.innerHTML = "";
-            new QRCode(el, {
-                text: `00020101021126580016ID.CO.QRIS.WWW0118936009143000000001520453995303360540${price}5802ID5916PHOTOBOOTH STUDIO6007JAKARTA6304ABCD`,
-                width: 95,
-                height: 95
-            });
-        }
-
-        function validateVoucher() {
-            const code = document.getElementById('voucher-input').value.trim().toUpperCase();
-            const msg = document.getElementById('voucher-msg');
-
-            if (VALID_VOUCHERS.includes(code)) {
-                msg.innerText = "Voucher Valid!";
-                msg.className = "text-xs mt-1 text-green-400 font-bold";
-                msg.classList.remove('hidden');
-                enableStartButton();
-            } else {
-                msg.innerText = "Voucher Tidak Valid!";
-                msg.className = "text-xs mt-1 text-red-400 font-bold";
-                msg.classList.remove('hidden');
-            }
-        }
-
-        function simulatePaymentSuccess() {
-            alert('Simulasi Bayar Berhasil!');
-            enableStartButton();
-        }
-
-        function enableStartButton() {
-            isPaid = true;
-            const btn = document.getElementById('btn-start-photo');
-            btn.disabled = false;
-            btn.classList.replace('bg-slate-600', 'bg-amber-500');
-            btn.classList.replace('text-slate-400', 'text-slate-900');
-            btn.classList.remove('cursor-not-allowed');
-        }
-
-        async function startWebcam() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                webcam.srcObject = stream;
-            } catch (err) {
-                console.error("Gagal membuka kamera:", err);
-            }
-        }
-
-        function startPhotoSessionTimer() {
-            sessionTimeLeft = 300;
-            updateSessionTimerDisplay();
-
-            if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-
-            sessionTimerInterval = setInterval(() => {
-                sessionTimeLeft--;
-                updateSessionTimerDisplay();
-
-                if (sessionTimeLeft <= 0) {
-                    clearInterval(sessionTimerInterval);
-                    alert('Waktu Sesi Foto (5 M) Habis!');
-                    while (capturedPhotos.length < 4) {
-                        capturedPhotos.push(capturedPhotos[0] || webcamCanvasPlaceholder());
-                    }
-                    goToScreen(4);
-                }
-            }, 1000);
-        }
-
-        function updateSessionTimerDisplay() {
-            const minutes = Math.floor(sessionTimeLeft / 60);
-            const seconds = sessionTimeLeft % 60;
-            document.getElementById('photo-session-timer').innerText = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function startCaptureProcess() {
-            if (capturedPhotos.length >= 4) return;
-
-            let count = 3;
-            const overlay = document.getElementById('countdown-overlay');
-            overlay.innerText = count;
-            overlay.classList.remove('hidden');
-
-            const timer = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    overlay.innerText = count;
+        (function() {
+            const isAuth = sessionStorage.getItem('admin_authenticated');
+            if (isAuth !== 'true') {
+                // PIN Keamanan Default (Bisa diubah di bawah)
+                const securePin = "2026"; 
+                const inputPin = prompt("🔒 PROTEKSI KEAMANAN PRO:\nMasukkan PIN Admin untuk mengakses Dashboard:");
+                if (inputPin === securePin) {
+                    sessionStorage.setItem('admin_authenticated', 'true');
                 } else {
-                    clearInterval(timer);
-                    overlay.classList.add('hidden');
-                    takePhoto();
+                    alert("❌ PIN Salah! Akses ditolak.");
+                    window.location.href = "index.html";
                 }
-            }, 1000);
-        }
+            }
+        })();
+    </script>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-indigo-500 selection:text-white">
 
-        function takePhoto() {
-            const canvas = document.createElement('canvas');
-            canvas.width = webcam.videoWidth || 640;
-            canvas.height = webcam.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
+    <!-- SIDEBAR NAVIGASI PRO -->
+    <aside class="w-full lg:w-72 glass-card border-r border-slate-800 p-4 lg:p-6 flex flex-col justify-between shrink-0">
+        <div>
+            <!-- Branding SaaS Pro -->
+            <div class="flex items-center gap-3 mb-8 px-2">
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-sm tracking-wider text-white">PHOTOBOOTH PRO</h1>
+                    <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Secure SaaS Edition</p>
+                </div>
+            </div>
+
+            <!-- Status Sistem & Hardware Health -->
+            <div class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 mb-6 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Server Status:</span>
+                    <span class="flex items-center gap-1.5 text-emerald-400 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Aman (SSL)</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Kamera / Printer:</span>
+                    <span class="text-indigo-300 font-mono font-bold">Connected</span>
+                </div>
+            </div>
+
+            <!-- Menu Tab Navigasi -->
+            <nav class="space-y-1.5">
+                <button onclick="switchTab('tab-analytics')" id="btn-tab-analytics" class="nav-btn active w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
+                    <i class="fa-solid fa-chart-pie text-emerald-400 w-5"></i> Analisis & Recap Omset
+                </button>
+                <button onclick="switchTab('tab-tenants')" id="btn-tab-tenants" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
+                    <i class="fa-solid fa-users-gear text-indigo-400 w-5"></i> Kelola Vendor / Cabang
+                </button>
+                <button onclick="switchTab('tab-finance')" id="btn-tab-finance" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
+                    <i class="fa-solid fa-qrcode text-emerald-400 w-5"></i> QRIS & Harga Paket
+                </button>
+                <button onclick="switchTab('tab-vouchers')" id="btn-tab-vouchers" class="nav-btn w-full text-left px-4 py-3 rounded-xl text-xs md:text-sm font-bold border border-transparent hover:bg-slate-800/60 transition flex items-center gap-3 text-slate-300">
+                    <i class="fa-solid fa-ticket text-orange-400 w-5"></i> Voucher & Diskon
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tombol Keluar / Kiosk -->
+        <div class="mt-8 pt-4 border-t border-slate-800">
+            <a href="index.html" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs text-center border border-slate-800 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-desktop"></i> Kembali ke Kiosk Utama
+            </a>
+        </div>
+    </aside>
+
+    <!-- AREA KONTEN UTAMA -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+
+        <!-- HEADER TOP BAR -->
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+            <div>
+                <h2 id="tab-title" class="text-xl md:text-2xl font-black text-white">Analisis Keuangan & Omset</h2>
+                <p class="text-xs md:text-sm text-slate-400">Pantau pemasukan riil QRIS vs transaksi voucher non-QR</p>
+            </div>
+            <button onclick="syncData()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 text-xs md:text-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Sinkronisasi Data
+            </button>
+        </header>
+
+        <!-- ====================================================
+             TAB 1: ANALISIS, INSIGHT & RECAP OMSET
+             ==================================================== -->
+        <section id="tab-analytics" class="tab-content active space-y-6">
             
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+            <!-- 4 SUMMARY CARDS METRICS -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card p-4 rounded-2xl">
+                    <p class="text-xs text-slate-400 mb-1">Total Sesi Foto</p>
+                    <h3 class="text-xl md:text-2xl font-black text-white">1,248 <span class="text-xs text-emerald-400 font-semibold">+12%</span></h3>
+                    <p class="text-[10px] text-slate-500 mt-1">Pengunjung Kiosk Aktif</p>
+                </div>
 
-            const photoUrl = canvas.toDataURL('image/png');
-            capturedPhotos.push(photoUrl);
+                <div class="glass-card p-4 rounded-2xl">
+                    <p class="text-xs text-slate-400 mb-1">Total Omset Kotor</p>
+                    <h3 class="text-xl md:text-2xl font-black text-amber-400">Rp 28.450.000</h3>
+                    <p class="text-[10px] text-slate-500 mt-1">Gabungan QRIS & Voucher</p>
+                </div>
 
-            updatePhotoGrid();
-        }
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
+                    <p class="text-xs text-slate-400 mb-1">Uang Masuk (QRIS Riil)</p>
+                    <h3 class="text-xl md:text-2xl font-black text-emerald-400">Rp 22.150.000</h3>
+                    <p class="text-[10px] text-emerald-500 mt-1">77.8% Pendapatan Utama</p>
+                </div>
 
-        function webcamCanvasPlaceholder() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 640;
-            canvas.height = 480;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(0, 0, 640, 480);
-            return canvas.toDataURL('image/png');
-        }
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-orange-500">
+                    <p class="text-xs text-slate-400 mb-1">Non-QR (Voucher Promo)</p>
+                    <h3 class="text-xl md:text-2xl font-black text-orange-400">Rp 6.300.000</h3>
+                    <p class="text-[10px] text-orange-500 mt-1">22.2% (180 Sesi Promo)</p>
+                </div>
+            </div>
 
-        function updatePhotoGrid() {
-            const grid = document.getElementById('photo-grid');
-            grid.innerHTML = "";
+            <!-- GRAFIK STATISTIK -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card lg:col-span-2 p-5 rounded-2xl">
+                    <h3 class="font-bold text-slate-200 text-sm mb-4"><i class="fa-solid fa-chart-area mr-2 text-indigo-400"></i>Grafik Perkembangan Omset Bulanan</h3>
+                    <div class="w-full h-64"><canvas id="omsetChart"></canvas></div>
+                </div>
 
-            capturedPhotos.forEach((photo, index) => {
-                const item = document.createElement('div');
-                item.className = "relative rounded-xl overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center";
-                
-                const deleteBtnHtml = retakeQuota > 0 
-                    ? `<button onclick="deletePhoto(${index})" class="bg-red-600 text-white p-1 rounded text-[10px] hover:bg-red-700 shadow"><i class="fa-solid fa-trash"></i></button>`
-                    : `<button disabled class="bg-slate-600 text-slate-400 p-1 rounded text-[10px] cursor-not-allowed opacity-50"><i class="fa-solid fa-trash"></i></button>`;
-
-                item.innerHTML = `
-                    <img src="${photo}" class="w-full h-16 sm:h-20 object-cover">
-                    <div class="absolute top-1 right-1">
-                        ${deleteBtnHtml}
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-200 text-sm mb-4"><i class="fa-solid fa-chart-pie mr-2 text-amber-400"></i>Komposisi Pembayaran</h3>
+                        <div class="w-full h-48"><canvas id="paymentChart"></canvas></div>
                     </div>
-                `;
-                grid.appendChild(item);
+                    <div class="mt-4 pt-3 border-t border-slate-800 text-xs space-y-2">
+                        <div class="flex justify-between"><span class="text-slate-400">QRIS Merchant</span><span class="font-bold text-emerald-400">Rp 22.150.000</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Voucher / Non-QR</span><span class="font-bold text-orange-400">Rp 6.300.000</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             TAB 2: KELOLA VENDOR & SAAS SUBSCRIPTION
+             ==================================================== -->
+        <section id="tab-tenants" class="tab-content space-y-6">
+            <div class="glass-card p-5 rounded-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-indigo-400 text-sm"><i class="fa-solid fa-store mr-2"></i>Daftar Mitra / Vendor Berlangganan (SaaS)</h3>
+                        <p class="text-xs text-slate-400">Kontrol masa aktif sewa bulanan sistem photobooth mitra Anda</p>
+                    </div>
+                    <button onclick="addVendor()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Mitra Baru
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs md:text-sm">
+                        <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] font-bold">
+                            <tr>
+                                <th class="p-3 rounded-l-xl">Nama Vendor / Studio</th>
+                                <th class="p-3">Paket Sewa</th>
+                                <th class="p-3">Masa Aktif Berakhir</th>
+                                <th class="p-3">Omset Cabang</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 rounded-r-xl text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60">
+                            <tr>
+                                <td class="p-3 font-bold text-white">Studio Foto Mahakarya<br><span class="text-[10px] text-slate-500">mahakarya.photobooth.app</span></td>
+                                <td class="p-3">Pro Monthly (Rp 350.000)</td>
+                                <td class="p-3 font-mono text-slate-300">28 Nov 2026</td>
+                                <td class="p-3 font-bold text-emerald-400">Rp 8.400.000</td>
+                                <td class="p-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">PAID</span></td>
+                                <td class="p-3 text-right">
+                                    <button onclick="alert('Lisensi Diperpanjang!')" class="text-indigo-400 font-bold mr-2 hover:underline">Perpanjang</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-white">Event Organizer Happy<br><span class="text-[10px] text-slate-500">happy.photobooth.app</span></td>
+                                <td class="p-3">Event Pass (Rp 200.000)</td>
+                                <td class="p-3 font-mono text-amber-400">Pending Konfirmasi</td>
+                                <td class="p-3 font-bold text-emerald-400">Rp 2.100.000</td>
+                                <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">PENDING</span></td>
+                                <td class="p-3 text-right">
+                                    <button onclick="alert('Vendor diaktifkan!')" class="text-emerald-400 font-bold mr-2 hover:underline">Konfirmasi</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             TAB 3 & 4 (FINANCE & VOUCHERS PLACEHOLDER)
+             ==================================================== -->
+        <section id="tab-finance" class="tab-content space-y-6">
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="font-bold text-emerald-400 text-base mb-2"><i class="fa-solid fa-qrcode mr-2"></i>Pengaturan QRIS & Rekening</h3>
+                <p class="text-xs text-slate-400 mb-4">Ganti NMID atau unggah QRIS statis toko Anda di sini.</p>
+                <input type="text" value="ID1029384756102" class="w-full max-w-md px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs mb-3 font-mono">
+                <br><button onclick="alert('Disimpan!')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
+            </div>
+        </section>
+
+        <section id="tab-vouchers" class="tab-content space-y-6">
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="font-bold text-orange-400 text-base mb-2"><i class="fa-solid fa-ticket mr-2"></i>Manajemen Kode Voucher</h3>
+                <p class="text-xs text-slate-400">Buat voucher diskon atau akses gratis sesi foto.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SCRIPT CONTROLLER & CHART -->
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById(`btn-${tabId}`).classList.add('active');
+        }
+
+        function syncData() {
+            alert('Sinkronisasi data berhasil! Cloud terhubung.');
+        }
+
+        function addVendor() {
+            const name = prompt("Masukkan Nama Vendor/Cabang Baru:");
+            if (name) alert(`Vendor "${name}" berhasil ditambahkan.`);
+        }
+
+        window.onload = function() {
+            // Grafik Omset
+            new Chart(document.getElementById('omsetChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                    datasets: [{
+                        label: 'Omset (Rp)',
+                        data: [4500000, 8200000, 14000000, 28450000],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
             });
 
-            document.getElementById('photo-count').innerText = capturedPhotos.length;
-            document.getElementById('gallery-counter').innerText = `${capturedPhotos.length} / 4 Foto`;
-            document.getElementById('retake-count-display').innerText = retakeQuota;
-
-            const btnEdit = document.getElementById('btn-to-edit');
-            if (capturedPhotos.length === 4) {
-                btnEdit.disabled = false;
-                btnEdit.classList.replace('bg-slate-600', 'bg-amber-500');
-                btnEdit.classList.replace('text-slate-400', 'text-slate-900');
-                btnEdit.classList.remove('cursor-not-allowed');
-            } else {
-                btnEdit.disabled = true;
-                btnEdit.classList.replace('bg-amber-500', 'bg-slate-600');
-                btnEdit.classList.replace('text-slate-900', 'text-slate-400');
-                btnEdit.classList.add('cursor-not-allowed');
-            }
-        }
-
-        function deletePhoto(index) {
-            if (retakeQuota <= 0) return;
-
-            retakeQuota--;
-            capturedPhotos.splice(index, 1);
-            
-            if (retakeQuota === 0) {
-                document.getElementById('retake-limit-msg').classList.remove('hidden');
-            }
-
-            updatePhotoGrid();
-        }
-
-        function startEditingTimer() {
-            timeLeft = 20;
-            document.getElementById('timer-display').innerText = timeLeft;
-            renderFinalPreview();
-
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer-display').innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    finishEditingAndPrint();
-                }
-            }, 1000);
-        }
-
-        function renderFinalPreview() {
-            const container = document.getElementById('preview-frame-container');
-            container.innerHTML = "";
-
-            capturedPhotos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo;
-                img.className = "w-full h-16 sm:h-24 object-cover rounded";
-                container.appendChild(img);
+            // Grafik Perbandingan Pembayaran
+            new Chart(document.getElementById('paymentChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['QRIS (Riil)', 'Voucher (Non-QR)'],
+                    datasets: [{
+                        data: [22150000, 6300000],
+                        backgroundColor: ['#10b981', '#f97316']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
             });
-        }
-
-        function applyFrameStyle(style) {
-            const container = document.getElementById('preview-frame-container');
-            if (style === 'classic') container.className = "grid grid-cols-2 gap-2 border-4 border-slate-900 p-2 bg-slate-900";
-            else if (style === 'white') container.className = "grid grid-cols-2 gap-2 border-4 border-slate-200 p-2 bg-white";
-            else container.className = "grid grid-cols-2 gap-2 p-0 bg-transparent";
-        }
-
-        function applyAIFrame() {
-            alert('Frame AI Dipasang!');
-            const container = document.getElementById('preview-frame-container');
-            container.className = "grid grid-cols-2 gap-2 border-4 border-indigo-500 p-2 bg-indigo-950";
-        }
-
-        function finishEditingAndPrint() {
-            if (timerInterval) clearInterval(timerInterval);
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = 600;
-            canvas.height = 800;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, 600, 800);
-            
-            finalImageBase64 = canvas.toDataURL('image/jpeg', 0.9);
-            goToScreen(5);
-        }
-
-        async function processFinalPrintAndUpload() {
-            generateQRIS('extra-print-qris', 10000);
-            uploadToCloudinary();
-        }
-
-        async function uploadToCloudinary() {
-            const statusElem = document.getElementById('upload-cloud-status');
-            statusElem.innerText = "Mengunggah ke Cloudinary...";
-            
-            try {
-                const formData = new FormData();
-                formData.append('file', finalImageBase64 || capturedPhotos[0]);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                const data = await res.json();
-                
-                if (data.secure_url) {
-                    statusElem.innerText = "Softfile Siap Diunduh!";
-                    statusElem.className = "text-[11px] text-green-400 font-bold mb-2";
-                    
-                    const softfileQr = document.getElementById('softfile-qrcode');
-                    softfileQr.innerHTML = "";
-                    new QRCode(softfileQr, { text: data.secure_url, width: 95, height: 95 });
-                } else {
-                    statusElem.innerText = "Gagal Upload";
-                    statusElem.className = "text-[11px] text-red-400 font-bold mb-2";
-                }
-            } catch (e) {
-                statusElem.innerText = "Gagal Terhubung ke Cloud";
-                statusElem.className = "text-[11px] text-red-400 font-bold mb-2";
-            }
-        }
-
-        function processExtraPrintPayment() {
-            alert('Pembayaran Rp 10.000 Berhasil!');
-        }
-
-        function resetApp() {
-            capturedPhotos = [];
-            isPaid = false;
-            retakeQuota = 3;
-            document.getElementById('retake-limit-msg').classList.add('hidden');
-            document.getElementById('voucher-input').value = "";
-            document.getElementById('voucher-msg').classList.add('hidden');
-            
-            const btnStart = document.getElementById('btn-start-photo');
-            btnStart.disabled = true;
-            btnStart.classList.replace('bg-amber-500', 'bg-slate-600');
-            btnStart.classList.replace('text-slate-900', 'text-slate-400');
-            btnStart.classList.add('cursor-not-allowed');
-
-            goToScreen(1);
-        }
-
-        generateQRIS('qris-code', 15000);
+        };
     </script>
 </body>
 </html>
