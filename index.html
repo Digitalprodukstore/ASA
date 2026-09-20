@@ -45,7 +45,7 @@
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-2"></span> Kiosk Ready
       </span>
       <button onclick="resetToWelcome()" class="text-slate-400 hover:text-white transition text-sm">
-        <i class="fa-solid fa-rotate-right mr-1">="</i> Reset
+        <i class="fa-solid fa-rotate-right mr-1"></i> Reset
       </button>
     </div>
   </header>
@@ -74,7 +74,7 @@
       </div>
     </section>
 
-    <!-- STEP 2: PILIH PAKET & OPTIONS -->
+    <!-- STEP 2: PILIH PAKET -->
     <section id="step-package" class="hidden w-full max-w-5xl">
       <div class="text-center mb-10">
         <h2 class="text-3xl font-bold mb-2">Pilih Paket Sesi Foto</h2>
@@ -82,7 +82,6 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Paket A -->
         <div onclick="selectPackage('Paket Standard', 25000, 2)" class="package-card glass-card rounded-2xl p-6 cursor-pointer border border-slate-800 hover:border-indigo-500 transition relative group">
           <div class="text-indigo-400 font-semibold text-sm mb-2">Populer</div>
           <h3 class="text-xl font-bold mb-1">Standard Strip</h3>
@@ -96,7 +95,6 @@
           <button class="w-full py-3 rounded-xl bg-slate-800 group-hover:bg-indigo-600 transition font-bold text-sm">Pilih Paket</button>
         </div>
 
-        <!-- Paket B -->
         <div onclick="selectPackage('Paket Deluxe', 35000, 4)" class="package-card glass-card rounded-2xl p-6 cursor-pointer border border-indigo-500/50 bg-indigo-950/20 transition relative group">
           <div class="absolute -top-3 right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">Best Value</div>
           <div class="text-pink-400 font-semibold text-sm mb-2">Double Print</div>
@@ -104,21 +102,20 @@
           <p class="text-xs text-slate-400 mb-4">4x Strip Foto + Full HD Digital Media</p>
           <div class="text-3xl font-black mb-6">Rp 35.000</div>
           <ul class="text-sm text-slate-300 space-y-2 mb-6">
-            <li><i class="fa-solid fa-check text-pink-400 mr-2"></i> 4 Pose Foto</li>
+            <li><i class="fa-solid fa-check text-pink-400 mr-2"></i> 3 Pose Foto</li>
             <li><i class="fa-solid fa-check text-pink-400 mr-2"></i> 4 Print Strip</li>
             <li><i class="fa-solid fa-check text-pink-400 mr-2"></i> Live GIF + MP4 Video</li>
           </ul>
           <button class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-bold text-sm">Pilih Paket</button>
         </div>
 
-        <!-- Paket C -->
         <div onclick="selectPackage('Paket Group', 50000, 6)" class="package-card glass-card rounded-2xl p-6 cursor-pointer border border-slate-800 hover:border-indigo-500 transition relative group">
           <div class="text-purple-400 font-semibold text-sm mb-2">Ramai-ramai</div>
           <h3 class="text-xl font-bold mb-1">Party Pack</h3>
           <p class="text-xs text-slate-400 mb-4">6x Strip Foto + Multi QR Download</p>
           <div class="text-3xl font-black mb-6">Rp 50.000</div>
           <ul class="text-sm text-slate-300 space-y-2 mb-6">
-            <li><i class="fa-solid fa-check text-purple-400 mr-2"></i> 6 Pose Foto</li>
+            <li><i class="fa-solid fa-check text-purple-400 mr-2"></i> 3 Pose Foto</li>
             <li><i class="fa-solid fa-check text-purple-400 mr-2"></i> 6 Print Strip</li>
             <li><i class="fa-solid fa-check text-purple-400 mr-2"></i> Custom Frame Filter</li>
           </ul>
@@ -133,7 +130,7 @@
       </div>
     </section>
 
-    <!-- STEP 3: PILIH TEMPLATE FRAME -->
+    <!-- STEP 3: PILIH FRAME -->
     <section id="step-frame" class="hidden w-full max-w-5xl">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold mb-2">Pilih Desain Frame</h2>
@@ -141,8 +138,7 @@
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <!-- Frame Option 1 -->
-        <div onclick="selectFrame('Classic Black Strip')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
+        <div onclick="selectFrame('Classic Dark Strip', '#0f172a', '#ffffff')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
           <div class="bg-slate-900 rounded-xl h-48 mb-3 flex flex-col items-center justify-center p-2 border border-slate-700 group-hover:scale-105 transition">
             <div class="w-full h-10 bg-slate-800 rounded mb-1"></div>
             <div class="w-full h-10 bg-slate-800 rounded mb-1"></div>
@@ -152,8 +148,7 @@
           <h4 class="font-bold text-sm">Classic Dark Strip</h4>
         </div>
 
-        <!-- Frame Option 2 -->
-        <div onclick="selectFrame('Minimalist White')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
+        <div onclick="selectFrame('Minimalist White', '#ffffff', '#0f172a')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
           <div class="bg-slate-100 text-slate-800 rounded-xl h-48 mb-3 flex flex-col items-center justify-center p-2 border border-slate-300 group-hover:scale-105 transition">
             <div class="w-full h-10 bg-slate-300 rounded mb-1"></div>
             <div class="w-full h-10 bg-slate-300 rounded mb-1"></div>
@@ -163,8 +158,7 @@
           <h4 class="font-bold text-sm">Minimalist White</h4>
         </div>
 
-        <!-- Frame Option 3 -->
-        <div onclick="selectFrame('Pastel Y2K')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
+        <div onclick="selectFrame('Cute Pastel Y2K', '#f472b6', '#ffffff')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
           <div class="bg-gradient-to-b from-pink-300 to-purple-300 rounded-xl h-48 mb-3 flex flex-col items-center justify-center p-2 border border-pink-400 group-hover:scale-105 transition">
             <div class="w-full h-10 bg-white/70 rounded mb-1"></div>
             <div class="w-full h-10 bg-white/70 rounded mb-1"></div>
@@ -174,11 +168,10 @@
           <h4 class="font-bold text-sm">Cute Pastel Y2K</h4>
         </div>
 
-        <!-- Frame Option 4 -->
-        <div onclick="selectFrame('Neon Cyberpunk')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
+        <div onclick="selectFrame('Neon Cyber', '#0284c7', '#38bdf8')" class="frame-card glass-card rounded-2xl p-4 cursor-pointer border border-slate-800 hover:border-indigo-500 transition text-center group">
           <div class="bg-slate-950 border-2 border-cyan-400 rounded-xl h-48 mb-3 flex flex-col items-center justify-center p-2 group-hover:scale-105 transition shadow-lg shadow-cyan-500/20">
             <div class="w-full h-10 bg-cyan-950 border border-cyan-500/40 rounded mb-1"></div>
-            <div class="w-full h-full h-10 bg-cyan-950 border border-cyan-500/40 rounded mb-1"></div>
+            <div class="w-full h-10 bg-cyan-950 border border-cyan-500/40 rounded mb-1"></div>
             <div class="w-full h-10 bg-cyan-950 border border-cyan-500/40 rounded"></div>
             <span class="text-[10px] text-cyan-400 mt-2 font-mono">NEON NIGHTS</span>
           </div>
@@ -193,45 +186,37 @@
       </div>
     </section>
 
-    <!-- STEP 4: KIOSK CAMERA ENGINE (CAPTURE SESSION) -->
+    <!-- STEP 4: KIOSK CAMERA ENGINE -->
     <section id="step-camera" class="hidden w-full max-w-4xl">
       <div class="glass-card rounded-3xl p-6 border border-slate-800 relative overflow-hidden">
         
-        <!-- Live Camera Viewport -->
+        <!-- Viewport Kamera -->
         <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
-          <video id="webcam" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+          <video id="webcam" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100 z-10"></video>
           
-          <!-- Flash Overlay Animation -->
-          <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150"></div>
+          <!-- Efek Flash Overlay -->
+          <div id="flash-overlay" class="hidden absolute inset-0 bg-white z-30 transition-opacity duration-150 pointer-events-none"></div>
 
           <!-- Countdown Overlay -->
-          <div id="countdown-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs">
-            <span id="countdown-text" class="text-9xl font-black text-white drop-shadow-2xl animate-ping">3</span>
+          <div id="countdown-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs z-20">
+            <span id="countdown-text" class="text-9xl font-black text-white drop-shadow-2xl">3</span>
           </div>
 
-          <!-- Status Indicator Overlay -->
-          <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 border border-slate-700">
+          <!-- Indikator Pose -->
+          <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 border border-slate-700 z-20">
             <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
             <span id="pose-indicator">Pose 1 dari 3</span>
           </div>
-
-          <!-- Live GIF Recording Badge -->
-          <div id="gif-recording-badge" class="hidden absolute top-4 right-4 bg-pink-600/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-2">
-            <i class="fa-solid fa-film animate-spin"></i>
-            <span>Merekam GIF Live...</span>
-          </div>
         </div>
 
-        <!-- Controls & Thumbnail Strip -->
+        <!-- Controls & Thumbnails -->
         <div class="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <!-- Captured Thumbnail Strip -->
           <div class="flex space-x-3 overflow-x-auto py-2" id="thumbnail-container">
-            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Foto 1</div>
-            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Foto 2</div>
-            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Foto 3</div>
+            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Pose 1</div>
+            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Pose 2</div>
+            <div class="w-16 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-500">Pose 3</div>
           </div>
 
-          <!-- Capture Button -->
           <button id="btn-start-capture" onclick="startCaptureSequence()" class="w-full md:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-lg shadow-xl hover:opacity-90 transition">
             <i class="fa-solid fa-camera mr-2"></i> Ambil Foto Sesi
           </button>
@@ -240,7 +225,7 @@
       </div>
     </section>
 
-    <!-- STEP 5: PREVIEW, FILTER & RETOUCH -->
+    <!-- STEP 5: PREVIEW & FILTER -->
     <section id="step-preview" class="hidden w-full max-w-4xl">
       <div class="text-center mb-6">
         <h2 class="text-3xl font-bold mb-1">Hasil Foto & Filter</h2>
@@ -248,88 +233,73 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Main Preview Canvas Frame -->
         <div class="md:col-span-2 glass-card rounded-2xl p-4 flex items-center justify-center bg-slate-900/50">
           <canvas id="preview-canvas" class="max-h-[450px] rounded-xl shadow-2xl border border-slate-700 filter-normal"></canvas>
         </div>
 
-        <!-- Filter Selector Panel -->
         <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
           <div>
             <h3 class="font-bold text-sm mb-4 text-slate-300">Pilih Filter Warna</h3>
             <div class="grid grid-cols-2 gap-3 mb-6">
-              <button onclick="applyFilter('filter-normal')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Normal</button>
-              <button onclick="applyFilter('filter-bw')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Black & White</button>
-              <button onclick="applyFilter('filter-vintage')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Vintage</button>
-              <button onclick="applyFilter('filter-warm')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Warm Soft</button>
-              <button onclick="applyFilter('filter-cool')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Cool Vibe</button>
-              <button onclick="applyFilter('filter-smooth')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold text-center border border-slate-700">Glow Smooth</button>
+              <button onclick="applyFilter('filter-normal')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">Normal</button>
+              <button onclick="applyFilter('filter-bw')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">B&W</button>
+              <button onclick="applyFilter('filter-vintage')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">Vintage</button>
+              <button onclick="applyFilter('filter-warm')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">Warm</button>
+              <button onclick="applyFilter('filter-cool')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">Cool</button>
+              <button onclick="applyFilter('filter-smooth')" class="p-3 rounded-xl bg-slate-800 hover:bg-indigo-600 transition text-xs font-semibold border border-slate-700">Smooth</button>
             </div>
           </div>
 
           <button onclick="goToStep('step-finish')" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg hover:opacity-90 transition">
-            Cetak & Buat QR Download <i class="fa-solid fa-arrow-right ml-2"></i>
+            Selesai & Scan QR <i class="fa-solid fa-arrow-right ml-2"></i>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- STEP 6: FINISH (PRINT & QR CODE DOWNLOAD) -->
+    <!-- STEP 6: FINISH (SCAN QR CODE) -->
     <section id="step-finish" class="hidden w-full max-w-3xl text-center">
       <div class="glass-card rounded-3xl p-8 md:p-12 border border-slate-800 shadow-2xl relative overflow-hidden">
-        
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-6">
           <i class="fa-solid fa-circle-check text-3xl"></i>
         </div>
-        <h2 class="text-3xl font-black mb-2">Sesi Foto Selesai!</h2>
-        <p class="text-slate-400 text-sm mb-8">Foto kamu sedang dicetak. Scan QR Code di bawah untuk mendownload Foto Strip + Live GIF video.</p>
+        <h2 class="text-3xl font-black mb-2">Foto Siap Di-download!</h2>
+        <p class="text-slate-400 text-sm mb-8">Scan QR Code di bawah menggunakan kamera HP untuk mengunduh hasil Foto Strip kamu.</p>
 
-        <!-- QR Code Container -->
         <div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-8 p-6 bg-slate-900/80 rounded-2xl border border-slate-800">
-          <div class="p-4 bg-white rounded-2xl shadow-xl">
+          <div class="p-4 bg-white rounded-2xl shadow-xl flex items-center justify-center">
             <div id="qrcode-container"></div>
           </div>
           <div class="text-left max-w-xs space-y-3">
             <div class="flex items-center space-x-2 text-xs font-bold text-indigo-400">
               <i class="fa-solid fa-qrcode"></i>
-              <span>SCAN VIA SAFARI / CAMERA HP</span>
+              <span>SCAN PAKAI KAMERA HP</span>
             </div>
             <p class="text-xs text-slate-300">
-              Gunakan kamera ponsel untuk mengunduh versi HD Foto Strip & Animasi GIF langsung ke Galeri HP kamu.
+              Arahkan kamera HP ke QR Code ini untuk langsung membuka dan menyimpan foto strip ke galeri ponselmu.
             </p>
-            <div class="text-[11px] text-slate-500 italic">
-              *Link download berlaku selama 24 jam.
-            </div>
           </div>
         </div>
 
-        <!-- Action Controls -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <div class="flex justify-center">
           <button onclick="resetToWelcome()" class="px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 transition font-bold text-sm shadow-xl">
             <i class="fa-solid fa-house mr-2"></i> Selesai / Sesi Baru
           </button>
         </div>
-
       </div>
     </section>
 
   </main>
 
-  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
-    // State management
     let selectedPackageData = { name: 'Standard Strip', price: 25000, printCount: 2 };
-    let selectedFrameName = 'Classic Black Strip';
+    let selectedFrame = { name: 'Classic Dark Strip', bg: '#0f172a', text: '#ffffff' };
     let capturedPhotos = [];
-    let currentFilterClass = 'filter-normal';
     let webcamStream = null;
 
-    // Navigation Helper
     function goToStep(stepId) {
       const steps = ['step-welcome', 'step-package', 'step-frame', 'step-camera', 'step-preview', 'step-finish'];
-      steps.forEach(id => {
-        document.getElementById(id).classList.add('hidden');
-      });
+      steps.forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById(stepId).classList.remove('hidden');
 
       if (stepId === 'step-camera') {
@@ -348,19 +318,16 @@
       goToStep('step-welcome');
     }
 
-    // Package Selection
     function selectPackage(name, price, printCount) {
       selectedPackageData = { name, price, printCount };
       goToStep('step-frame');
     }
 
-    // Frame Selection
-    function selectFrame(frameName) {
-      selectedFrameName = frameName;
+    function selectFrame(name, bg, text) {
+      selectedFrame = { name, bg, text };
       goToStep('step-camera');
     }
 
-    // Camera Access
     async function initCamera() {
       try {
         const video = document.getElementById('webcam');
@@ -381,7 +348,6 @@
       }
     }
 
-    // Capture Sequence
     async function startCaptureSequence() {
       const btn = document.getElementById('btn-start-capture');
       btn.disabled = true;
@@ -393,9 +359,6 @@
       const countdownText = document.getElementById('countdown-text');
       const flashOverlay = document.getElementById('flash-overlay');
       const poseIndicator = document.getElementById('pose-indicator');
-      const gifBadge = document.getElementById('gif-recording-badge');
-
-      gifBadge.classList.remove('hidden');
 
       for (let i = 1; i <= totalPoses; i++) {
         poseIndicator.innerText = `Pose ${i} dari ${totalPoses}`;
@@ -408,17 +371,15 @@
 
         countdownOverlay.classList.add('hidden');
 
-        // Flash Effect
-        flashOverlay.classList.remove('opacity-0');
-        flashOverlay.classList.add('opacity-100');
-        setTimeout(() => flashOverlay.classList.remove('opacity-100'), 150);
+        // Efek Flash
+        flashOverlay.classList.remove('hidden');
+        await new Promise(r => setTimeout(r, 100));
+        flashOverlay.classList.add('hidden');
 
-        // Capture Frame from Video
         captureFrame();
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 500));
       }
 
-      gifBadge.classList.add('hidden');
       btn.disabled = false;
       btn.classList.remove('opacity-50');
 
@@ -433,7 +394,6 @@
       canvas.height = 480;
       const ctx = canvas.getContext('2d');
       
-      // Mirror flip for natural feel
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -445,7 +405,7 @@
     function updateThumbnails() {
       const container = document.getElementById('thumbnail-container');
       container.innerHTML = '';
-      capturedPhotos.forEach((src, idx) => {
+      capturedPhotos.forEach((src) => {
         const img = document.createElement('img');
         img.src = src;
         img.className = 'w-16 h-12 rounded-lg object-cover border border-indigo-500 shadow';
@@ -453,64 +413,63 @@
       });
     }
 
-    // Canvas Preview Generator (Simulasi Photo Strip Layout)
     function renderPreviewCanvas() {
       const canvas = document.getElementById('preview-canvas');
       const ctx = canvas.getContext('2d');
 
       canvas.width = 400;
-      canvas.height = 1000;
+      canvas.height = 950;
 
-      // Background Frame
-      ctx.fillStyle = '#0f172a'; // Slate-900 background
+      // Frame Background
+      ctx.fillStyle = selectedFrame.bg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Photos
-      let startY = 40;
+      let startY = 30;
       const photoWidth = 340;
-      const photoHeight = 250;
+      const photoHeight = 240;
 
-      capturedPhotos.forEach((photoSrc) => {
+      let loadedCount = 0;
+      capturedPhotos.forEach((photoSrc, idx) => {
         const img = new Image();
         img.onload = () => {
-          ctx.drawImage(img, 30, startY, photoWidth, photoHeight);
-          startY += photoHeight + 20;
+          ctx.drawImage(img, 30, startY + (idx * (photoHeight + 15)), photoWidth, photoHeight);
+          loadedCount++;
 
-          // Footer Watermark / Logo
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 20px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('BOOTHPRO KIOSK', canvas.width / 2, 940);
-          ctx.fillStyle = '#94a3b8';
-          ctx.font = '12px sans-serif';
-          ctx.fillText(new Date().toLocaleDateString('id-ID'), canvas.width / 2, 965);
+          if (loadedCount === capturedPhotos.length) {
+            // Branding Footer
+            ctx.fillStyle = selectedFrame.text;
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('BOOTHPRO KIOSK', canvas.width / 2, 880);
+            ctx.fillStyle = selectedFrame.text;
+            ctx.font = '12px sans-serif';
+            ctx.fillText(new Date().toLocaleDateString('id-ID'), canvas.width / 2, 905);
+          }
         };
         img.src = photoSrc;
       });
     }
 
-    // Apply Filter
     function applyFilter(filterClass) {
       const canvas = document.getElementById('preview-canvas');
       canvas.className = `max-h-[450px] rounded-xl shadow-2xl border border-slate-700 ${filterClass}`;
-      currentFilterClass = filterClass;
     }
 
-    // Generate QR Code
     function generateQRCode() {
       const container = document.getElementById('qrcode-container');
       container.innerHTML = '';
-      
-      // Dummy cloud gallery link
-      const downloadUrl = `https://boothpro-app.vercel.app/gallery?id=session_${Date.now()}`;
-      
+
+      const canvas = document.getElementById('preview-canvas');
+      // Konversi hasil foto menjadi URL gambar langsung
+      const photoDataUrl = canvas.toDataURL('image/jpeg');
+
       new QRCode(container, {
-        text: downloadUrl,
-        width: 140,
-        height: 140,
+        text: photoDataUrl,
+        width: 150,
+        height: 150,
         colorDark: "#000000",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.L
       });
     }
   </script>
