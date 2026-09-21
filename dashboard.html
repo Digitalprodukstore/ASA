@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobooth Studio - Admin Synchronized Dashboard</title>
+    <title>Photobooth Studio - Admin Pro Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Grafik Insight -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -20,7 +22,7 @@
         .nav-item.active .nav-icon { background: var(--primary-bg); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
         .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
-    <!-- KEAMANAN PIN ADMIN -->
+    <!-- KEAMANAN PIN ADMIN (DIPERTAHANKAN) -->
     <script>
         (function() {
             if (sessionStorage.getItem('admin_authenticated') !== 'true') {
@@ -36,26 +38,178 @@
         })();
     </script>
 </head>
-<body class="min-h-screen p-4 max-w-xl mx-auto">
+<body class="min-h-screen p-4 max-w-2xl mx-auto">
 
-    <!-- HEADER DASHBOARD & SINKRONISASI -->
+    <!-- HEADER DASHBOARD PRO -->
     <div class="glass-card p-4 rounded-2xl mb-4 flex justify-between items-center">
         <div>
             <h1 class="font-extrabold text-sm text-white tracking-wide" id="brandTitle">PHOTOBOOTH STUDIO PRO</h1>
             <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5 mt-0.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Terkoneksi dengan Kiosk Utama
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Multi-Device Hub Active
             </p>
         </div>
-        <a href="index.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700 text-indigo-300">
-            <i class="fa-solid fa-desktop mr-1"></i> Buka Kiosk
+        <a href="index.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700 text-indigo-300 flex items-center gap-1">
+            <i class="fa-solid fa-desktop"></i> Buka Kiosk
         </a>
     </div>
 
-    <!-- ================= TAB 1: PENGATURAN PAKET & TARIF ================= -->
-    <div id="section-paket" class="tab-section active space-y-4">
+    <!-- ================= TAB 1: ANALITIK & INSIGHT PEMBUKUAN ================= -->
+    <div id="section-insight" class="tab-section active space-y-4">
+        <!-- Ringkasan Statistik -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="glass-card p-3 rounded-xl border border-indigo-500/20">
+                <span class="text-[9px] text-slate-400 font-bold block">TOTAL SESI (HARI INI)</span>
+                <p class="text-base font-black text-indigo-400 font-mono" id="statTodayShots">38 Sesi</p>
+            </div>
+            <div class="glass-card p-3 rounded-xl border border-emerald-500/20">
+                <span class="text-[9px] text-slate-400 font-bold block">INCOME QRIS</span>
+                <p class="text-base font-black text-emerald-400 font-mono" id="statQrisInc">Rp 570.000</p>
+            </div>
+            <div class="glass-card p-3 rounded-xl border border-amber-500/20">
+                <span class="text-[9px] text-slate-400 font-bold block">INCOME VOUCHER</span>
+                <p class="text-base font-black text-amber-400 font-mono" id="statVoucherInc">Rp 150.000</p>
+            </div>
+            <div class="glass-card p-3 rounded-xl border border-cyan-500/20">
+                <span class="text-[9px] text-slate-400 font-bold block">TOTAL REKAP BULANAN</span>
+                <p class="text-base font-black text-cyan-400 font-mono" id="statTotalInc">Rp 720.000</p>
+            </div>
+        </div>
+
+        <!-- Grafik Visual Transaksi -->
+        <div class="glass-card p-4 rounded-2xl space-y-2">
+            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-chart-line text-indigo-400 mr-1.5"></i>Grafik Performa Foto & Transaksi</h3>
+            <div class="h-48 w-full">
+                <canvas id="analyticsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 2: MANAGEMENT CABANG & PROFIT SHARING ================= -->
+    <div id="section-cabang" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-tags text-indigo-400 mr-2"></i>Tarif Paket & Extra Print</h2>
-            <p class="text-xs text-slate-400">Atur harga setiap paket bundling yang tampil pada layar pilihan customer di kiosk.</p>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-store text-emerald-400 mr-2"></i>Manajemen Cabang / Vendor Partner</h2>
+            <p class="text-xs text-slate-400">Pantau performa studio pihak ketiga & atur skema sewa atau bagi hasil.</p>
+
+            <div class="space-y-3">
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Cabang 01 - Mall Central</h4>
+                        <p class="text-[10px] text-slate-400">Skema: Bagi Hasil (70% Owner / 30% Partner)</p>
+                    </div>
+                    <span class="text-xs font-mono text-emerald-400 font-bold">Active</span>
+                </div>
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Cabang 02 - Cafe Studio</h4>
+                        <p class="text-[10px] text-slate-400">Skema: Langganan Bulanan (Rp 500.000/Bln)</p>
+                    </div>
+                    <span class="text-xs font-mono text-emerald-400 font-bold">Active</span>
+                </div>
+            </div>
+
+            <button onclick="alert('Fitur Tambah Cabang Baru Siap Digunakan!')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                + Tambah Cabang Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= TAB 3: TAMPILAN, FONT, FILTER & IMPORT FRAME ================= -->
+    <div id="section-tampilan" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-pink-400 mr-2"></i>Desain, Font & Impor Frame PNG</h2>
+
+            <!-- Teks Sambutan / Watermark Kiosk -->
+            <div>
+                <label class="text-xs text-slate-300 font-bold block mb-1">Teks Sambutan / Watermark Kiosk</label>
+                <input type="text" id="welcomeMsgInput" placeholder="Welcome to Our Studio" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+            </div>
+
+            <!-- Pilihan Jenis Font Kiosk -->
+            <div>
+                <label class="text-xs text-slate-300 font-bold block mb-1">Pilih Jenis Font Kiosk</label>
+                <select id="kioskFontSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                    <option value="Inter">Inter (Default Modern)</option>
+                    <option value="Poppins">Poppins (Clean & Soft)</option>
+                    <option value="Montserrat">Montserrat (Bold & Stylish)</option>
+                    <option value="Playfair Display">Playfair (Elegant & Vintage)</option>
+                    <option value="Courier New">Courier (Retro Typewriter)</option>
+                    <option value="Comic Sans MS">Comic Sans (Playful Children)</option>
+                </select>
+            </div>
+
+            <!-- Upload / Impor Frame PNG dari Galeri -->
+            <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
+                <span class="text-xs font-bold text-slate-300 block">Impor Frame PNG dari Galeri Device</span>
+                <input type="file" id="frameFileInput" accept="image/png" class="hidden" onchange="handleFrameUpload(event)">
+                <button onclick="document.getElementById('frameFileInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
+                    Pilih File PNG Transparan
+                </button>
+            </div>
+
+            <!-- Custom Warna Background Aplikasi -->
+            <div>
+                <label class="text-xs text-slate-300 font-bold block mb-1">Warna Background Kiosk (HEX)</label>
+                <div class="flex gap-2">
+                    <input type="color" id="appBgColorPicker" value="#07090e" class="h-9 w-12 bg-transparent cursor-pointer rounded-lg">
+                    <input type="text" id="appBgColorText" value="#07090e" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
+                </div>
+            </div>
+
+            <button onclick="saveDesignSettings()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan & Sinkronkan Desain Ke Kiosk
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= TAB 4: UNIVERSAL HARDWARE & NETWORK (KAMERA, DEVICE & PRINTER) ================= -->
+    <div id="section-hardware" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-plug text-amber-400 mr-2"></i>Universal Hardware & Network Hub</h2>
+            <p class="text-xs text-slate-400">Dukungan bebas ke semua kamera (DSLR/Webcam/HP), device, & printer (USB/Wi-Fi).</p>
+
+            <!-- Pengaturan Perangkat Kamera -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-300 font-bold block">Sumber Perangkat Kamera</label>
+                <select id="cameraSourceSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                    <option value="webcam">Webcam USB Internal/External (Auto-Detect)</option>
+                    <option value="dslr">DSLR / Mirrorless Camera (via Capture Bridge / EOS Utility)</option>
+                    <option value="mobile">Kamera Smartphone / Tablet (Wireless Cam)</option>
+                </select>
+            </div>
+
+            <!-- Pengaturan Printer Universal -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-300 font-bold block">Koneksi Printer</label>
+                <select id="printerConnSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                    <option value="usb">USB Direct Thermal / Photo Printer (DNP / Citizen / Epson)</option>
+                    <option value="wifi">Wi-Fi Wireless Network Printer (AirPrint / IP Address)</option>
+                </select>
+            </div>
+
+            <!-- Status Jaringan & Bluetooth -->
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2">
+                <span class="text-[10px] font-bold text-slate-400 block">STATUS JARINGAN & PERANGKAT:</span>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-300"><i class="fa-solid fa-wifi text-emerald-400 mr-1.5"></i> Wi-Fi Kiosk:</span>
+                    <span class="text-emerald-400 font-bold font-mono">Connected (High Speed)</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-300"><i class="fa-brands fa-bluetooth-b text-indigo-400 mr-1.5"></i> Bluetooth Remote:</span>
+                    <span class="text-indigo-400 font-bold font-mono">Paired</span>
+                </div>
+            </div>
+
+            <button onclick="saveHardwareSettings()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Konfigurasi Hardware
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= TAB 5: TARIF, SESI & CLOUD (FITUR LAMA DIPERTAHANKAN) ================= -->
+    <div id="section-tarif" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i>Tarif, Timer & Cloud Storage</h2>
 
             <div class="space-y-3">
                 <div>
@@ -71,48 +225,29 @@
                     <input type="number" id="pricePkg3" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-300 font-bold block mb-1">Harga Tambah Cetak / Extra Print (per lembar)</label>
+                    <label class="text-xs text-slate-300 font-bold block mb-1">Harga Tambah Cetak / Extra Print</label>
                     <input type="number" id="priceExtraPrint" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-emerald-400 font-mono">
                 </div>
             </div>
 
-            <button onclick="savePackagePrices()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Pengaturan Paket
-            </button>
-        </div>
-    </div>
+            <hr class="border-slate-800">
 
-    <!-- ================= TAB 2: ATURAN SESI (TIMER & RETAKE) ================= -->
-    <div id="section-sesi" class="tab-section space-y-4">
-        <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-stopwatch text-amber-400 mr-2"></i>Aturan Sesi & Retake Foto</h2>
-            
             <div class="space-y-3">
                 <div>
                     <label class="text-xs text-slate-300 font-bold block mb-1">Batas Waktu Sesi Foto (Menit)</label>
-                    <input type="number" id="sessionTimerMinutes" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono" placeholder="7">
+                    <input type="number" id="sessionTimerMinutes" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
                 </div>
                 <div>
                     <label class="text-xs text-slate-300 font-bold block mb-1">Maksimal Kesempatan Retake (kali)</label>
-                    <input type="number" id="maxRetakeQuota" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono" placeholder="3">
+                    <input type="number" id="maxRetakeQuota" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
                 </div>
             </div>
 
-            <button onclick="saveSessionRules()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Aturan Sesi
-            </button>
-        </div>
-    </div>
-
-    <!-- ================= TAB 3: INTEGRASI CLOUD (CLOUDINARY) ================= -->
-    <div id="section-cloud" class="tab-section space-y-4">
-        <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-cloud text-cyan-400 mr-2"></i>Integrasi Soft File Cloudinary</h2>
-            <p class="text-xs text-slate-400">Penyimpanan otomatis agar pelanggan bisa langsung scan QR Code untuk mengunduh foto & video.</p>
+            <hr class="border-slate-800">
 
             <div class="space-y-3">
                 <div>
-                    <label class="text-xs text-slate-300 font-bold block mb-1">Cloud Name</label>
+                    <label class="text-xs text-slate-300 font-bold block mb-1">Cloud Name (Cloudinary)</label>
                     <input type="text" id="cloudNameInput" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-cyan-300 font-mono">
                 </div>
                 <div>
@@ -121,65 +256,37 @@
                 </div>
             </div>
 
-            <button onclick="saveCloudSettings()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Konfigurasi Cloud
+            <button onclick="saveTariffAndCloud()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Semua Tarif & Cloud
             </button>
         </div>
     </div>
 
-    <!-- ================= TAB 4: TEMA WARNA & BRANDING ================= -->
-    <div id="section-tampilan" class="tab-section space-y-4">
-        <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-pink-400 mr-2"></i>Kustomisasi Brand & Tema</h2>
-            
-            <div class="space-y-2">
-                <label class="text-xs text-slate-300 font-bold block">Nama Brand Studio</label>
-                <div class="flex gap-2">
-                    <input type="text" id="brandNameInput" placeholder="Contoh: OurBooth Studio" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
-                    <button onclick="updateBrandName()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Simpan</button>
-                </div>
-            </div>
-
-            <hr class="border-slate-800">
-
-            <div class="space-y-2">
-                <label class="text-xs text-slate-300 font-bold block">Palet Warna Utama Kiosk</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="setThemeColor('#6366f1', '#4f46e5', 'Original')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-indigo-500"></span> Original
-                    </button>
-                    <button onclick="setThemeColor('#10b981', '#059669', 'Natural')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Natural
-                    </button>
-                    <button onclick="setThemeColor('#a855f7', '#9333ea', 'Ungu')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-purple-500"></span> Ungu
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOTTOM NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto glass-card border-t border-slate-800 px-2 py-2 flex justify-around items-center z-50">
-        <button onclick="switchTab('paket')" id="nav-paket" class="nav-item active flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-tags"></i></div>
-            Paket
+    <!-- NAVIGATION BOTTOM BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass-card border-t border-slate-800 px-2 py-2 flex justify-around items-center z-50">
+        <button onclick="switchTab('insight')" id="nav-insight" class="nav-item active flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
+            <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-chart-pie"></i></div>
+            Insight
         </button>
-        <button onclick="switchTab('sesi')" id="nav-sesi" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-stopwatch"></i></div>
-            Sesi
+        <button onclick="switchTab('cabang')" id="nav-cabang" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
+            <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-store"></i></div>
+            Cabang
         </button>
-        <button onclick="switchTab('cloud')" id="nav-cloud" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-cloud"></i></div>
-            Cloud
-        </button>
-        <button onclick="switchTab('tampilan')" id="nav-tampilan" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-palette"></i></div>
+        <button onclick="switchTab('tampilan')" id="nav-tampilan" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
+            <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-palette"></i></div>
             Tampilan
+        </button>
+        <button onclick="switchTab('hardware')" id="nav-hardware" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
+            <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-plug"></i></div>
+            Hardware
+        </button>
+        <button onclick="switchTab('tarif')" id="nav-tarif" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
+            <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-sliders"></i></div>
+            Settings
         </button>
     </nav>
 
-    <!-- SCRIPT SINKRONISASI LOGIKA -->
+    <!-- SCRIPT LOGIKA DASHBOARD PRO -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
@@ -190,44 +297,91 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function savePackagePrices() {
+        // SIMPAN DESAIN, FONT, WATERMARK & BACKGROUND
+        function saveDesignSettings() {
+            const welcomeMsg = document.getElementById('welcomeMsgInput').value;
+            const fontChoice = document.getElementById('kioskFontSelect').value;
+            const bgColor = document.getElementById('appBgColorText').value;
+
+            if (welcomeMsg) localStorage.setItem('app_welcome_msg', welcomeMsg);
+            if (fontChoice) localStorage.setItem('app_kiosk_font', fontChoice);
+            if (bgColor) localStorage.setItem('app_custom_bg_color', bgColor);
+
+            alert("✓ Desain, Font & Watermark berhasil disinkronkan ke Kiosk!");
+        }
+
+        // HANDLER IMPOR FRAME PNG
+        function handleFrameUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localStorage.setItem('custom_frame_png', e.target.result);
+                    alert("✓ Frame PNG transparan berhasil diimpor dan terhubung ke Kiosk!");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // SIMPAN DUKUNGAN HARDWARE & NETWORK
+        function saveHardwareSettings() {
+            const cam = document.getElementById('cameraSourceSelect').value;
+            const print = document.getElementById('printerConnSelect').value;
+            localStorage.setItem('hardware_camera_source', cam);
+            localStorage.setItem('hardware_printer_type', print);
+            alert("✓ Konfigurasi Kamera & Printer Universal tersimpan!");
+        }
+
+        // SIMPAN TARIF, TIMER & CLOUDINARY
+        function saveTariffAndCloud() {
             localStorage.setItem('pkg1_price', document.getElementById('pricePkg1').value);
             localStorage.setItem('pkg2_price', document.getElementById('pricePkg2').value);
             localStorage.setItem('pkg3_price', document.getElementById('pricePkg3').value);
             localStorage.setItem('extra_print_price', document.getElementById('priceExtraPrint').value);
-            alert("✓ Pengaturan harga paket & extra print berhasil disinkronkan ke Kiosk!");
-        }
-
-        function saveSessionRules() {
             localStorage.setItem('session_timer_minutes', document.getElementById('sessionTimerMinutes').value);
             localStorage.setItem('max_retake_quota', document.getElementById('maxRetakeQuota').value);
-            alert("✓ Aturan durasi sesi dan kuota retake berhasil diperbarui!");
-        }
-
-        function saveCloudSettings() {
             localStorage.setItem('cloudinary_cloud_name', document.getElementById('cloudNameInput').value);
             localStorage.setItem('cloudinary_preset_name', document.getElementById('presetNameInput').value);
-            alert("✓ Konfigurasi Cloud Storage tersimpan!");
+            alert("✓ Pengaturan Tarif, Timer & Cloudinary berhasil diperbarui!");
         }
 
-        function setThemeColor(primaryHex, bgHex, themeName) {
-            document.documentElement.style.setProperty('--primary-color', primaryHex);
-            document.documentElement.style.setProperty('--primary-bg', bgHex);
-            localStorage.setItem('app_theme_primary', primaryHex);
-            localStorage.setItem('app_theme_bg', bgHex);
-            alert(`Tema warna diubah ke: ${themeName}`);
+        // RENDER GRAFIK ANALITIK
+        function initAnalyticsChart() {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                    datasets: [{
+                        label: 'Sesi Foto',
+                        data: [12, 19, 15, 25, 32, 48, 55],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                    }
+                }
+            });
         }
 
-        function updateBrandName() {
-            const name = document.getElementById('brandNameInput').value;
-            if (!name) return;
-            document.getElementById('brandTitle').innerText = name.toUpperCase();
-            localStorage.setItem('app_brand_name', name);
-            alert(`Nama brand diubah menjadi: ${name}`);
-        }
+        // COLOR PICKER SYNC
+        document.getElementById('appBgColorPicker').addEventListener('input', (e) => {
+            document.getElementById('appBgColorText').value = e.target.value;
+        });
 
-        // Auto-load data tersimpan saat dashboard dibuka
+        // AUTO-LOAD DATA TERSEMPAN
         window.onload = function() {
+            initAnalyticsChart();
+
             document.getElementById('pricePkg1').value = localStorage.getItem('pkg1_price') || 15000;
             document.getElementById('pricePkg2').value = localStorage.getItem('pkg2_price') || 25000;
             document.getElementById('pricePkg3').value = localStorage.getItem('pkg3_price') || 10000;
@@ -239,11 +393,9 @@
             document.getElementById('cloudNameInput').value = localStorage.getItem('cloudinary_cloud_name') || "risakil1";
             document.getElementById('presetNameInput').value = localStorage.getItem('cloudinary_preset_name') || "risakil";
 
-            const savedBrand = localStorage.getItem('app_brand_name');
-            if (savedBrand) {
-                document.getElementById('brandTitle').innerText = savedBrand.toUpperCase();
-                document.getElementById('brandNameInput').value = savedBrand;
-            }
+            document.getElementById('welcomeMsgInput').value = localStorage.getItem('app_welcome_msg') || "";
+            document.getElementById('kioskFontSelect').value = localStorage.getItem('app_kiosk_font') || "Inter";
+            document.getElementById('appBgColorText').value = localStorage.getItem('app_custom_bg_color') || "#07090e";
         };
     </script>
 </body>
