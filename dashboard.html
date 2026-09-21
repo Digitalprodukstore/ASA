@@ -83,22 +83,7 @@
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-store text-emerald-400 mr-2"></i>Manajemen Cabang / Vendor Partner</h2>
             <p class="text-xs text-slate-400">Pantau performa studio pihak ketiga & atur skema sewa atau bagi hasil.</p>
 
-            <div class="space-y-3" id="branchListContainer">
-                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Cabang 01 - Mall Central</h4>
-                        <p class="text-[10px] text-slate-400">Skema: Bagi Hasil (70% Owner / 30% Partner)</p>
-                    </div>
-                    <span class="text-xs font-mono text-emerald-400 font-bold">Active</span>
-                </div>
-                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <h4 class="text-xs font-bold text-white">Cabang 02 - Cafe Studio</h4>
-                        <p class="text-[10px] text-slate-400">Skema: Langganan Bulanan (Rp 500.000/Bln)</p>
-                    </div>
-                    <span class="text-xs font-mono text-emerald-400 font-bold">Active</span>
-                </div>
-            </div>
+            <div class="space-y-3" id="branchListContainer"></div>
 
             <button onclick="addNewBranch()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all">
                 + Tambah Cabang Baru
@@ -360,7 +345,6 @@
 
     <!-- SCRIPT UTAMA & SINKRONISASI -->
     <script>
-        // Broadcast Channel untuk sinkronisasi instan antar tab/window kiosk tanpa lag
         const syncChannel = new BroadcastChannel('photobooth_sync_channel');
 
         function switchTab(tabName) {
@@ -409,16 +393,10 @@
             document.getElementById('cloudNameInput').value = localStorage.getItem('cloudinary_cloud_name') || 'risakil1';
             document.getElementById('presetNameInput').value = localStorage.getItem('cloudinary_preset_name') || 'risakil';
 
-            // Sinkronisasi Data Real-Time Insight (Pendapatan & Sesi)
-            const totalShots = localStorage.getItem('stat_today_shots') || '38 Sesi';
-            const qrisInc = localStorage.getItem('stat_qris_income') || 'Rp 570.000';
-            const voucherInc = localStorage.getItem('stat_voucher_income') || 'Rp 150.000';
-            const totalInc = localStorage.getItem('stat_total_income') || 'Rp 720.000';
-
-            document.getElementById('statTodayShots').innerText = totalShots;
-            document.getElementById('statQrisInc').innerText = qrisInc;
-            document.getElementById('statVoucherInc').innerText = voucherInc;
-            document.getElementById('statTotalInc').innerText = totalInc;
+            document.getElementById('statTodayShots').innerText = localStorage.getItem('stat_today_shots') || '38 Sesi';
+            document.getElementById('statQrisInc').innerText = localStorage.getItem('stat_qris_income') || 'Rp 570.000';
+            document.getElementById('statVoucherInc').innerText = localStorage.getItem('stat_voucher_income') || 'Rp 150.000';
+            document.getElementById('statTotalInc').innerText = localStorage.getItem('stat_total_income') || 'Rp 720.000';
         }
 
         function applyThemePreset(bgColor, textColor, fontName, presetTitle) {
@@ -496,91 +474,92 @@
                 branches.push({ name, scheme });
                 localStorage.setItem('studio_branches', JSON.stringify(branches));
                 loadBranchList();
+                syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
                 alert("✓ Cabang baru berhasil ditambahkan!");
             }
         }
 
         function deleteBranch(index) {
-            let branches = JSON.parse(localStorage.getItem('studio_branches') || '[]');
-            branches.splice(index, 1);
-            localStorage.setItem('studio_branches', JSON.stringify(branches));
-            loadBranchList();
-            alert("✓ Cabang berhasil dihapus.");
-        }
-
-        // GALERI FRAME (MAX 30 FRAME)
-        function handleFrameUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
-                if (frames.length >= 30) {
-                    alert("❌ Batas maksimal galeri adalah 30 frame.");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    frames.push({ id: Date.now(), name: `Frame ${frames.length + 1}`, url: e.target.result });
-                    localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
-                    renderFrameGallery();
-                    syncChannel.postMessage({ type: 'FRAMES_UPDATED' });
-                    alert("✓ Frame PNG transparan berhasil di-upload ke galeri & langsung sinkron ke Kiosk!");
-                };
-                reader.readAsDataURL(file);
+            if(confirm("Yakin ingin menghapus cabang ini?")) {
+                let branches = JSON.parse(localStorage.getItem('studio_branches') || '[]');
+                branches.splice(index, 1);
+                localStorage.setItem('studio_branches', JSON.stringify(branches));
+                loadBranchList();
+                syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
             }
         }
 
+        // GALERI FRAME PNG
         function renderFrameGallery() {
-            const container = document.getElementById('frameGalleryContainer');
-            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+            let frames = JSON.parse(localStorage.getItem('kiosk_custom_frames') || '[]');
             document.getElementById('frameCountBadge').innerText = frames.length;
-
-            if (frames.length === 0) {
-                container.innerHTML = `<div class="col-span-4 text-[10px] text-slate-500 italic text-center py-6">Belum ada frame di galeri.</div>`;
+            const container = document.getElementById('frameGalleryContainer');
+            if(frames.length === 0) {
+                container.innerHTML = '<p class="text-[10px] text-slate-500 col-span-full text-center py-4">Belum ada frame kustom yang di-upload.</p>';
                 return;
             }
-
-            container.innerHTML = frames.map((f, idx) => `
-                <div class="relative bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center gap-1">
-                    <img src="${f.url}" class="w-full h-16 object-contain rounded bg-slate-900">
-                    <span class="text-[8px] text-slate-400 font-mono truncate w-full text-center">${f.name}</span>
-                    <button onclick="deleteFrame(${idx})" class="w-full py-1 bg-red-600 hover:bg-red-500 text-white text-[9px] font-bold rounded transition-all">
-                        🗑 Hapus
-                    </button>
+            container.innerHTML = frames.map((f, i) => `
+                <div class="relative group bg-slate-950 p-1.5 rounded-lg border border-slate-800 flex flex-col items-center">
+                    <img src="${f}" class="h-20 object-contain rounded">
+                    <button onclick="deleteFrame(${i})" class="absolute top-2 right-2 bg-red-600/80 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-xmark"></i></button>
+                    <span class="text-[9px] text-slate-400 mt-1">Frame #${i+1}</span>
                 </div>
             `).join('');
         }
 
-        function deleteFrame(index) {
-            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
-            frames.splice(index, 1);
-            localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
-            renderFrameGallery();
-            syncChannel.postMessage({ type: 'FRAMES_UPDATED' });
-            alert("✓ Frame berhasil dihapus dari galeri.");
+        function handleFrameUpload(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let frames = JSON.parse(localStorage.getItem('kiosk_custom_frames') || '[]');
+                    if(frames.length >= 30) {
+                        alert("❌ Batas maksimal 30 frame tercapai!");
+                        return;
+                    }
+                    frames.push(e.target.result);
+                    localStorage.setItem('kiosk_custom_frames', JSON.stringify(frames));
+                    renderFrameGallery();
+                    syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
+                    alert("✓ Frame PNG transparan berhasil ditambahkan ke galeri!");
+                }
+                reader.readAsDataURL(file);
+            }
         }
 
+        function deleteFrame(index) {
+            let frames = JSON.parse(localStorage.getItem('kiosk_custom_frames') || '[]');
+            frames.splice(index, 1);
+            localStorage.setItem('kiosk_custom_frames', JSON.stringify(frames));
+            renderFrameGallery();
+            syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
+        }
+
+        // PENGATURAN BANK & QRIS
         function saveBankSettings() {
             localStorage.setItem('qris_bank_name', document.getElementById('bankNameInput').value);
             localStorage.setItem('qris_account_no', document.getElementById('bankAccInput').value);
             syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
-            alert("✓ Rekening QRIS tersimpan & tersinkronisasi!");
+            alert("✓ Pengaturan Rekening & QRIS berhasil disimpan!");
         }
 
+        // KONTROL AI & TOGGLE
         function saveKioskToggles() {
             localStorage.setItem('toggle_ai_studio_active', document.getElementById('toggleAiStudio').checked);
             localStorage.setItem('toggle_qris_active', document.getElementById('toggleQris').checked);
             localStorage.setItem('toggle_voucher_active', document.getElementById('toggleVoucher').checked);
             syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
-            alert("✓ Kontrol Kiosk & AI Studio tersimpan!");
+            alert("✓ Kontrol AI Studio & Kiosk berhasil diperbarui!");
         }
 
+        // HARDWARE
         function saveHardwareSettings() {
             localStorage.setItem('hardware_camera_source', document.getElementById('cameraSourceSelect').value);
             syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
-            alert("✓ Konfigurasi Hardware tersimpan!");
+            alert("✓ Konfigurasi hardware berhasil disimpan!");
         }
 
+        // TARIF & CLOUD
         function saveTariffAndCloud() {
             localStorage.setItem('pkg1_price', document.getElementById('pricePkg1').value);
             localStorage.setItem('pkg2_price', document.getElementById('pricePkg2').value);
@@ -591,24 +570,21 @@
             localStorage.setItem('cloudinary_cloud_name', document.getElementById('cloudNameInput').value);
             localStorage.setItem('cloudinary_preset_name', document.getElementById('presetNameInput').value);
             syncChannel.postMessage({ type: 'SETTINGS_UPDATED' });
-            alert("✓ Semua Tarif, Timer & Cloud berhasil disimpan & disinkronkan!");
+            alert("✓ Tarif, Timer, & Cloud Storage berhasil disimpan!");
         }
 
-        // CHART.JS OPTIMIZATION (ANTI-LAG)
+        // CHART.JS ANALYTICS
         function initChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
                     datasets: [{
-                        label: 'Sesi Foto',
-                        data: [12, 19, 15, 25, 32, 45, 38],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3
+                        label: 'Jumlah Sesi Foto',
+                        data: [12, 19, 15, 22, 30, 45, 38],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -616,8 +592,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
                     }
                 }
             });
