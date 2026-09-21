@@ -33,18 +33,15 @@
         .btn-theme:hover { filter: brightness(1.1); }
         .mirror-mode { transform: scaleX(-1); }
         
-        /* Modul Orientasi Kamera */
         .cam-portrait { height: 320px; width: 240px; margin: 0 auto; }
         .cam-landscape { height: 240px; width: 100%; }
 
-        /* Filter Live Editor */
         .filter-grayscale { filter: grayscale(100%); }
         .filter-sepia { filter: sepia(80%); }
         .filter-vintage { filter: contrast(120%) brightness(90%) sepia(30%); }
         .filter-none { filter: none; }
     </style>
     
-    <!-- SINKRONISASI OTOMATIS DARI DASHBOARD SEBELUM KIOSK DILOAD -->
     <script>
         function syncSettingsFromDashboard() {
             const savedFont = localStorage.getItem('app_kiosk_font') || 'Inter';
@@ -91,7 +88,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 max-w-xl mx-auto">
 
-    <!-- HEADER KIOSK & SESSION TIMER -->
+    <!-- HEADER KIOSK -->
     <header class="glass-card p-3 rounded-2xl flex justify-between items-center mb-4 sticky top-2 z-50">
         <div>
             <h1 id="brandNameDisplay" class="font-extrabold text-xs text-white tracking-wider">PHOTOBOOTH STUDIO</h1>
@@ -108,7 +105,7 @@
         </a>
     </header>
 
-    <!-- ================= STEP 1: WELCOME & PILIH PAKET ================= -->
+    <!-- STEP 1: WELCOME & PILIH PAKET -->
     <div id="step-welcome" class="step-section active flex-col space-y-4 my-auto">
         <div class="text-center space-y-1">
             <span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
@@ -145,7 +142,7 @@
         </div>
     </div>
 
-    <!-- ================= STEP 2: METODE PEMBAYARAN ================= -->
+    <!-- STEP 2: METODE PEMBAYARAN -->
     <div id="step-payment" class="step-section flex-col space-y-4 my-auto">
         <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
             <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i>Pilih Metode Pembayaran</h3>
@@ -176,7 +173,7 @@
         </div>
     </div>
 
-    <!-- ================= STEP 3: STUDIO KAMERA ================= -->
+    <!-- STEP 3: STUDIO KAMERA -->
     <div id="step-booth" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <div class="flex justify-between items-center text-xs">
@@ -221,49 +218,47 @@
         </div>
     </div>
 
-    <!-- ================= STEP 4: EDITOR FOTO REALTIME & PILIH MULTI-FRAME DASHBOARD ================= -->
+    <!-- STEP 4: EDITOR FOTO, PILIH FRAME, & GESER URUTAN TATA LETAK FOTO -->
     <div id="step-print" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
-            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Pilih Frame</h3>
+            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Geser Tata Letak</h3>
             
-            <!-- LIVE PREVIEW SHEET DENGAN OVERLAY FRAME -->
-            <div class="relative w-full h-56 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
-                <img id="dashboardCustomFrameOverlay" class="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none hidden" alt="Frame Dashboard">
-                
-                <div id="livePhotosheetPreview" class="w-full h-full p-2 flex flex-col justify-around items-center filter-none relative z-0">
-                    <div id="editorPhotosContainer" class="grid grid-cols-2 gap-1.5 w-full h-full"></div>
+            <!-- LIVE PREVIEW SHEET 4R DENGAN PRESISI FRAME TRANSPARAN -->
+            <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-2">
+                <!-- Container Foto yang bisa diatur posisinya -->
+                <div id="livePhotosheetPreview" class="relative w-36 h-full bg-white rounded shadow-md overflow-hidden flex flex-col justify-around p-2">
+                    <div id="editorPhotosContainer" class="grid grid-cols-1 gap-1 w-full h-full"></div>
                 </div>
+                <!-- Frame PNG Overlay dari Dashboard -->
+                <img id="dashboardCustomFrameOverlay" class="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none hidden" alt="Frame Dashboard">
                 
-                <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-sm text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-20 pointer-events-none px-2"></div>
+                <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-sm text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-30 pointer-events-none px-2"></div>
+            </div>
+
+            <!-- INSTRUKSI & TOMBOL GESER URUTAN / TUKAR POSISI FOTO -->
+            <div class="space-y-1.5 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-[10px] text-indigo-300 font-bold block"><i class="fa-solid fa-arrows-up-down mr-1"></i> Geser/Tukar Urutan Kotak Foto:</span>
+                <p class="text-[9px] text-slate-400">Klik tombol panah di bawah untuk menukar posisi letak foto (Atas ⇄ Bawah) agar pas dengan frame:</p>
+                <div id="slotMoverContainer" class="flex flex-wrap gap-1.5 pt-1">
+                    <!-- Tombol urutan di-generate via JS -->
+                </div>
             </div>
 
             <!-- MODUL PILIHAN FRAME DARI GALERI DASHBOARD -->
             <div class="space-y-1">
                 <label class="text-[10px] text-slate-400 font-bold block"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame dari Galeri Dashboard:</label>
-                <div id="kioskFrameSelectorGallery" class="flex gap-2 overflow-x-auto py-1.5 px-1 bg-slate-900 rounded-xl border border-slate-800 min-h-[50px]">
-                    <!-- Javascript merender opsi frame di sini -->
-                </div>
+                <div id="kioskFrameSelectorGallery" class="flex gap-2 overflow-x-auto py-1.5 px-1 bg-slate-900 rounded-xl border border-slate-800 min-h-[50px]"></div>
             </div>
 
-            <!-- KONTROL EDITOR REALTIME -->
+            <!-- KONTROL EDITOR & QRIS -->
             <div class="space-y-2 text-[10px]">
                 <div>
                     <label class="text-slate-400 block mb-1 font-bold">Tambah Teks Kustom pada Foto:</label>
                     <input type="text" id="customTextInput" oninput="updateLiveText()" placeholder="Ketik teks kustom (misal: Happy Birthday!)..." class="w-full bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs">
                 </div>
-
-                <div>
-                    <label class="text-slate-400 block mb-1 font-bold">Pilih Filter Warna Realtime:</label>
-                    <div class="grid grid-cols-4 gap-1.5">
-                        <button onclick="applyLiveFilter('none')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Original</button>
-                        <button onclick="applyLiveFilter('grayscale')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Monokrom</button>
-                        <button onclick="applyLiveFilter('sepia')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Sepia</button>
-                        <button onclick="applyLiveFilter('vintage')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Vintage</button>
-                    </div>
-                </div>
             </div>
 
-            <!-- QR Code Soft File Cloudinary -->
+            <!-- Cloudinary QR (Terkunci risakil1 & risakil) -->
             <div class="glass-card p-3 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-2">
                 <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
                 <div id="cloudinaryQrCode" class="w-24 h-24 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div>
@@ -550,6 +545,7 @@
             document.getElementById('sessionTimerContainer').classList.add('hidden');
             stopKioskCamera();
             renderEditorPhotos();
+            renderSlotMovers();
             loadDashboardFramesSelector();
             generateCloudinaryQR();
             goToStep('print');
@@ -557,12 +553,39 @@
 
         function renderEditorPhotos() {
             const container = document.getElementById('editorPhotosContainer');
-            container.innerHTML = capturedPhotos.map(src => `
-                <img src="${src}" class="w-full h-24 object-cover rounded-md shadow-sm border border-slate-800">
+            container.innerHTML = capturedPhotos.map((src, idx) => `
+                <div class="relative w-full h-full overflow-hidden rounded bg-slate-900 border border-slate-700">
+                    <img src="${src}" class="w-full h-full object-cover">
+                    <span class="absolute top-1 left-1 bg-black/70 text-white text-[8px] font-bold px-1 rounded">#${idx + 1}</span>
+                </div>
             `).join('');
         }
 
-        // LOAD DAFTAR PILIHAN FRAME DARI GALERI DASHBOARD
+        // FITUR BARU: GESER / TUKAR POSISI FOTO ANTAR SLOT KOTAK
+        function renderSlotMovers() {
+            const moverContainer = document.getElementById('slotMoverContainer');
+            moverContainer.innerHTML = capturedPhotos.map((_, idx) => `
+                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded-lg text-[9px] font-bold">
+                    <span>Foto #${idx + 1}</span>
+                    <button onclick="movePhotoSlot(${idx}, -1)" class="px-1.5 py-0.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white" title="Geser ke Atas">▲</button>
+                    <button onclick="movePhotoSlot(${idx}, 1)" class="px-1.5 py-0.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white" title="Geser ke Bawah">▼</button>
+                </div>
+            `).join('');
+        }
+
+        function movePhotoSlot(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= capturedPhotos.length) return; // Batas ujung
+            
+            // Tukar posisi array foto
+            const temp = capturedPhotos[index];
+            capturedPhotos[index] = capturedPhotos[newIndex];
+            capturedPhotos[newIndex] = temp;
+
+            renderEditorPhotos();
+            renderSlotMovers();
+        }
+
         function loadDashboardFramesSelector() {
             const selectorContainer = document.getElementById('kioskFrameSelectorGallery');
             let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
@@ -596,11 +619,6 @@
             } else {
                 frameImg.classList.add('hidden');
             }
-        }
-
-        function applyLiveFilter(filterName) {
-            const preview = document.getElementById('livePhotosheetPreview');
-            preview.className = `w-full h-full p-2 flex flex-col justify-around items-center filter-${filterName} relative z-0`;
         }
 
         function updateLiveText() {
