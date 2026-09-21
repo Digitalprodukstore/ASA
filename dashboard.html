@@ -22,7 +22,7 @@
         .nav-item.active .nav-icon { background: var(--primary-bg); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
         .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
-    <!-- KEAMANAN PIN ADMIN (DIPERTAHANKAN) -->
+    <!-- KEAMANAN PIN ADMIN -->
     <script>
         (function() {
             if (sessionStorage.getItem('admin_authenticated') !== 'true') {
@@ -55,7 +55,6 @@
 
     <!-- ================= TAB 1: ANALITIK & INSIGHT PEMBUKUAN ================= -->
     <div id="section-insight" class="tab-section active space-y-4">
-        <!-- Ringkasan Statistik -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div class="glass-card p-3 rounded-xl border border-indigo-500/20">
                 <span class="text-[9px] text-slate-400 font-bold block">TOTAL SESI (HARI INI)</span>
@@ -75,7 +74,6 @@
             </div>
         </div>
 
-        <!-- Grafik Visual Transaksi -->
         <div class="glass-card p-4 rounded-2xl space-y-2">
             <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-chart-line text-indigo-400 mr-1.5"></i>Grafik Performa Foto & Transaksi</h3>
             <div class="h-48 w-full">
@@ -113,18 +111,17 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: TAMPILAN, FONT, FILTER & IMPORT FRAME ================= -->
+    <!-- ================= TAB 3: TAMPILAN, GALERI FRAME, & REKENING QRIS ================= -->
     <div id="section-tampilan" class="tab-section space-y-4">
+        <!-- Pengaturan Tampilan & Font Kiosk -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-pink-400 mr-2"></i>Desain, Font & Impor Frame PNG</h2>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-pink-400 mr-2"></i>Desain, Font & Watermark Kiosk</h2>
 
-            <!-- Teks Sambutan / Watermark Kiosk -->
             <div>
                 <label class="text-xs text-slate-300 font-bold block mb-1">Teks Sambutan / Watermark Kiosk</label>
                 <input type="text" id="welcomeMsgInput" placeholder="Welcome to Our Studio" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
             </div>
 
-            <!-- Pilihan Jenis Font Kiosk -->
             <div>
                 <label class="text-xs text-slate-300 font-bold block mb-1">Pilih Jenis Font Kiosk</label>
                 <select id="kioskFontSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
@@ -137,17 +134,6 @@
                 </select>
             </div>
 
-            <!-- Upload / Impor Frame PNG dari Galeri -->
-            <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
-                <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
-                <span class="text-xs font-bold text-slate-300 block">Impor Frame PNG dari Galeri Device</span>
-                <input type="file" id="frameFileInput" accept="image/png" class="hidden" onchange="handleFrameUpload(event)">
-                <button onclick="document.getElementById('frameFileInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
-                    Pilih File PNG Transparan
-                </button>
-            </div>
-
-            <!-- Custom Warna Background Aplikasi -->
             <div>
                 <label class="text-xs text-slate-300 font-bold block mb-1">Warna Background Kiosk (HEX)</label>
                 <div class="flex gap-2">
@@ -156,19 +142,114 @@
                 </div>
             </div>
 
-            <button onclick="saveDesignSettings()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan & Sinkronkan Desain Ke Kiosk
+            <button onclick="saveDesignSettings()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                Simpan Pengaturan Desain Kiosk
+            </button>
+        </div>
+
+        <!-- GALERI PENYIMPANAN FRAME (UPLOAD, PILIH & HAPUS) -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-images text-indigo-400 mr-2"></i>Galeri Penyimpanan Frame PNG</h2>
+            <p class="text-xs text-slate-400">Unggah frame baru, pilih frame aktif untuk kiosk, atau hapus frame yang tidak terpakai.</p>
+
+            <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
+                <span class="text-xs font-bold text-slate-300 block">Tambah / Upload Frame PNG Baru</span>
+                <input type="file" id="frameFileInput" accept="image/png" class="hidden" onchange="handleFrameUpload(event)">
+                <button onclick="document.getElementById('frameFileInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
+                    Pilih File PNG Transparan
+                </button>
+            </div>
+
+            <!-- Daftar Galeri Frame -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-slate-300 block">Daftar Frame Tersimpan di Galeri:</span>
+                <div id="frameGalleryContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800">
+                    <!-- Javascript akan merender daftar frame di sini -->
+                </div>
+            </div>
+        </div>
+
+        <!-- REKENING BANK / WALLET UNTUK QRIS OTOMATIS -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i>Rekening Bank & e-Wallet (QRIS Payment)</h2>
+            <p class="text-xs text-slate-400">Atur rekening atau merchant akun pembayaran yang otomatis terhubung ke QRIS kiosk.</p>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-300 font-bold block mb-1">Nama Bank / e-Wallet</label>
+                    <input type="text" id="bankNameInput" placeholder="Contoh: BCA / DANA / QRIS" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-300 font-bold block mb-1">Nomor Rekening / Merchant ID</label>
+                    <input type="text" id="bankAccInput" placeholder="Contoh: 1234567890" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
+                </div>
+            </div>
+
+            <button onclick="saveBankSettings()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                Simpan & Update QRIS Kiosk
             </button>
         </div>
     </div>
 
-    <!-- ================= TAB 4: UNIVERSAL HARDWARE & NETWORK (KAMERA, DEVICE & PRINTER) ================= -->
+    <!-- ================= TAB 4: PENGATURAN KONTROL KIOSK & HARDWARE ================= -->
     <div id="section-hardware" class="tab-section space-y-4">
+        <!-- KONTROL FITUR KIOSK (TOGGLE ON / OFF) -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-toggle-on text-cyan-400 mr-2"></i>Kontrol Fitur Kiosk (On / Off)</h2>
+            <p class="text-xs text-slate-400">Atur fitur apa saja yang aktif dan dapat diakses oleh customer di mesin kiosk.</p>
+
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="font-bold text-white block">Metode Pembayaran QRIS</span>
+                        <span class="text-[10px] text-slate-400">Aktifkan opsi bayar via QRIS Digital di kiosk</span>
+                    </div>
+                    <input type="checkbox" id="toggleQris" class="w-5 h-5 accent-indigo-600 cursor-pointer" checked>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="font-bold text-white block">Metode Pembayaran Voucher</span>
+                        <span class="text-[10px] text-slate-400">Aktifkan opsi tukar kode voucher/promo</span>
+                    </div>
+                    <input type="checkbox" id="toggleVoucher" class="w-5 h-5 accent-indigo-600 cursor-pointer" checked>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="font-bold text-white block">Tombol Mirror Kamera (On/Off)</span>
+                        <span class="text-[10px] text-slate-400">Izinkan customer mengubah mode mirror</span>
+                    </div>
+                    <input type="checkbox" id="toggleMirrorBtn" class="w-5 h-5 accent-indigo-600 cursor-pointer" checked>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="font-bold text-white block">Pilihan Orientasi (Landscape / Portrait)</span>
+                        <span class="text-[10px] text-slate-400">Izinkan customer mengganti tata letak kamera</span>
+                    </div>
+                    <input type="checkbox" id="toggleOrientationBtn" class="w-5 h-5 accent-indigo-600 cursor-pointer" checked>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="font-bold text-white block">Pilihan Mode Ambil Foto (Otomatis/Manual)</span>
+                        <span class="text-[10px] text-slate-400">Izinkan customer memilih mode jepret</span>
+                    </div>
+                    <input type="checkbox" id="toggleCaptureModeBtn" class="w-5 h-5 accent-indigo-600 cursor-pointer" checked>
+                </div>
+            </div>
+
+            <button onclick="saveKioskToggles()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                Simpan Kontrol Fitur Kiosk
+            </button>
+        </div>
+
+        <!-- HARDWARE & NETWORK HUB -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-plug text-amber-400 mr-2"></i>Universal Hardware & Network Hub</h2>
-            <p class="text-xs text-slate-400">Dukungan bebas ke semua kamera (DSLR/Webcam/HP), device, & printer (USB/Wi-Fi).</p>
 
-            <!-- Pengaturan Perangkat Kamera -->
             <div class="space-y-2">
                 <label class="text-xs text-slate-300 font-bold block">Sumber Perangkat Kamera</label>
                 <select id="cameraSourceSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
@@ -178,7 +259,6 @@
                 </select>
             </div>
 
-            <!-- Pengaturan Printer Universal -->
             <div class="space-y-2">
                 <label class="text-xs text-slate-300 font-bold block">Koneksi Printer</label>
                 <select id="printerConnSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
@@ -187,26 +267,13 @@
                 </select>
             </div>
 
-            <!-- Status Jaringan & Bluetooth -->
-            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2">
-                <span class="text-[10px] font-bold text-slate-400 block">STATUS JARINGAN & PERANGKAT:</span>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-300"><i class="fa-solid fa-wifi text-emerald-400 mr-1.5"></i> Wi-Fi Kiosk:</span>
-                    <span class="text-emerald-400 font-bold font-mono">Connected (High Speed)</span>
-                </div>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-300"><i class="fa-brands fa-bluetooth-b text-indigo-400 mr-1.5"></i> Bluetooth Remote:</span>
-                    <span class="text-indigo-400 font-bold font-mono">Paired</span>
-                </div>
-            </div>
-
             <button onclick="saveHardwareSettings()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Konfigurasi Hardware
+                Simpan Konfigurasi Hardware
             </button>
         </div>
     </div>
 
-    <!-- ================= TAB 5: TARIF, SESI & CLOUD (FITUR LAMA DIPERTAHANKAN) ================= -->
+    <!-- ================= TAB 5: TARIF, SESI & CLOUD ================= -->
     <div id="section-tarif" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i>Tarif, Timer & Cloud Storage</h2>
@@ -257,7 +324,7 @@
             </div>
 
             <button onclick="saveTariffAndCloud()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Semua Tarif & Cloud
+                Simpan Semua Tarif & Cloud
             </button>
         </div>
     </div>
@@ -278,15 +345,15 @@
         </button>
         <button onclick="switchTab('hardware')" id="nav-hardware" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
             <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-plug"></i></div>
-            Hardware
+            Settings
         </button>
         <button onclick="switchTab('tarif')" id="nav-tarif" class="nav-item flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
             <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-sliders"></i></div>
-            Settings
+            Tarif & Cloud
         </button>
     </nav>
 
-    <!-- SCRIPT LOGIKA DASHBOARD PRO -->
+    <!-- SCRIPT LOGIKA DASHBOARD PRO 2.0 -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
@@ -297,42 +364,105 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // SIMPAN DESAIN, FONT, WATERMARK & BACKGROUND
+        // SIMPAN DESAIN KIOSK
         function saveDesignSettings() {
-            const welcomeMsg = document.getElementById('welcomeMsgInput').value;
-            const fontChoice = document.getElementById('kioskFontSelect').value;
-            const bgColor = document.getElementById('appBgColorText').value;
-
-            if (welcomeMsg) localStorage.setItem('app_welcome_msg', welcomeMsg);
-            if (fontChoice) localStorage.setItem('app_kiosk_font', fontChoice);
-            if (bgColor) localStorage.setItem('app_custom_bg_color', bgColor);
-
-            alert("✓ Desain, Font & Watermark berhasil disinkronkan ke Kiosk!");
+            localStorage.setItem('app_welcome_msg', document.getElementById('welcomeMsgInput').value);
+            localStorage.setItem('app_kiosk_font', document.getElementById('kioskFontSelect').value);
+            localStorage.setItem('app_custom_bg_color', document.getElementById('appBgColorText').value);
+            alert("✓ Desain kiosk berhasil diperbarui!");
         }
 
-        // HANDLER IMPOR FRAME PNG
+        // GALERI FRAME (UPLOAD, PILIH AKTIF, & HAPUS)
         function handleFrameUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+                    frames.push(e.target.result);
+                    localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
+                    
+                    // Otomatis jadikan frame aktif pertama kali diupload
                     localStorage.setItem('custom_frame_png', e.target.result);
-                    alert("✓ Frame PNG transparan berhasil diimpor dan terhubung ke Kiosk!");
+                    
+                    renderFrameGallery();
+                    alert("✓ Frame PNG berhasil diunggah ke galeri dan diaktifkan!");
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        // SIMPAN DUKUNGAN HARDWARE & NETWORK
-        function saveHardwareSettings() {
-            const cam = document.getElementById('cameraSourceSelect').value;
-            const print = document.getElementById('printerConnSelect').value;
-            localStorage.setItem('hardware_camera_source', cam);
-            localStorage.setItem('hardware_printer_type', print);
-            alert("✓ Konfigurasi Kamera & Printer Universal tersimpan!");
+        function renderFrameGallery() {
+            const container = document.getElementById('frameGalleryContainer');
+            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+            let activeFrame = localStorage.getItem('custom_frame_png');
+
+            if (frames.length === 0) {
+                container.innerHTML = `<div class="col-span-3 text-[10px] text-slate-500 italic text-center py-3">Belum ada frame di galeri.</div>`;
+                return;
+            }
+
+            container.innerHTML = frames.map((src, idx) => `
+                <div class="relative bg-slate-950 p-2 rounded-xl border ${src === activeFrame ? 'border-indigo-500 ring-2 ring-indigo-500/50' : 'border-slate-800'} flex flex-col items-center gap-1.5">
+                    <img src="${src}" class="w-full h-16 object-contain rounded bg-slate-900">
+                    <span class="text-[8px] text-slate-400 font-mono">Frame #${idx + 1}</span>
+                    <div class="flex gap-1 w-full">
+                        <button onclick="setActiveFrame('${src}')" class="flex-1 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[9px] font-bold rounded">
+                            ${src === activeFrame ? '✓ Aktif' : 'Pakai'}
+                        </button>
+                        <button onclick="deleteFrame(${idx})" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-[9px] font-bold rounded">
+                            🗑
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // SIMPAN TARIF, TIMER & CLOUDINARY
+        function setActiveFrame(src) {
+            localStorage.setItem('custom_frame_png', src);
+            renderFrameGallery();
+            alert("✓ Frame aktif berhasil diubah!");
+        }
+
+        function deleteFrame(index) {
+            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+            let activeFrame = localStorage.getItem('custom_frame_png');
+            
+            if (frames[index] === activeFrame) {
+                localStorage.removeItem('custom_frame_png');
+            }
+            
+            frames.splice(index, 1);
+            localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
+            renderFrameGallery();
+            alert("✓ Frame dihapus dari galeri.");
+        }
+
+        // SIMPAN REKENING / WALLET QRIS
+        function saveBankSettings() {
+            const bank = document.getElementById('bankNameInput').value;
+            const acc = document.getElementById('bankAccInput').value;
+            localStorage.setItem('qris_bank_name', bank);
+            localStorage.setItem('qris_account_no', acc);
+            alert(`✓ Rekening ${bank.toUpperCase()} (${acc}) berhasil dihubungkan ke QRIS Kiosk!`);
+        }
+
+        // SIMPAN KONTROL FITUR KIOSK (ON/OFF)
+        function saveKioskToggles() {
+            localStorage.setItem('toggle_qris_active', document.getElementById('toggleQris').checked);
+            localStorage.setItem('toggle_voucher_active', document.getElementById('toggleVoucher').checked);
+            localStorage.setItem('toggle_mirror_btn', document.getElementById('toggleMirrorBtn').checked);
+            localStorage.setItem('toggle_orientation_btn', document.getElementById('toggleOrientationBtn').checked);
+            localStorage.setItem('toggle_capture_mode_btn', document.getElementById('toggleCaptureModeBtn').checked);
+            alert("✓ Kontrol fitur kiosk berhasil disinkronkan!");
+        }
+
+        function saveHardwareSettings() {
+            localStorage.setItem('hardware_camera_source', document.getElementById('cameraSourceSelect').value);
+            localStorage.setItem('hardware_printer_type', document.getElementById('printerConnSelect').value);
+            alert("✓ Konfigurasi Hardware tersimpan!");
+        }
+
         function saveTariffAndCloud() {
             localStorage.setItem('pkg1_price', document.getElementById('pricePkg1').value);
             localStorage.setItem('pkg2_price', document.getElementById('pricePkg2').value);
@@ -342,10 +472,9 @@
             localStorage.setItem('max_retake_quota', document.getElementById('maxRetakeQuota').value);
             localStorage.setItem('cloudinary_cloud_name', document.getElementById('cloudNameInput').value);
             localStorage.setItem('cloudinary_preset_name', document.getElementById('presetNameInput').value);
-            alert("✓ Pengaturan Tarif, Timer & Cloudinary berhasil diperbarui!");
+            alert("✓ Pengaturan Tarif & Cloud berhasil diperbarui!");
         }
 
-        // RENDER GRAFIK ANALITIK
         function initAnalyticsChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
             new Chart(ctx, {
@@ -373,14 +502,13 @@
             });
         }
 
-        // COLOR PICKER SYNC
         document.getElementById('appBgColorPicker').addEventListener('input', (e) => {
             document.getElementById('appBgColorText').value = e.target.value;
         });
 
-        // AUTO-LOAD DATA TERSEMPAN
         window.onload = function() {
             initAnalyticsChart();
+            renderFrameGallery();
 
             document.getElementById('pricePkg1').value = localStorage.getItem('pkg1_price') || 15000;
             document.getElementById('pricePkg2').value = localStorage.getItem('pkg2_price') || 25000;
@@ -396,6 +524,16 @@
             document.getElementById('welcomeMsgInput').value = localStorage.getItem('app_welcome_msg') || "";
             document.getElementById('kioskFontSelect').value = localStorage.getItem('app_kiosk_font') || "Inter";
             document.getElementById('appBgColorText').value = localStorage.getItem('app_custom_bg_color') || "#07090e";
+
+            document.getElementById('bankNameInput').value = localStorage.getItem('qris_bank_name') || "";
+            document.getElementById('bankAccInput').value = localStorage.getItem('qris_account_no') || "";
+
+            // Load toggle states
+            if (localStorage.getItem('toggle_qris_active') === 'false') document.getElementById('toggleQris').checked = false;
+            if (localStorage.getItem('toggle_voucher_active') === 'false') document.getElementById('toggleVoucher').checked = false;
+            if (localStorage.getItem('toggle_mirror_btn') === 'false') document.getElementById('toggleMirrorBtn').checked = false;
+            if (localStorage.getItem('toggle_orientation_btn') === 'false') document.getElementById('toggleOrientationBtn').checked = false;
+            if (localStorage.getItem('toggle_capture_mode_btn') === 'false') document.getElementById('toggleCaptureModeBtn').checked = false;
         };
     </script>
 </body>
