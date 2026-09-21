@@ -111,11 +111,34 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: TAMPILAN, GALERI FRAME, & REKENING QRIS ================= -->
+    <!-- ================= TAB 3: TAMPILAN, PRESET BRAND COFFEE SHOP, GALERI FRAME, & QRIS ================= -->
     <div id="section-tampilan" class="tab-section space-y-4">
-        <!-- Pengaturan Tampilan & Font Kiosk -->
+        <!-- Pengaturan Preset Tema & Homescreen Kiosk -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-pink-400 mr-2"></i>Desain, Font & Watermark Kiosk</h2>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-mug-hot text-amber-500 mr-2"></i>Preset Tema & Homescreen Kiosk (Brand / Coffee Shop)</h2>
+            <p class="text-xs text-slate-400">Pilih tema instan ala coffee shop atau kustomisasi warna & font homescreen kiosk Anda.</p>
+
+            <!-- Tombol Preset Instan -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="applyThemePreset('#2e1a11', '#d4a373', 'Poppins', '☕ Coffee Shop Warm Brown')" class="p-2.5 bg-[#2e1a11] hover:brightness-125 border border-amber-800/50 rounded-xl text-left text-white">
+                    <span class="text-[10px] font-bold block">☕ Coffee Warm</span>
+                    <span class="text-[8px] text-amber-300">Cokelat Hangat Kafe</span>
+                </button>
+                <button onclick="applyThemePreset('#1e1b2e', '#f472b6', 'Poppins', '🌸 Cute Pastel Pink')" class="p-2.5 bg-[#1e1b2e] hover:brightness-125 border border-pink-800/50 rounded-xl text-left text-white">
+                    <span class="text-[10px] font-bold block">🌸 Cute Pastel</span>
+                    <span class="text-[8px] text-pink-300">Pink Lembut Remaja</span>
+                </button>
+                <button onclick="applyThemePreset('#0b0f19', '#6366f1', 'Montserrat', '🌙 Dark Sleek Pro')" class="p-2.5 bg-[#0b0f19] hover:brightness-125 border border-indigo-800/50 rounded-xl text-left text-white">
+                    <span class="text-[10px] font-bold block">🌙 Dark Sleek</span>
+                    <span class="text-[8px] text-indigo-300">Elegan Premium</span>
+                </button>
+                <button onclick="applyThemePreset('#f8fafc', '#0f172a', 'Inter', '✨ Clean Minimalist')" class="p-2.5 bg-slate-200 hover:brightness-95 border border-slate-300 rounded-xl text-left text-slate-900">
+                    <span class="text-[10px] font-bold block">✨ Minimalist</span>
+                    <span class="text-[8px] text-slate-600">Putih Bersih Terang</span>
+                </button>
+            </div>
+
+            <hr class="border-slate-800">
 
             <div>
                 <label class="text-xs text-slate-300 font-bold block mb-1">Teks Sambutan / Watermark Kiosk</label>
@@ -143,7 +166,7 @@
             </div>
 
             <button onclick="saveDesignSettings()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                Simpan Pengaturan Desain Kiosk
+                Simpan Pengaturan Desain & Preset Kiosk
             </button>
         </div>
 
@@ -161,12 +184,9 @@
                 </button>
             </div>
 
-            <!-- Daftar Galeri Frame -->
             <div class="space-y-2">
                 <span class="text-xs font-bold text-slate-300 block">Daftar Frame Tersimpan di Galeri:</span>
-                <div id="frameGalleryContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800">
-                    <!-- Javascript akan merender daftar frame di sini -->
-                </div>
+                <div id="frameGalleryContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800"></div>
             </div>
         </div>
 
@@ -192,14 +212,23 @@
         </div>
     </div>
 
-    <!-- ================= TAB 4: PENGATURAN KONTROL KIOSK & HARDWARE ================= -->
+    <!-- ================= TAB 4: PENGATURAN KONTROL KIOSK, AI STUDIO & HARDWARE ================= -->
     <div id="section-hardware" class="tab-section space-y-4">
-        <!-- KONTROL FITUR KIOSK (TOGGLE ON / OFF) -->
+        <!-- KONTROL AI STUDIO BACKGROUND CHANGER & KONTROL KIOSK -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-toggle-on text-cyan-400 mr-2"></i>Kontrol Fitur Kiosk (On / Off)</h2>
-            <p class="text-xs text-slate-400">Atur fitur apa saja yang aktif dan dapat diakses oleh customer di mesin kiosk.</p>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-pink-400 mr-2"></i>AI Studio & Kontrol Kiosk (On/Off)</h2>
+            <p class="text-xs text-slate-400">Atur fitur AI Studio formal dan saklar fitur kiosk dari jarak jauh.</p>
 
             <div class="space-y-3 text-xs">
+                <!-- FITUR BARU: AI STUDIO BACKGROUND CHANGER -->
+                <div class="flex justify-between items-center p-3 bg-pink-950/40 rounded-xl border border-pink-500/30">
+                    <div>
+                        <span class="font-bold text-white block"><i class="fa-solid fa-user-tie text-pink-400 mr-1"></i> AI Studio Pas Foto Formal (Latar Merah/Biru/Hijau)</span>
+                        <span class="text-[10px] text-pink-300">Otomatis ubah background kafe jadi latar pas foto studio (Permanen & Gratis)</span>
+                    </div>
+                    <input type="checkbox" id="toggleAiStudio" class="w-5 h-5 accent-pink-600 cursor-pointer">
+                </div>
+
                 <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
                     <div>
                         <span class="font-bold text-white block">Metode Pembayaran QRIS</span>
@@ -242,7 +271,7 @@
             </div>
 
             <button onclick="saveKioskToggles()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                Simpan Kontrol Fitur Kiosk
+                Simpan Kontrol AI Studio & Kiosk
             </button>
         </div>
 
@@ -353,7 +382,7 @@
         </button>
     </nav>
 
-    <!-- SCRIPT LOGIKA DASHBOARD PRO 2.0 -->
+    <!-- SCRIPT LOGIKA DASHBOARD PRO 3.0 -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
@@ -362,6 +391,21 @@
             document.getElementById('section-' + tabName).classList.add('active');
             document.getElementById('nav-' + tabName).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // PRESET TEMA COFFEE SHOP / BRAND
+        function applyThemePreset(bgColor, textColor, fontName, presetTitle) {
+            document.getElementById('appBgColorPicker').value = bgColor;
+            document.getElementById('appBgColorText').value = bgColor;
+            document.getElementById('kioskFontSelect').value = fontName;
+            document.getElementById('welcomeMsgInput').value = presetTitle;
+            
+            // Simpan otomatis ke localStorage agar langsung sinkron ke kiosk
+            localStorage.setItem('app_welcome_msg', presetTitle);
+            localStorage.setItem('app_kiosk_font', fontName);
+            localStorage.setItem('app_custom_bg_color', bgColor);
+            
+            alert(`✓ Tema '${presetTitle}' berhasil diterapkan & disinkronkan ke Kiosk!`);
         }
 
         // SIMPAN DESAIN KIOSK
@@ -381,10 +425,7 @@
                     let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
                     frames.push(e.target.result);
                     localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
-                    
-                    // Otomatis jadikan frame aktif pertama kali diupload
                     localStorage.setItem('custom_frame_png', e.target.result);
-                    
                     renderFrameGallery();
                     alert("✓ Frame PNG berhasil diunggah ke galeri dan diaktifkan!");
                 };
@@ -427,11 +468,7 @@
         function deleteFrame(index) {
             let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
             let activeFrame = localStorage.getItem('custom_frame_png');
-            
-            if (frames[index] === activeFrame) {
-                localStorage.removeItem('custom_frame_png');
-            }
-            
+            if (frames[index] === activeFrame) localStorage.removeItem('custom_frame_png');
             frames.splice(index, 1);
             localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
             renderFrameGallery();
@@ -447,14 +484,15 @@
             alert(`✓ Rekening ${bank.toUpperCase()} (${acc}) berhasil dihubungkan ke QRIS Kiosk!`);
         }
 
-        // SIMPAN KONTROL FITUR KIOSK (ON/OFF)
+        // SIMPAN KONTROL AI STUDIO & KIOSK TOGGLES
         function saveKioskToggles() {
+            localStorage.setItem('toggle_ai_studio_active', document.getElementById('toggleAiStudio').checked);
             localStorage.setItem('toggle_qris_active', document.getElementById('toggleQris').checked);
             localStorage.setItem('toggle_voucher_active', document.getElementById('toggleVoucher').checked);
             localStorage.setItem('toggle_mirror_btn', document.getElementById('toggleMirrorBtn').checked);
             localStorage.setItem('toggle_orientation_btn', document.getElementById('toggleOrientationBtn').checked);
             localStorage.setItem('toggle_capture_mode_btn', document.getElementById('toggleCaptureModeBtn').checked);
-            alert("✓ Kontrol fitur kiosk berhasil disinkronkan!");
+            alert("✓ Kontrol AI Studio & Fitur Kiosk berhasil disinkronkan!");
         }
 
         function saveHardwareSettings() {
@@ -529,6 +567,7 @@
             document.getElementById('bankAccInput').value = localStorage.getItem('qris_account_no') || "";
 
             // Load toggle states
+            if (localStorage.getItem('toggle_ai_studio_active') === 'true') document.getElementById('toggleAiStudio').checked = true;
             if (localStorage.getItem('toggle_qris_active') === 'false') document.getElementById('toggleQris').checked = false;
             if (localStorage.getItem('toggle_voucher_active') === 'false') document.getElementById('toggleVoucher').checked = false;
             if (localStorage.getItem('toggle_mirror_btn') === 'false') document.getElementById('toggleMirrorBtn').checked = false;
