@@ -35,7 +35,7 @@
         .cam-portrait { height: 320px; width: 240px; margin: 0 auto; }
         .cam-landscape { height: 220px; width: 100%; }
 
-        /* Filter HD & Efek Dasar */
+        /* Filter HD & Efek Dasar Real-Time */
         .filter-none { filter: none; }
         .filter-grayscale { filter: grayscale(100%) contrast(110%); }
         .filter-sepia { filter: sepia(85%) contrast(105%); }
@@ -43,7 +43,6 @@
         .filter-vivid { filter: saturate(160%) contrast(110%) brightness(105%); }
         .filter-cool { filter: hue-rotate(180deg) saturate(120%) brightness(102%); }
         .filter-warm { filter: sepia(40%) saturate(140%) brightness(105%); }
-        .filter-bw-high { filter: grayscale(100%) contrast(160%) brightness(90%); }
         .filter-matte { filter: contrast(90%) brightness(110%) saturate(85%); }
     </style>
     
@@ -58,7 +57,6 @@
             else if (savedFont === 'Comic Sans MS') fontFamily = "'Comic Neue', cursive";
             document.documentElement.style.setProperty('--app-font-family', fontFamily);
 
-            // Sinkronisasi Warna / Background Homescreen dari Dashboard
             const savedAppBg = localStorage.getItem('app_custom_bg_color');
             const savedBgImage = localStorage.getItem('app_custom_bg_image');
             
@@ -184,7 +182,7 @@
         </div>
     </div>
 
-    <!-- STEP 3: STUDIO KAMERA & GALERI FRAME PRO-LEVEL -->
+    <!-- STEP 3: STUDIO KAMERA & GALERI FRAME -->
     <div id="step-booth" class="step-section flex-col space-y-2.5 my-auto">
         <div class="glass-card p-3 rounded-2xl space-y-2.5">
             <div class="flex justify-between items-center text-xs">
@@ -207,11 +205,6 @@
             <div id="cameraBox" class="bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-landscape">
                 <video id="kioskCameraStream" autoplay playsinline muted class="w-full h-full object-cover mirror-mode" style="transform-style: preserve-3d; backface-visibility: hidden;"></video>
                 <canvas id="photoCanvas" class="hidden"></canvas>
-                
-                <!-- LIVE PREVIEW FRAME -->
-                <div id="liveFrameOverlay" class="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
-                    <img id="activeFramePreviewImg" src="" class="w-full h-full object-fill hidden" alt="Active Frame">
-                </div>
 
                 <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/60 flex items-center justify-center text-5xl font-black text-white hidden z-30" style="backdrop-filter: none !important;">
                     3
@@ -244,18 +237,18 @@
                 <i class="fa-solid fa-camera"></i> <span id="snapBtnText">Ambil Foto (Hitung Mundur 3s)</span>
             </button>
 
+            <!-- TOMBOL MANUAL KE EDITOR DENGAN JEDA WAKTU AMAN -->
             <button onclick="finishSessionEarly()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md">
                 <i class="fa-solid fa-check-circle"></i> Selesai Foto & Lanjut Ke Editor <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>
 
-    <!-- STEP 4: EDITOR FOTO, FILTER HD, 10+ TEKS, & TIMER 1 MENIT -->
+    <!-- STEP 4: EDITOR FOTO, FILTER HD REAL-TIME, 10+ TEKS, & TIMER 1 MENIT -->
     <div id="step-print" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <div class="flex justify-between items-center border-b border-slate-700 pb-2">
                 <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Filter HD</h3>
-                <!-- Timer 1 Menit di Halaman Edit / Print -->
                 <div class="bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center">
                     <span class="text-[7px] text-amber-300 block font-bold leading-none">WAKTU EDIT</span>
                     <span id="editorCountdownTimer" class="text-xs font-black text-amber-400 font-mono">01:00</span>
@@ -267,12 +260,12 @@
                 <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-xs text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-30 pointer-events-none px-2"></div>
             </div>
 
-            <!-- PILIHAN FILTER HD & EFEK DASAR -->
+            <!-- PILIHAN FILTER HD REAL-TIME -->
             <div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
                 <span class="text-[10px] text-indigo-300 font-bold block"><i class="fa-solid fa-filter mr-1"></i> Pilih Filter & Efek HD:</span>
                 <div class="grid grid-cols-4 gap-1 text-[9px]">
                     <button onclick="applyFilter('none')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-white font-bold border border-slate-700">Normal</button>
-                    <button onclick="applyFilter('grayscale')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-bold border border-slate-700">B&W Classic</button>
+                    <button onclick="applyFilter('grayscale')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 font-bold border border-slate-700">Monokrom</button>
                     <button onclick="applyFilter('sepia')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-amber-300 font-bold border border-slate-700">Sepia</button>
                     <button onclick="applyFilter('vintage')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-orange-300 font-bold border border-slate-700">Vintage</button>
                     <button onclick="applyFilter('vivid')" class="py-1 bg-slate-800 hover:bg-slate-700 rounded text-emerald-300 font-bold border border-slate-700">Vivid HD</button>
@@ -282,7 +275,7 @@
                 </div>
             </div>
 
-            <div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+            <div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
                 <span class="text-[10px] text-indigo-300 font-bold block"><i class="fa-solid fa-arrows-up-down mr-1"></i> Geser/Tukar Urutan Kotak Foto:</span>
                 <div id="slotMoverContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
             </div>
@@ -342,18 +335,16 @@
         let captureMode = 'auto';
         let timerInterval = null;
         let autoCaptureTimer = null;
-        let editorTimerInterval = null; // Variabel untuk timer 1 menit di halaman edit
+        let editorTimerInterval = null;
         let kioskStream = null;
         let capturedPhotos = [];
         let selectedFrameSrc = '';
         let activeFilterClass = 'filter-none';
-        let sessionTimerStarted = false;
 
         function goToStep(stepName) {
             document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
             document.getElementById('step-' + stepName).classList.add('active');
             
-            // Hentikan timer editor jika keluar dari halaman print
             if (stepName !== 'print') {
                 if (editorTimerInterval) clearInterval(editorTimerInterval);
             }
@@ -362,7 +353,7 @@
                 initKioskCamera();
                 loadDashboardFramesForBooth();
             } else if (stepName === 'print') {
-                startEditorCountdownTimer(); // Mulai timer 1 menit saat masuk halaman edit
+                startEditorCountdownTimer();
             } else {
                 stopKioskCamera();
                 if (autoCaptureTimer) clearInterval(autoCaptureTimer);
@@ -417,7 +408,6 @@
             retakesLeft = parseInt(localStorage.getItem('max_retake_quota')) || 3;
             
             let timeLeft = sessionMins * 60;
-            sessionTimerStarted = true;
 
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -440,6 +430,8 @@
             
             capturedPhotos = [];
             renderInstantGallery();
+            document.getElementById('startPhotoSessionBtn').classList.remove('hidden');
+            document.getElementById('snapBtn').classList.add('hidden');
             goToStep('booth');
         }
 
@@ -516,8 +508,6 @@
                         overlay.classList.add('hidden');
                         if (capturedPhotos.length < currentPackage.shots) {
                             setTimeout(startAutoCaptureSequence, 1200);
-                        } else {
-                            setTimeout(finishSessionEarly, 1000);
                         }
                     }, 600);
                 }
@@ -623,7 +613,6 @@
 
             if (!selectedFrameSrc && frames[0].url) {
                 selectedFrameSrc = frames[0].url;
-                updateLiveFramePreview(selectedFrameSrc);
             }
 
             container.innerHTML = frames.map((f, idx) => `
@@ -643,17 +632,6 @@
             });
             el.classList.remove('border-slate-700');
             el.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500/40');
-            updateLiveFramePreview(url);
-        }
-
-        function updateLiveFramePreview(url) {
-            const prevImg = document.getElementById('activeFramePreviewImg');
-            if (url) {
-                prevImg.src = url;
-                prevImg.classList.remove('hidden');
-            } else {
-                prevImg.classList.add('hidden');
-            }
         }
 
         function loadDashboardFramesSelectorForPrint() {
@@ -678,7 +656,6 @@
                 alert("Ambil minimal 1 foto terlebih dahulu!");
                 return;
             }
-            clearInterval(timerInterval);
             if (autoCaptureTimer) clearInterval(autoCaptureTimer);
             document.getElementById('sessionTimerContainer').classList.add('hidden');
             stopKioskCamera();
@@ -689,10 +666,9 @@
             goToStep('print');
         }
 
-        // Timer 1 Menit Khusus Halaman Edit / Print
         function startEditorCountdownTimer() {
             if (editorTimerInterval) clearInterval(editorTimerInterval);
-            let editorTimeLeft = 60; // 60 detik (1 menit)
+            let editorTimeLeft = 60;
             const timerDisplay = document.getElementById('editorCountdownTimer');
 
             editorTimerInterval = setInterval(() => {
@@ -733,15 +709,7 @@
         }
 
         function applyFilter(filterName) {
-            if (filterName === 'none') activeFilterClass = 'filter-none';
-            else if (filterName === 'grayscale') activeFilterClass = 'filter-grayscale';
-            else if (filterName === 'sepia') activeFilterClass = 'filter-sepia';
-            else if (filterName === 'vintage') activeFilterClass = 'filter-vintage';
-            else if (filterName === 'vivid') activeFilterClass = 'filter-vivid';
-            else if (filterName === 'cool') activeFilterClass = 'filter-cool';
-            else if (filterName === 'warm') activeFilterClass = 'filter-warm';
-            else if (filterName === 'matte') activeFilterClass = 'filter-matte';
-
+            activeFilterClass = 'filter-' + filterName;
             updateCompositeCanvas();
         }
 
@@ -772,6 +740,7 @@
                 img.crossOrigin = "anonymous";
                 img.onload = () => {
                     ctx.save();
+                    // Terapkan filter HD secara real-time pada canvas
                     if (activeFilterClass === 'filter-grayscale') ctx.filter = 'grayscale(100%) contrast(110%)';
                     else if (activeFilterClass === 'filter-sepia') ctx.filter = 'sepia(85%) contrast(105%)';
                     else if (activeFilterClass === 'filter-vintage') ctx.filter = 'contrast(125%) brightness(95%) sepia(35%)';
@@ -779,6 +748,7 @@
                     else if (activeFilterClass === 'filter-cool') ctx.filter = 'hue-rotate(180deg) saturate(120%) brightness(102%)';
                     else if (activeFilterClass === 'filter-warm') ctx.filter = 'sepia(40%) saturate(140%) brightness(105%)';
                     else if (activeFilterClass === 'filter-matte') ctx.filter = 'contrast(90%) brightness(110%) saturate(85%)';
+                    else ctx.filter = 'none';
 
                     ctx.drawImage(img, startX, startY + idx * (slotHeight + 15), slotWidth, slotHeight);
                     ctx.restore();
