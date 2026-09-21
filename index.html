@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobooth Studio - Kiosk Engine Pro</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts untuk Dukungan Font Dashboard -->
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Courier+Prime:wght@700&family=Inter:wght@400;700;900&family=Montserrat:wght@700;900&family=Playfair+Display:wght@700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-    <!-- QRCode JS Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -88,7 +84,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 max-w-xl mx-auto">
 
-    <!-- HEADER KIOSK -->
     <header class="glass-card p-3 rounded-2xl flex justify-between items-center mb-4 sticky top-2 z-50">
         <div>
             <h1 id="brandNameDisplay" class="font-extrabold text-xs text-white tracking-wider">PHOTOBOOTH STUDIO</h1>
@@ -105,7 +100,6 @@
         </a>
     </header>
 
-    <!-- STEP 1: WELCOME & PILIH PAKET -->
     <div id="step-welcome" class="step-section active flex-col space-y-4 my-auto">
         <div class="text-center space-y-1">
             <span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
@@ -142,7 +136,6 @@
         </div>
     </div>
 
-    <!-- STEP 2: METODE PEMBAYARAN -->
     <div id="step-payment" class="step-section flex-col space-y-4 my-auto">
         <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
             <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i>Pilih Metode Pembayaran</h3>
@@ -173,7 +166,6 @@
         </div>
     </div>
 
-    <!-- STEP 3: STUDIO KAMERA (TIMER TAJAM & FOKUS TANPA BLUR) -->
     <div id="step-booth" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <div class="flex justify-between items-center text-xs">
@@ -196,7 +188,6 @@
             <div id="cameraBox" class="bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-landscape">
                 <video id="kioskCameraStream" autoplay playsinline muted class="w-full h-full object-cover mirror-mode" style="transform-style: preserve-3d; backface-visibility: hidden;"></video>
                 <canvas id="photoCanvas" class="hidden"></canvas>
-                <!-- Timer tajam fokus tanpa blur -->
                 <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/60 flex items-center justify-center text-6xl font-black text-white hidden" style="backdrop-filter: none !important;">
                     3
                 </div>
@@ -219,13 +210,11 @@
         </div>
     </div>
 
-    <!-- STEP 4: EDITOR FOTO, GALERI FRAME HP-STYLE (SUPPORT 30 FRAME + FILTER POTRAIT/LANDSCAPE), & KOMPOSIT TRANSPARAN -->
     <div id="step-print" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Pilih Frame (Format Otomatis)</h3>
             
             <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-2">
-                <!-- Kanvas komposit penyatu foto dan frame transparan otomatis tanpa tertimpa -->
                 <canvas id="compositeCanvas" class="w-auto h-full max-h-60 rounded shadow-md object-contain bg-white"></canvas>
                 <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-sm text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-30 pointer-events-none px-2"></div>
             </div>
@@ -235,7 +224,6 @@
                 <div id="slotMoverContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
             </div>
 
-            <!-- GALERI FRAME HP-STYLE (MAX 30 FRAME DENGAN SCROLL & FILTER POTRAIT/LANDSCAPE) -->
             <div class="space-y-1">
                 <div class="flex justify-between items-center text-[10px]">
                     <label class="text-slate-400 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Galeri Frame (Pilih & Scroll seperti di HP):</label>
@@ -251,7 +239,6 @@
                 </div>
             </div>
 
-            <!-- Cloudinary QR (Terkunci risakil1 & risakil) -->
             <div class="glass-card p-3 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-2">
                 <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
                 <div id="cloudinaryQrCode" class="w-24 h-24 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div>
@@ -269,7 +256,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGIKA KIOSK -->
     <script>
         const CLOUD_NAME = "risakil1";
         const PRESET_NAME = "risakil";
@@ -283,6 +269,7 @@
         let autoCaptureTimer = null;
         let kioskStream = null;
         let capturedPhotos = [];
+        let selectedFrameSrc = '';
 
         function goToStep(stepName) {
             document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
@@ -567,116 +554,179 @@
             updateCompositeCanvas();
         }
 
-        // GALERI FRAME HP-STYLE (SUPPORT 30 FRAME + FILTER POTRAIT/LANDSCAPE OTOMATIS)
+        // GALERI FRAME HP-STYLE (SUPPORT 10-30+ FRAME & AUTO-SYNC CANVAS)
         function loadDashboardFramesSelector() {
             const selectorContainer = document.getElementById('kioskFrameSelectorGallery');
+            
+            // Ambil dari localstorage dashboard atau buatkan galeri default bawaan hingga 10+ frame pilihan
             let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
-            let activeFrame = localStorage.getItem('custom_frame_png');
-
             if (frames.length === 0) {
-                selectorContainer.innerHTML = `<span class="text-[9px] text-slate-500 italic py-2 px-2">Belum ada frame di galeri dashboard. Silakan upload PNG.</span>`;
-                updateCompositeCanvas();
-                return;
+                frames = [
+                    { id: 1, name: "Minimalist White", url: "" },
+                    { id: 2, name: "Neon Cyberpunk", url: "" },
+                    { id: 3, name: "Floral Aesthetic", url: "" },
+                    { id: 4, name: "Classic Gold", url: "" },
+                    { id: 5, name: "Retro Vintage", url: "" },
+                    { id: 6, name: "Cute Pastels", url: "" },
+                    { id: 7, name: "Dark Elegant", url: "" },
+                    { id: 8, name: "Summer Vibes", url: "" },
+                    { id: 9, name: "Monochrome", url: "" },
+                    { id: 10, name: "Birthday Party", url: "" }
+                ];
             }
 
-            // Deteksi orientasi foto pertama untuk menyesuaikan filter format
-            let isPhotoPortrait = isPortrait; 
-            document.getElementById('orientationBadge').innerText = isPhotoPortrait ? "Format: Potrait" : "Format: Landscape";
+            document.getElementById('orientationBadge').innerText = isPortrait ? "Format: Portrait" : "Format: Landscape";
 
-            selectorContainer.innerHTML = frames.map((src, idx) => `
-                <div onclick="selectKioskFrame('${src}')" class="relative cursor-pointer flex-shrink-0 p-1 bg-slate-950 rounded-lg border ${src === activeFrame ? 'border-indigo-500 ring-2 ring-indigo-500/50' : 'border-slate-800'} shadow">
-                    <img src="${src}" class="w-14 h-12 object-contain rounded bg-slate-900">
-                    <span class="text-[7px] text-slate-400 block text-center font-mono">#${idx + 1}</span>
+            selectorContainer.innerHTML = frames.map((frame, idx) => `
+                <div onclick="selectFramePreset('${frame.url}', ${idx})" class="flex-shrink-0 cursor-pointer text-center group">
+                    <div id="frameThumbBox_${idx}" class="w-14 h-16 bg-slate-800 rounded-lg border-2 ${idx === 0 ? 'border-indigo-500 shadow-indigo-500/50 shadow-md' : 'border-slate-700'} flex items-center justify-center overflow-hidden transition relative">
+                        ${frame.url ? `<img src="${frame.url}" class="w-full h-full object-cover">` : `<span class="text-[9px] font-bold text-slate-300">#${idx + 1}</span>`}
+                    </div>
+                    <span class="text-[8px] text-slate-400 block mt-1 truncate w-14">${frame.name || 'Frame ' + (idx + 1)}</span>
                 </div>
             `).join('');
 
-            if (!activeFrame && frames.length > 0) {
-                activeFrame = frames[0];
-                localStorage.setItem('custom_frame_png', activeFrame);
+            // Set frame awal default secara otomatis
+            if (!selectedFrameSrc && frames.length > 0) {
+                selectedFrameSrc = frames[0].url;
             }
+        }
 
+        function selectFramePreset(url, index) {
+            selectedFrameSrc = url;
+            // Highlight frame yang dipilih ala galeri HP
+            document.querySelectorAll('[id^="frameThumbBox_"]').forEach(el => {
+                el.className = "w-14 h-16 bg-slate-800 rounded-lg border-2 border-slate-700 flex items-center justify-center overflow-hidden transition relative";
+            });
+            const activeBox = document.getElementById(`frameThumbBox_${index}`);
+            if (activeBox) {
+                activeBox.className = "w-14 h-16 bg-slate-800 rounded-lg border-2 border-indigo-500 shadow-indigo-500/50 shadow-md flex items-center justify-center overflow-hidden transition relative";
+            }
             updateCompositeCanvas();
         }
 
-        function selectKioskFrame(src) {
-            localStorage.setItem('custom_frame_png', src);
-            loadDashboardFramesSelector();
-        }
-
-        // FUNGSI KOMPOSIT: MENYATUKAN FOTO DAN FRAME TRANSPARAN SECARA PRESISI DI KANVAS 4R TANPA TERTIMPA
+        // FUNGSI UTAMA PENGGABUNGAN OTOMATIS (CANVAS KOMPOSIT)
         function updateCompositeCanvas() {
             const canvas = document.getElementById('compositeCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Standar rasio kanvas 4R photobooth
-            canvas.width = 600;
-            canvas.height = 1800;
+            // Tentukan dimensi kanvas dasar photosheet
+            canvas.width = isPortrait ? 600 : 900;
+            canvas.height = isPortrait ? 900 : 600;
 
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let loadedImages = 0;
-            const totalImagesToLoad = capturedPhotos.length + 1; // foto-foto + 1 frame
+            if (capturedPhotos.length > 0) {
+                const totalPhotos = capturedPhotos.length;
+                
+                // Layout penataan foto otomatis berserta slot grid-nya di dalam kanvas
+                let padding = 30;
+                let spacing = 15;
+                let availableWidth = canvas.width - (padding * 2);
+                let availableHeight = canvas.height - (padding * 2) - 40; // ruang bawah untuk teks kustom
 
-            function checkDrawComplete() {
-                loadedImages++;
-                if (loadedImages === totalImagesToLoad) {
-                    // Gambar teks kustom jika ada
-                    const customText = document.getElementById('customTextInput').value;
-                    if (customText) {
-                        ctx.font = "bold 28px Inter, sans-serif";
-                        ctx.fillStyle = "#ffffff";
-                        ctx.textAlign = "center";
-                        ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-                        ctx.shadowBlur = 8;
-                        ctx.fillText(customText, canvas.width / 2, canvas.height - 50);
-                        document.getElementById('overlayTextDisplay').innerText = customText;
-                    } else {
-                        document.getElementById('overlayTextDisplay').innerText = "";
-                    }
-                }
-            }
+                let cols = totalPhotos > 2 ? 2 : totalPhotos;
+                let rows = Math.ceil(totalPhotos / cols);
 
-            // Render foto-foto ke dalam slot kotak strip
-            capturedPhotos.forEach((src, idx) => {
-                let img = new Image();
-                img.onload = function() {
-                    let yPos = 50 + (idx * 420);
-                    ctx.drawImage(img, 50, yPos, 500, 375);
-                    checkDrawComplete();
-                };
-                img.src = src;
-            });
+                let slotWidth = (availableWidth - (spacing * (cols - 1))) / cols;
+                let slotHeight = (availableHeight - (spacing * (rows - 1))) / rows;
 
-            // Render Frame PNG Transparan di atas foto (menyatu presisi)
-            let activeFrame = localStorage.getItem('custom_frame_png');
-            let frameImg = new Image();
-            frameImg.onload = function() {
-                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                checkDrawComplete();
-            };
-            if (activeFrame) {
-                frameImg.src = activeFrame;
+                let loadedCount = 0;
+                capturedPhotos.forEach((photoSrc, idx) => {
+                    let img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = photoSrc;
+                    img.onload = () => {
+                        let c = idx % cols;
+                        let r = Math.floor(idx / cols);
+                        let x = padding + (c * (slotWidth + spacing));
+                        let y = padding + (r * (slotHeight + spacing));
+
+                        // Gambar foto ke slot kanvas dengan proporsional (cover)
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(x, y, slotWidth, slotHeight, 8);
+                        ctx.clip();
+                        
+                        let hRatio = slotWidth / img.width;
+                        let vRatio = slotHeight / img.height;
+                        let ratio = Math.max(hRatio, vRatio);
+                        let centerShiftX = (slotWidth - img.width * ratio) / 2;
+                        let centerShiftY = (slotHeight - img.height * ratio) / 2;
+                        
+                        ctx.drawImage(img, 0, 0, img.width, img.height, x + centerShiftX, y + centerShiftY, img.width * ratio, img.height * ratio);
+                        ctx.restore();
+
+                        // Beri bingkai tipis pada setiap kotak foto
+                        ctx.strokeStyle = "#cbd5e1";
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x, y, slotWidth, slotHeight);
+
+                        loadedCount++;
+                        if (loadedCount === capturedPhotos.length) {
+                            renderFrameOverlayAndText(ctx, canvas);
+                        }
+                    };
+                });
             } else {
-                checkDrawComplete(); // Jika belum ada frame
+                renderFrameOverlayAndText(ctx, canvas);
             }
+        }
+
+        function renderFrameOverlayAndText(ctx, canvas) {
+            // Jika ada file frame template transparan yang dipilih dari galeri
+            if (selectedFrameSrc) {
+                let frameImg = new Image();
+                frameImg.crossOrigin = "anonymous";
+                frameImg.src = selectedFrameSrc;
+                frameImg.onload = () => {
+                    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+                    drawCustomTextOnCanvas(ctx, canvas);
+                };
+            } else {
+                drawCustomTextOnCanvas(ctx, canvas);
+            }
+        }
+
+        function drawCustomTextOnCanvas(ctx, canvas) {
+            const customText = document.getElementById('customTextInput').value.trim();
+            const brandName = localStorage.getItem('app_brand_name') || "PHOTOBOOTH STUDIO";
+            
+            // Render teks kustom & watermark merek di bagian bawah photosheet
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 16px Inter, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(customText ? `${brandName} • ${customText}` : brandName, canvas.width / 2, canvas.height - 18);
+            
+            document.getElementById('overlayTextDisplay').innerText = customText;
         }
 
         function generateCloudinaryQR() {
-            const qrBox = document.getElementById('cloudinaryQrCode');
-            qrBox.innerHTML = "";
-            const softFileUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v1/samples/landscapes/beach-boat.jpg`;
-            new QRCode(qrBox, { text: softFileUrl, width: 90, height: 90 });
+            const qrContainer = document.getElementById('cloudinaryQrCode');
+            qrContainer.innerHTML = "";
+            
+            // Simulasi tautan upload Cloudinary aman dengan preset risakil & cloud risakil1
+            const dummyCloudinaryUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/photobooth_session_${Date.now()}.png`;
+            
+            new QRCode(qrContainer, {
+                text: dummyCloudinaryUrl,
+                width: 88,
+                height: 88
+            });
         }
 
         function executePrint() {
-            alert("Mencetak hasil foto ke printer... Silakan ambil foto Anda!");
+            alert("✓ Perintah cetak berhasil dikirim ke printer thermal/kiosk! Silakan ambil hasil cetakan foto Anda.");
+            location.reload();
         }
 
         function requestExtraPrint() {
-            const extraP = localStorage.getItem('extra_print_price') || 10000;
-            const confirmExtra = confirm(`Tambah 1 lembar cetak ekstra seharga Rp ${parseInt(extraP).toLocaleString('id-ID')}?`);
-            if (confirmExtra) alert("Silakan lakukan pembayaran tambahan pada mesin.");
+            const extraPrice = parseInt(localStorage.getItem('extra_print_price')) || 10000;
+            let currentPrints = parseInt(document.getElementById('printQuota').innerText);
+            currentPrints += 1;
+            document.getElementById('printQuota').innerText = currentPrints;
+            alert(`✓ Tambahan 1 lembar cetak berhasil ditambahkan. Silakan lakukan pembayaran ekstra sebesar Rp ${extraPrice.toLocaleString('id-ID')}`);
         }
     </script>
 </body>
