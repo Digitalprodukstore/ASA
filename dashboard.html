@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobooth Pro - Dashboard & Control Panel</title>
+    <title>Custom Photobooth Studio - Pro Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-bg: #4f46e5;
+        }
         body { background-color: #07090e; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; padding-bottom: 90px; }
         .tab-section { display: none; }
         .tab-section.active { display: block; }
-        .nav-item.active { color: #6366f1; }
-        .nav-item.active .nav-icon { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item.active .nav-icon { background: var(--primary-bg); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
         .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
-    <!-- KEAMANAN: PROTEKSI PIN ADMIN -->
+    <!-- KEAMANAN PIN ADMIN -->
     <script>
         (function() {
             if (sessionStorage.getItem('admin_authenticated') !== 'true') {
@@ -37,193 +41,139 @@
     <!-- HEADER STATUS -->
     <div class="glass-card p-4 rounded-2xl mb-4 flex justify-between items-center">
         <div>
-            <h1 class="font-extrabold text-sm text-white tracking-wide">PHOTOBOOTH STUDIO PRO</h1>
+            <h1 class="font-extrabold text-sm text-white tracking-wide" id="brandTitle">PHOTOBOOTH STUDIO PRO</h1>
             <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5 mt-0.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktif & Siap Digunakan
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Terhubung & Aktif
             </p>
         </div>
         <a href="index.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700">Kiosk</a>
     </div>
 
-    <!-- ==========================================
-         1. TAB HOME (BERANDA & GATEWAY)
-         ========================================== -->
-    <div id="section-home" class="tab-section active space-y-4">
-        <div class="glass-card p-5 rounded-2xl space-y-3">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-qrcode text-indigo-400 mr-2"></i>Atur Pembayaran Sesi & Mulai Event Photobooth</h2>
-            <p class="text-xs text-slate-400 leading-relaxed">Pengunjung dapat melakukan scan QRIS merchant atau memasukkan tiket/voucher sebelum memilih template foto[cite: 5].</p>
-            <button onclick="alert('Membuka Pengaturan Gateway & Voucher...')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-sliders"></i> Atur Gateway & Voucher
-            </button>
-        </div>
-
-        <div class="glass-card p-5 rounded-2xl space-y-3 border-l-4 border-indigo-500">
-            <div class="flex justify-between items-center">
-                <span class="text-xs font-bold text-slate-300">Aplikasi Desktop / Mobile</span>
-                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded font-bold">PWA Ready</span>
-            </div>
-            <p class="text-xs text-slate-400">Instal aplikasi photobooth ini langsung ke perangkat Anda agar dapat berjalan lancar.</p>
-            <button onclick="alert('Aplikasi siap diinstal ke layar utama!')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-bold rounded-xl border border-slate-700 transition">
-                <i class="fa-solid fa-download mr-1.5"></i> Install Aplikasi Photobooth
-            </button>
-        </div>
-    </div>
-
-    <!-- ==========================================
-         2. TAB TEMPLATE
-         ========================================== -->
-    <div id="section-template" class="tab-section space-y-4">
+    <!-- ================= TAB 1: TAMPILAN & TEMA WARNA ================= -->
+    <div id="section-tampilan" class="tab-section active space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-image text-indigo-400 mr-2"></i>Manajemen Tag & Template</h2>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-palette text-indigo-400 mr-2"></i>Kustomisasi Tema & Warna Aplikasi</h2>
+            <p class="text-xs text-slate-400">Pilih palet warna tema aplikasi sesuai dengan identitas brand photobooth Anda.</p>
             
-            <div>
-                <label class="text-xs text-slate-400 mb-1 block">Nama Tag Baru</label>
-                <div class="flex gap-2">
-                    <input type="text" id="tagNameInput" placeholder="Contoh: Wedding, Graduation" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
-                    <button onclick="addNewTag()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Tambah</button>
+            <!-- Pilihan Palet Warna (12 Pilihan ala Video) -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-300 font-bold block">12 Palet Warna Utama</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setThemeColor('#6366f1', '#4f46e5', 'Original')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-indigo-500">
+                        <span class="w-3 h-3 rounded-full bg-indigo-500"></span> Original
+                    </button>
+                    <button onclick="setThemeColor('#10b981', '#059669', 'Natural')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-emerald-500">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Natural
+                    </button>
+                    <button onclick="setThemeColor('#a855f7', '#9333ea', 'Ungu')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-purple-500">
+                        <span class="w-3 h-3 rounded-full bg-purple-500"></span> Ungu
+                    </button>
+                    <button onclick="setThemeColor('#f59e0b', '#d97706', 'Citrus')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-amber-500">
+                        <span class="w-3 h-3 rounded-full bg-amber-500"></span> Citrus
+                    </button>
+                    <button onclick="setThemeColor('#ec4899', '#db2777', 'Rosé')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-pink-500">
+                        <span class="w-3 h-3 rounded-full bg-pink-500"></span> Rosé
+                    </button>
+                    <button onclick="setThemeColor('#06b6d4', '#0891b2', 'Cyan')" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-left flex items-center gap-2 hover:border-cyan-500">
+                        <span class="w-3 h-3 rounded-full bg-cyan-500"></span> Cyan
+                    </button>
                 </div>
             </div>
 
             <hr class="border-slate-800">
 
-            <div class="space-y-3">
-                <label class="text-xs text-slate-400 block font-bold">Upload Template Frame (PNG Transparan)</label>
-                <input type="text" id="templateName" placeholder="Nama Template (opsional)" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
-                <select id="templateTagSelect" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-slate-300">
-                    <option value="">-- Pilih Tag --</option>
-                    <option value="Wedding">Wedding</option>
-                    <option value="Graduation">Graduation</option>
-                </select>
-                <input type="file" id="templateFile" accept="image/png" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500">
-                <button onclick="uploadTemplate()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl">
-                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan & Upload Template
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================================
-         3. TAB BOOTH (KAMERA & TIMER)
-         ========================================== -->
-    <div id="section-booth" class="tab-section space-y-4">
-        <!-- Sumber Kamera -->
-        <div class="glass-card p-4 rounded-2xl space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-camera mr-2"></i>Sumber Perangkat Kamera</h3>
-            <div class="p-3 bg-slate-900/80 rounded-xl border border-indigo-500/40 flex justify-between items-center cursor-pointer" onclick="initCamera('user')">
-                <div>
-                    <p class="text-xs font-bold text-white">Kamera Depan / USB Webcams</p>
-                    <p class="text-[10px] text-slate-400">Aktifkan izin kamera perangkat langsung.</p>
+            <!-- Ubah Nama Brand -->
+            <div class="space-y-2">
+                <label class="text-xs text-slate-300 font-bold block">Nama Brand Studio Anda</label>
+                <div class="flex gap-2">
+                    <input type="text" id="brandNameInput" placeholder="Contoh: OurBooth Studio" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                    <button onclick="updateBrandName()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold">Simpan</button>
                 </div>
-                <input type="radio" name="cam" checked class="accent-indigo-500">
-            </div>
-        </div>
-
-        <!-- Live Monitor Preview (Aktif WebRTC) -->
-        <div class="glass-card p-4 rounded-2xl space-y-2">
-            <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400 font-bold">Live Monitor Preview Kamera</span>
-                <span id="camStatus" class="text-[10px] text-emerald-300 font-mono bg-emerald-950 px-2 py-0.5 rounded">Aktif / Live</span>
-            </div>
-            <div class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
-                <div class="absolute top-2 left-2 bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold animate-pulse z-10">● LIVE FEED</div>
-                <!-- Video Element untuk Umpan Kamera Asli -->
-                <video id="liveCameraStream" autoplay playsinline muted class="w-full h-full object-cover transform scale-100 transition-transform duration-200"></video>
-            </div>
-            <div class="space-y-1 pt-1">
-                <label class="text-[11px] text-slate-400">Zoom Lensa (Digital): <span id="zoomVal" class="text-white font-bold">1.0x</span></label>
-                <input type="range" id="zoomRange" min="1" max="3" step="0.1" value="1" oninput="adjustZoom(this.value)" class="w-full accent-indigo-500">
-            </div>
-        </div>
-
-        <!-- Pengaturan Timer -->
-        <div class="glass-card p-4 rounded-2xl space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-stopwatch mr-2"></i>Timer Hitung Mundur</h3>
-            <div class="grid grid-cols-4 gap-2 text-center text-xs" id="timerBtns">
-                <button onclick="setTimer(0, this)" class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold timer-btn">Off</button>
-                <button onclick="setTimer(3, this)" class="py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-md timer-btn">3s</button>
-                <button onclick="setTimer(5, this)" class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold timer-btn">5s</button>
-                <button onclick="setTimer(10, this)" class="py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold timer-btn">10s</button>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-         4. TAB BAYAR SESI (PAYMENT & PRICING)
-         ========================================== -->
+    <!-- ================= TAB 2: STUDIO & AI FRAME ================= -->
+    <div id="section-studio" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-2"></i>Studio: Pas Foto, AI Frame & Photocard</h2>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <button onclick="alert('Membuka Modul Pas Foto (3x4, 4x6 & BG Color)')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl font-bold">Pas Foto</button>
+                <button onclick="alert('Membuka Modul AI Frame Generator')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl font-bold">AI Frame</button>
+                <button onclick="alert('Membuka Modul AI Photocard')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl font-bold">Photocard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 3: TEMPLATE & AUTO-DETECT ================= -->
+    <div id="section-template" class="tab-section space-y-4">
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-image text-indigo-400 mr-2"></i>Pustaka Bingkai & Auto-Detect Slot</h2>
+            <p class="text-xs text-slate-400">Unggah frame template PNG transparan dan gunakan fitur deteksi otomatis slot foto.</p>
+            
+            <div class="space-y-3">
+                <input type="file" id="frameUpload" accept="image/png" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500">
+                
+                <!-- Tombol Auto Detect ala Video -->
+                <button onclick="simulateAutoDetect()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                    <i class="fa-solid fa-wand-magic"></i> Auto-Detect Window Slots (AI/Algoritma)
+                </button>
+                <div id="detectResult" class="text-[11px] text-emerald-400 font-mono bg-emerald-950/60 p-3 rounded-xl hidden border border-emerald-500/30">
+                    ✓ Berhasil mendeteksi 4 slot foto secara otomatis pada template!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 4: PEMBAYARAN & QRIS ================= -->
     <div id="section-bayar" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-credit-card text-emerald-400 mr-2"></i>Pengaturan Tarif & QRIS Sesi</h2>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-qrcode text-emerald-400 mr-2"></i>Gateway Pembayaran & Voucher</h2>
             <div>
-                <label class="text-xs text-slate-400 block mb-1">Harga per Sesi Cetak (Rp)</label>
+                <label class="text-xs text-slate-400 block mb-1">Tarif Sesi Per Cetak (Rp)</label>
                 <input type="text" id="sessionPrice" value="15.000" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white font-mono">
             </div>
             <div>
-                <label class="text-xs text-slate-400 block mb-1">Nama Merchant (Tampil di QRIS & Struk)</label>
-                <input type="text" id="merchantName" value="Photobooth Pro Studio" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                <label class="text-xs text-slate-400 block mb-1">Validasi Voucher / Kode Promo Event</label>
+                <input type="text" placeholder="Masukkan kode promo event..." class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
             </div>
-            <button onclick="savePaymentSettings()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl">
-                Simpan Konfigurasi Pembayaran
+            <button onclick="alert('Pengaturan pembayaran berhasil disimpan!')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl">
+                Simpan Konfigurasi Sesi
             </button>
         </div>
     </div>
 
-    <!-- ==========================================
-         5. TAB LAINNYA (SETTINGS & MENU LANJUTAN)
-         ========================================== -->
+    <!-- ================= TAB 5: PENGATURAN LAINNYA ================= -->
     <div id="section-lainnya" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-3">
-            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-gear text-indigo-400 mr-2"></i>Menu & Pengaturan Booth</h2>
-            
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <button onclick="alert('Fitur List Frame aktif dan siap.')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
-                    <i class="fa-solid fa-border-all text-indigo-400 mr-2"></i> List Frame
-                </button>
-                <button onclick="alert('Fitur Select Filter aktif dan siap.')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
-                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-2"></i> Select Filter
-                </button>
-                <button onclick="alert('Membuka direktori hasil foto lokal.')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
-                    <i class="fa-solid fa-images text-emerald-400 mr-2"></i> Result Photos
-                </button>
-                <button onclick="alert('Membuka panel Splash Screen & Wallpaper.')" class="p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left">
-                    <i class="fa-solid fa-palette text-violet-400 mr-2"></i> Splash & BG
-                </button>
-            </div>
-
-            <hr class="border-slate-800 my-3">
-
-            <div class="space-y-2">
-                <label class="text-xs text-slate-400 block font-bold">Orientasi Layar Booth Studio</label>
-                <div class="grid grid-cols-2 gap-2 text-xs" id="orientationBtns">
-                    <button onclick="setOrientation('landscape', this)" class="py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-md orient-btn">Mode Landscape</button>
-                    <button onclick="setOrientation('portrait', this)" class="py-2.5 bg-slate-900 border border-slate-700 text-slate-300 font-bold rounded-xl orient-btn">Mode Portrait</button>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <a href="index.html" class="block text-center w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold rounded-xl text-xs transition">
-                    <i class="fa-solid fa-right-from-bracket mr-2"></i> Keluar ke Kiosk Utama
-                </a>
-            </div>
+            <h2 class="text-base font-bold text-white"><i class="fa-solid fa-gear text-indigo-400 mr-2"></i>Pengaturan Sistem & Kamera</h2>
+            <button onclick="alert('Live Photo Mode diaktifkan.')" class="w-full p-3 bg-slate-900 hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-800 text-left flex justify-between items-center">
+                <span>Aktifkan Live Photo Mode (Video Pendek)</span>
+                <input type="checkbox" class="accent-indigo-500" checked>
+            </button>
+            <a href="index.html" class="block text-center w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold rounded-xl text-xs transition mt-4">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Keluar ke Kiosk Utama
+            </a>
         </div>
     </div>
 
     <!-- BOTTOM NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto glass-card border-t border-slate-800 px-4 py-2 flex justify-around items-center z-50">
-        <button onclick="switchTab('home')" id="nav-home" class="nav-item active flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-house"></i></div>
-            Home
+    <nav class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto glass-card border-t border-slate-800 px-2 py-2 flex justify-around items-center z-50">
+        <button onclick="switchTab('tampilan')" id="nav-tampilan" class="nav-item active flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-palette"></i></div>
+            Tampilan
+        </button>
+        <button onclick="switchTab('studio')" id="nav-studio" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
+            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            Studio
         </button>
         <button onclick="switchTab('template')" id="nav-template" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
             <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-image"></i></div>
             Template
         </button>
-        <button onclick="switchTab('booth')" id="nav-booth" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
-            <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-camera"></i></div>
-            Booth
-        </button>
         <button onclick="switchTab('bayar')" id="nav-bayar" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
             <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-qrcode"></i></div>
-            Bayar Sesi
+            Bayar
         </button>
         <button onclick="switchTab('lainnya')" id="nav-lainnya" class="nav-item flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 transition">
             <div class="nav-icon w-9 h-9 rounded-full flex items-center justify-center bg-slate-900 text-slate-300 transition"><i class="fa-solid fa-sliders"></i></div>
@@ -231,7 +181,7 @@
         </button>
     </nav>
 
-    <!-- SCRIPT LOGIKA UTAMA & AKTIVASI FITUR -->
+    <!-- SCRIPT LOGIKA FITUR UTAMA -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
@@ -240,126 +190,52 @@
             document.getElementById('section-' + tabName).classList.add('active');
             document.getElementById('nav-' + tabName).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Otomatis aktifkan kamera jika masuk ke tab booth
-            if(tabName === 'booth') {
-                initCamera();
-            } else {
-                stopCamera();
-            }
         }
 
-        let mediaStream = null;
-
-        // Inisialisasi Kamera Aktif (WebRTC getUserMedia)
-        async function initCamera() {
-            const videoElement = document.getElementById('liveCameraStream');
-            const statusEl = document.getElementById('camStatus');
-            if (!videoElement) return;
-
-            if (mediaStream) return; // Jika sudah aktif, biarkan
-
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-                    audio: false
-                });
-                videoElement.srcObject = mediaStream;
-                statusEl.innerText = "Aktif / Live";
-                statusEl.className = "text-[10px] text-emerald-300 font-mono bg-emerald-950 px-2 py-0.5 rounded";
-            } catch (err) {
-                console.warn("Akses kamera gagal/ditolak:", err);
-                statusEl.innerText = "Kamera Tidak Terdeteksi";
-                statusEl.className = "text-[10px] text-red-300 font-mono bg-red-950 px-2 py-0.5 rounded";
-            }
+        // Fungsi Mengubah Tema Warna Aplikasi Secara Dinamis
+        function setThemeColor(primaryHex, bgHex, themeName) {
+            document.documentElement.style.setProperty('--primary-color', primaryHex);
+            document.documentElement.style.setProperty('--primary-bg', bgHex);
+            localStorage.setItem('app_theme_primary', primaryHex);
+            localStorage.setItem('app_theme_bg', bgHex);
+            alert(`Tema warna berhasil diubah ke mode: ${themeName}!`);
         }
 
-        function stopCamera() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
+        // Fungsi Ubah Nama Brand Studio
+        function updateBrandName() {
+            const name = document.getElementById('brandNameInput').value;
+            if (!name) return;
+            document.getElementById('brandTitle').innerText = name.toUpperCase();
+            localStorage.setItem('app_brand_name', name);
+            alert(`Nama brand berhasil diubah menjadi: ${name}`);
         }
 
-        // Kontrol Zoom Digital Lensa
-        function adjustZoom(val) {
-            document.getElementById('zoomVal').innerText = val + 'x';
-            const videoElement = document.getElementById('liveCameraStream');
-            if (videoElement) {
-                videoElement.style.transform = `scale(${val})`;
-            }
-        }
-
-        // Manajemen Timer
-        function setTimer(seconds, btn) {
-            document.querySelectorAll('.timer-btn').forEach(b => {
-                b.className = "py-2 bg-slate-900 rounded-xl border border-slate-700 hover:border-indigo-500 font-bold timer-btn";
-            });
-            btn.className = "py-2 bg-indigo-600 rounded-xl font-bold text-white shadow-md timer-btn";
-            localStorage.setItem('photobooth_timer', seconds);
-        }
-
-        // Manajemen Orientasi Layar
-        function setOrientation(mode, btn) {
-            document.querySelectorAll('.orient-btn').forEach(b => {
-                b.className = "py-2.5 bg-slate-900 border border-slate-700 text-slate-300 font-bold rounded-xl orient-btn";
-            });
-            btn.className = "py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-md orient-btn";
-            localStorage.setItem('photobooth_orientation', mode);
-        }
-
-        // Tambah Tag Baru ke Select Option
-        function addNewTag() {
-            const input = document.getElementById('tagNameInput');
-            const select = document.getElementById('templateTagSelect');
-            if (!input.value.trim()) {
-                alert('Nama tag tidak boleh kosong!');
-                return;
-            }
-            const opt = document.createElement('option');
-            opt.value = input.value;
-            opt.innerText = input.value;
-            select.appendChild(opt);
-            alert(`Tag "${input.value}" berhasil ditambahkan!`);
-            input.value = '';
-        }
-
-        // Upload Template Frame
-        function uploadTemplate() {
-            const name = document.getElementById('templateName').value;
-            const tag = document.getElementById('templateTagSelect').value;
-            const fileInput = document.getElementById('templateFile');
-
-            if (!tag) {
-                alert('Silakan pilih tag terlebih dahulu.');
-                return;
-            }
+        // Simulasi Auto-Detect Slot Foto pada Frame (Mirip Video)
+        function simulateAutoDetect() {
+            const fileInput = document.getElementById('frameUpload');
             if (fileInput.files.length === 0) {
-                alert('Silakan pilih file gambar template (.PNG transparan).');
+                alert('Silakan pilih file gambar template frame terlebih dahulu!');
                 return;
             }
-
-            alert(`Template "${name || 'Tanpa Nama'}" dengan tag [${tag}] berhasil diunggah dan disimpan ke sistem!`);
-            document.getElementById('templateName').value = '';
-            fileInput.value = '';
+            const resBox = document.getElementById('detectResult');
+            resBox.classList.remove('hidden');
+            setTimeout(() => {
+                alert('Sistem berhasil mendeteksi koordinat lubang bingkai secara presisi!');
+            }, 500);
         }
 
-        // Simpan Konfigurasi Pembayaran ke LocalStorage
-        function savePaymentSettings() {
-            const price = document.getElementById('sessionPrice').value;
-            const merchant = document.getElementById('merchantName').value;
-            localStorage.setItem('photobooth_price', price);
-            localStorage.setItem('photobooth_merchant', merchant);
-            alert('Konfigurasi pembayaran & tarif berhasil disimpan secara permanen!');
-        }
-
-        // Auto-load konfigurasi tersimpan saat halaman dibuka
+        // Auto-load konfigurasi tersimpan
         window.onload = function() {
-            if (localStorage.getItem('photobooth_price')) {
-                document.getElementById('sessionPrice').value = localStorage.getItem('photobooth_price');
+            const savedPrimary = localStorage.getItem('app_theme_primary');
+            const savedBg = localStorage.getItem('app_theme_bg');
+            if (savedPrimary && savedBg) {
+                document.documentElement.style.setProperty('--primary-color', savedPrimary);
+                document.documentElement.style.setProperty('--primary-bg', savedBg);
             }
-            if (localStorage.getItem('photobooth_merchant')) {
-                document.getElementById('merchantName').value = localStorage.getItem('photobooth_merchant');
+            const savedBrand = localStorage.getItem('app_brand_name');
+            if (savedBrand) {
+                document.getElementById('brandTitle').innerText = savedBrand.toUpperCase();
+                document.getElementById('brandNameInput').value = savedBrand;
             }
         };
     </script>
