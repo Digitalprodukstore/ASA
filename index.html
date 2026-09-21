@@ -30,7 +30,6 @@
         .step-section.active { display: flex; }
         .btn-theme { background-color: var(--primary-bg); color: white; transition: all 0.2s; }
         .btn-theme:hover { filter: brightness(1.1); }
-        .mirror-mode { transform: scaleX(-1); }
         
         .cam-portrait { height: 340px; width: 240px; margin: 0 auto; }
         .cam-landscape { height: 240px; width: 100%; }
@@ -44,6 +43,9 @@
         .filter-cool { filter: hue-rotate(180deg) saturate(120%) brightness(102%); }
         .filter-warm { filter: sepia(40%) saturate(140%) brightness(105%); }
         .filter-matte { filter: contrast(90%) brightness(110%) saturate(85%); }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     
     <script>
@@ -102,7 +104,7 @@
         <div>
             <h1 id="brandNameDisplay" class="font-extrabold text-xs text-white tracking-wider">PHOTOBOOTH STUDIO</h1>
             <p class="text-[9px] text-emerald-400 font-semibold flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> KIOSK ONLINE
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> KIOSK ONLINE (ANTI-LAG)
             </p>
         </div>
         <div id="sessionTimerContainer" class="hidden bg-red-950/80 border border-red-500/40 px-3 py-1 rounded-xl text-center">
@@ -200,11 +202,11 @@
             </div>
             
             <div id="cameraBox" class="bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-landscape">
-                <video id="kioskCameraStream" autoplay playsinline muted class="hidden"></video>
-                <canvas id="liveCameraCanvas" class="w-full h-full object-cover"></canvas>
+                <video id="kioskCameraStream" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover -scale-x-100 bg-black"></video>
+                <img id="activeStaticFrameOverlay" src="" class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 opacity-90">
                 <canvas id="photoCanvas" class="hidden"></canvas>
 
-                <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/60 flex items-center justify-center text-5xl font-black text-white hidden z-30" style="backdrop-filter: none !important;">
+                <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center text-6xl font-black text-white hidden z-30">
                     3
                 </div>
             </div>
@@ -214,14 +216,14 @@
                     <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Pilih Template / Bingkai Sesi Ini:</span>
                     <span class="text-slate-400 text-[9px]">Geser 👉</span>
                 </div>
-                <div id="kioskLiveFrameGallery" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[58px] max-h-20 items-center">
+                <div id="kioskLiveFrameGallery" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[58px] max-h-20 items-center hide-scrollbar">
                     <div class="text-[9px] text-slate-500 italic">Memuat frame...</div>
                 </div>
             </div>
 
             <div class="space-y-1">
                 <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Galeri Foto (Klik 🗑 untuk Hapus & Retake):</span>
-                <div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 min-h-[58px]">
+                <div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 min-h-[58px] hide-scrollbar">
                     <div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto diambil</div>
                 </div>
             </div>
@@ -275,8 +277,8 @@
             </div>
 
             <div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
-                <span class="text-[10px] text-indigo-300 font-bold block"><i class="fa-solid fa-comment-dots mr-1"></i> Pilih Template Teks Cepat (10+ Pilihan):</span>
-                <div class="flex flex-wrap gap-1 pt-1 max-h-20 overflow-y-auto">
+                <span class="text-[10px] text-indigo-300 font-bold block"><i class="fa-solid fa-comment-dots mr-1"></i> Pilih Template Teks Cepat:</span>
+                <div class="flex flex-wrap gap-1 pt-1 max-h-20 overflow-y-auto hide-scrollbar">
                     <button onclick="selectQuickText('✨ Best Memories')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">✨ Best Memories</button>
                     <button onclick="selectQuickText('💖 Happy Birthday')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">💖 Happy Birthday</button>
                     <button onclick="selectQuickText('🎉 Party Time 2026')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">🎉 Party Time</button>
@@ -285,15 +287,12 @@
                     <button onclick="selectQuickText('🌟 Shine Bright')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">🌟 Shine Bright</button>
                     <button onclick="selectQuickText('☕ Weekend Vibe')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">☕ Weekend Vibe</button>
                     <button onclick="selectQuickText('🎓 Graduation Day')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">🎓 Graduation</button>
-                    <button onclick="selectQuickText('💍 Wedding Bells')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">💍 Wedding Bells</button>
-                    <button onclick="selectQuickText('🚀 Stay Awesome')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">🚀 Stay Awesome</button>
-                    <button onclick="selectQuickText('❤️ Family Time')" class="px-2 py-1 bg-slate-800 hover:bg-indigo-600 rounded text-[9px] text-white">❤️ Family Time</button>
                 </div>
-                <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Atau ketik teks kustom Anda sendiri..." class="w-full mt-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs">
+                <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Atau ketik teks kustom..." class="w-full mt-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs">
             </div>
 
             <div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1">
-                <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
+                <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Otomatis Upload Cloudinary)</span>
                 <div id="cloudinaryQrCode" class="w-16 h-16 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div>
                 <p class="text-[8px] text-slate-500 font-mono">Cloud: risakil1 | Preset: risakil</p>
             </div>
@@ -301,9 +300,6 @@
             <div class="space-y-2">
                 <button onclick="executePrint()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
                     <i class="fa-solid fa-print"></i> Cetak Hasil Sekarang (<span id="printQuota">1</span> Lembar)
-                </button>
-                <button onclick="requestExtraPrint()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-[10px] font-bold rounded-xl">
-                    + Tambah Lembar Cetak (Rp <span id="extraPrintPriceDisplay">10.000</span> / Lembar)
                 </button>
             </div>
         </div>
@@ -322,11 +318,10 @@
         let autoCaptureTimer = null;
         let editorTimerInterval = null;
         let kioskStream = null;
-        let livePreviewAnimFrame = null;
         let capturedPhotos = [];
         let selectedFrameSrc = ''; 
         let activeFilterClass = 'filter-none';
-        let loadedFrameObj = null;
+        let customTextValue = '';
 
         function goToStep(stepName) {
             document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
@@ -341,6 +336,7 @@
                 loadDashboardFramesForBooth();
             } else if (stepName === 'print') {
                 startEditorCountdownTimer();
+                generateCloudinaryQRCodeAndUpload();
             } else {
                 stopKioskCamera();
                 if (autoCaptureTimer) clearInterval(autoCaptureTimer);
@@ -425,41 +421,11 @@
         async function initKioskCamera() {
             const videoEl = document.getElementById('kioskCameraStream');
             try {
-                kioskStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+                kioskStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
                 videoEl.srcObject = kioskStream;
-                startLiveCanvasRenderer();
             } catch (err) {
                 alert("Kamera tidak dapat diakses: " + err.message);
             }
-        }
-
-        function startLiveCanvasRenderer() {
-            const video = document.getElementById('kioskCameraStream');
-            const canvas = document.getElementById('liveCameraCanvas');
-            const ctx = canvas.getContext('2d');
-
-            function renderLoop() {
-                if (!kioskStream) return;
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-
-                ctx.save();
-                if (isMirror) {
-                    ctx.translate(canvas.width, 0);
-                    ctx.scale(-1, 1);
-                }
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                ctx.restore();
-
-                // Jika ada frame terpilih, render frame di atas video secara real-time transparan
-                if (loadedFrameObj) {
-                    ctx.drawImage(loadedFrameObj, 0, 0, canvas.width, canvas.height);
-                }
-
-                livePreviewAnimFrame = requestAnimationFrame(renderLoop);
-            }
-            if (livePreviewAnimFrame) cancelAnimationFrame(livePreviewAnimFrame);
-            renderLoop();
         }
 
         function stopKioskCamera() {
@@ -467,13 +433,18 @@
                 kioskStream.getTracks().forEach(track => track.stop());
                 kioskStream = null;
             }
-            if (livePreviewAnimFrame) cancelAnimationFrame(livePreviewAnimFrame);
             if (autoCaptureTimer) clearInterval(autoCaptureTimer);
         }
 
         function toggleMirror() {
             isMirror = !isMirror;
+            const videoEl = document.getElementById('kioskCameraStream');
             document.getElementById('mirrorStatus').innerText = isMirror ? "ON" : "OFF";
+            if (isMirror) {
+                videoEl.classList.add('-scale-x-100');
+            } else {
+                videoEl.classList.remove('-scale-x-100');
+            }
         }
 
         function toggleOrientation() {
@@ -490,6 +461,34 @@
         function toggleCaptureMode() {
             captureMode = captureMode === 'manual' ? 'auto' : 'manual';
             document.getElementById('captureModeStatus').innerText = captureMode === 'manual' ? 'Manual' : 'Otomatis';
+        }
+
+        function loadDashboardFramesForBooth() {
+            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+            const container = document.getElementById('kioskLiveFrameGallery');
+
+            if (frames.length === 0) {
+                container.innerHTML = `<div class="text-[9px] text-slate-400 italic">Belum ada frame di dashboard. Menggunakan frame polos.</div>`;
+                return;
+            }
+
+            container.innerHTML = frames.map((f, idx) => `
+                <div onclick="selectKioskFrame('${f.url}', this)" class="cursor-pointer bg-slate-950 p-1 rounded border ${idx === 0 ? 'border-indigo-500 bg-indigo-950/40' : 'border-slate-800'} text-center shrink-0 kiosk-frame-item" style="width: 50px;">
+                    <img src="${f.url}" class="w-full h-10 object-contain rounded bg-black">
+                </div>
+            `).join('');
+
+            // Pilih frame pertama secara default
+            if (frames.length > 0) {
+                selectKioskFrame(frames[0].url, container.querySelector('.kiosk-frame-item'));
+            }
+        }
+
+        function selectKioskFrame(url, element) {
+            document.querySelectorAll('.kiosk-frame-item').forEach(el => el.classList.remove('border-indigo-500', 'bg-indigo-950/40'));
+            if (element) element.classList.add('border-indigo-500', 'bg-indigo-950/40');
+            selectedFrameSrc = url;
+            document.getElementById('activeStaticFrameOverlay').src = url;
         }
 
         function startPhotoSessionAction() {
@@ -511,66 +510,50 @@
             overlay.classList.remove('hidden');
             overlay.innerText = count;
 
-            autoCaptureTimer = setInterval(() => {
+            let cInterval = setInterval(() => {
                 count--;
                 if (count > 0) {
                     overlay.innerText = count;
                 } else {
-                    clearInterval(autoCaptureTimer);
-                    overlay.innerText = "📸 SNAP!";
-                    capturePhotoData();
-                    setTimeout(() => {
-                        overlay.classList.add('hidden');
-                        if (capturedPhotos.length < currentPackage.shots) {
-                            setTimeout(startAutoCaptureSequence, 1200);
-                        }
-                    }, 600);
+                    clearInterval(cInterval);
+                    overlay.classList.add('hidden');
+                    takeKioskSnapshot();
+
+                    if (capturedPhotos.length < currentPackage.shots) {
+                        setTimeout(startAutoCaptureSequence, 1200);
+                    } else {
+                        finishSessionEarly();
+                    }
                 }
             }, 1000);
         }
 
         function triggerManualSnap() {
+            if (capturedPhotos.length >= currentPackage.shots) return;
+            takeKioskSnapshot();
             if (capturedPhotos.length >= currentPackage.shots) {
-                alert("Jumlah foto sudah memenuhi batas paket! Silakan klik 'Selesai Foto & Lanjut Ke Editor'.");
-                return;
+                finishSessionEarly();
             }
-            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
-            
-            const overlay = document.getElementById('countdownOverlay');
-            overlay.classList.remove('hidden');
-            let count = 3;
-            overlay.innerText = count;
-
-            let cTimer = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    overlay.innerText = count;
-                } else {
-                    clearInterval(cTimer);
-                    overlay.innerText = "📸 SNAP!";
-                    capturePhotoData();
-                    setTimeout(() => overlay.classList.add('hidden'), 600);
-                }
-            }, 1000);
         }
 
-        function capturePhotoData() {
+        function takeKioskSnapshot() {
             const video = document.getElementById('kioskCameraStream');
             const canvas = document.getElementById('photoCanvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
             const ctx = canvas.getContext('2d');
 
+            ctx.save();
             if (isMirror) {
                 ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedPhotos.push(canvas.toDataURL('image/png'));
-            renderInstantGallery();
+            ctx.restore();
 
-            const currentNum = capturedPhotos.length;
-            document.getElementById('shotCounter').innerText = `Foto ${currentNum} dari ${currentPackage.shots}`;
+            capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.9));
+            document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
+            renderInstantGallery();
         }
 
         function renderInstantGallery() {
@@ -580,246 +563,209 @@
                 return;
             }
 
-            gallery.innerHTML = capturedPhotos.map((src, idx) => `
-                <div class="relative flex-shrink-0 group">
-                    <img src="${src}" class="w-14 h-12 object-cover rounded-lg border border-indigo-500/50 shadow-md">
-                    <button onclick="deleteSpecificPhoto(${idx})" class="absolute -top-1 -right-1 bg-red-600 text-white w-5 h-5 rounded-full text-[9px] font-bold flex items-center justify-center shadow-lg hover:bg-red-500">
-                        🗑
+            gallery.innerHTML = capturedPhotos.map((photo, idx) => `
+                <div class="relative shrink-0 w-14 h-14 bg-slate-950 rounded border border-slate-700 overflow-hidden group">
+                    <img src="${photo}" class="w-full h-full object-cover">
+                    <button onclick="retakePhotoIndex(${idx})" class="absolute inset-0 bg-black/60 text-rose-400 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs transition" title="Hapus & Ulangi">
+                        <i class="fa-solid fa-trash"></i>
                     </button>
-                    <span class="absolute bottom-0.5 left-0.5 bg-black/70 text-white text-[8px] font-bold px-1 rounded">#${idx + 1}</span>
                 </div>
             `).join('');
         }
 
-        function deleteSpecificPhoto(index) {
-            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
-            if (retakesLeft > 0) {
-                retakesLeft--;
-                capturedPhotos.splice(index, 1);
-                document.getElementById('retakeCount').innerText = retakesLeft;
-                renderInstantGallery();
-                document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
-                alert(`Foto #${index + 1} dihapus. Sisa retake: ${retakesLeft}x`);
-            } else {
-                alert("Kesempatan retake Anda sudah habis!");
+        function retakePhotoIndex(index) {
+            if (retakesLeft <= 0) {
+                alert("❌ Kuota retake Anda sudah habis!");
+                return;
             }
-        }
-
-        function getDashboardFramesList() {
-            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery')) || [];
-            return frames.slice(0, 30);
-        }
-
-        function loadDashboardFramesForBooth() {
-            const container = document.getElementById('kioskLiveFrameGallery');
-            const frames = getDashboardFramesList();
-
-            let html = `
-                <div onclick="selectLiveFrame('', this)" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border-2 ${selectedFrameSrc === '' ? 'border-emerald-500 ring-2 ring-emerald-500/40' : 'border-slate-700'} flex flex-col items-center justify-center transition">
-                    <i class="fa-solid fa-ban text-xs text-slate-400 mb-0.5"></i>
-                    <span class="text-[7px] text-white font-bold text-center">Tanpa Frame</span>
-                </div>
-            `;
-
-            if (frames.length > 0) {
-                html += frames.map((f) => `
-                    <div onclick="selectLiveFrame('${f.url}', this)" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border-2 ${selectedFrameSrc === f.url ? 'border-indigo-500 ring-2 ring-indigo-500/40' : 'border-slate-700'} overflow-hidden relative flex items-center justify-center transition">
-                        <img src="${f.url}" class="w-full h-full object-cover">
-                    </div>
-                `).join('');
-            }
-
-            container.innerHTML = html;
-        }
-
-        function selectLiveFrame(url, el) {
-            selectedFrameSrc = url;
-            
-            if (url) {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => {
-                    loadedFrameObj = img;
-                };
-                img.src = url;
-            } else {
-                loadedFrameObj = null;
-            }
-
-            document.querySelectorAll('#kioskLiveFrameGallery > div').forEach(d => {
-                d.classList.remove('border-indigo-500', 'border-emerald-500', 'ring-2', 'ring-indigo-500/40', 'ring-emerald-500/40');
-                d.classList.add('border-slate-700');
-            });
-            el.classList.remove('border-slate-700');
-            if (url === '') {
-                el.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/40');
-            } else {
-                el.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500/40');
-            }
+            retakesLeft--;
+            document.getElementById('retakeCount').innerText = retakesLeft;
+            capturedPhotos.splice(index, 1);
+            document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
+            renderInstantGallery();
+            document.getElementById('startPhotoSessionBtn').classList.remove('hidden');
         }
 
         function finishSessionEarly() {
             if (capturedPhotos.length === 0) {
-                alert("Ambil minimal 1 foto terlebih dahulu!");
+                alert("⚠️ Harap ambil minimal 1 foto terlebih dahulu!");
                 return;
             }
-            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
-            document.getElementById('sessionTimerContainer').classList.add('hidden');
             stopKioskCamera();
-            renderSlotMovers();
-            
-            setTimeout(() => {
-                updateCompositeCanvas();
-            }, 100);
-
-            generateCloudinaryQR();
+            if (timerInterval) clearInterval(timerInterval);
+            renderSlotMoverButtons();
+            updateCompositeCanvas();
             goToStep('print');
         }
 
         function startEditorCountdownTimer() {
+            let editTime = 60;
+            const el = document.getElementById('editorCountdownTimer');
             if (editorTimerInterval) clearInterval(editorTimerInterval);
-            let editorTimeLeft = 60;
-            const timerDisplay = document.getElementById('editorCountdownTimer');
 
             editorTimerInterval = setInterval(() => {
-                let mins = Math.floor(editorTimeLeft / 60);
-                let secs = editorTimeLeft % 60;
-                timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-                if (editorTimeLeft <= 0) {
+                let m = Math.floor(editTime / 60);
+                let s = editTime % 60;
+                el.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                if (editTime <= 0) {
                     clearInterval(editorTimerInterval);
-                    alert("⏰ Waktu edit telah habis! Sistem otomatis mencetak foto Anda.");
                     executePrint();
                 }
-                editorTimeLeft--;
+                editTime--;
             }, 1000);
         }
 
-        function renderSlotMovers() {
-            const moverContainer = document.getElementById('slotMoverContainer');
-            moverContainer.innerHTML = capturedPhotos.map((_, idx) => `
-                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded-lg text-[9px] font-bold">
+        function applyFilter(filterType) {
+            activeFilterClass = 'filter-' + filterType;
+            updateCompositeCanvas();
+        }
+
+        function renderSlotMoverButtons() {
+            const container = document.getElementById('slotMoverContainer');
+            container.innerHTML = capturedPhotos.map((_, idx) => `
+                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-[10px] font-bold">
                     <span>Foto #${idx + 1}</span>
-                    <button onclick="movePhotoSlot(${idx}, -1)" class="px-1.5 py-0.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white" title="Geser Atas">▲</button>
-                    <button onclick="movePhotoSlot(${idx}, 1)" class="px-1.5 py-0.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white" title="Geser Bawah">▼</button>
+                    <button onclick="movePhotoSlot(${idx}, -1)" class="text-indigo-400 px-1 hover:text-white">◀</button>
+                    <button onclick="movePhotoSlot(${idx}, 1)" class="text-indigo-400 px-1 hover:text-white">▶</button>
                 </div>
             `).join('');
         }
 
         function movePhotoSlot(index, direction) {
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= capturedPhotos.length) return;
-            
-            const temp = capturedPhotos[index];
-            capturedPhotos[index] = capturedPhotos[newIndex];
-            capturedPhotos[newIndex] = temp;
-
-            renderSlotMovers();
+            const target = index + direction;
+            if (target < 0 || target >= capturedPhotos.length) return;
+            let temp = capturedPhotos[index];
+            capturedPhotos[index] = capturedPhotos[target];
+            capturedPhotos[target] = temp;
+            renderSlotMoverButtons();
             updateCompositeCanvas();
         }
 
-        function applyFilter(filterName) {
-            activeFilterClass = 'filter-' + filterName;
-            updateCompositeCanvas();
-        }
-
-        function selectQuickText(textVal) {
-            document.getElementById('customTextInput').value = textVal;
+        function selectQuickText(txt) {
+            document.getElementById('customTextInput').value = txt;
             updateCompositeCanvas();
         }
 
         function updateCompositeCanvas() {
             const canvas = document.getElementById('compositeCanvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 600;
-            canvas.height = 900;
+            canvas.width = 1200;
+            canvas.height = 1800;
 
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let loadedImgs = 0;
+            customTextValue = document.getElementById('customTextInput').value;
+            document.getElementById('overlayTextDisplay').innerText = customTextValue;
+
+            let loadedCount = 0;
+            let imgObjs = [];
+
             if (capturedPhotos.length === 0) return;
 
-            const slotWidth = 520;
-            const slotHeight = Math.floor((760 - (capturedPhotos.length - 1) * 15) / capturedPhotos.length);
-            const startX = 40;
-            let startY = 40;
-
             capturedPhotos.forEach((src, idx) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => {
-                    ctx.save();
-                    if (activeFilterClass === 'filter-grayscale') ctx.filter = 'grayscale(100%) contrast(110%)';
-                    else if (activeFilterClass === 'filter-sepia') ctx.filter = 'sepia(85%) contrast(105%)';
-                    else if (activeFilterClass === 'filter-vintage') ctx.filter = 'contrast(125%) brightness(95%) sepia(35%)';
-                    else if (activeFilterClass === 'filter-vivid') ctx.filter = 'saturate(160%) contrast(110%) brightness(105%)';
-                    else if (activeFilterClass === 'filter-cool') ctx.filter = 'hue-rotate(180deg) saturate(120%) brightness(102%)';
-                    else if (activeFilterClass === 'filter-warm') ctx.filter = 'sepia(40%) saturate(140%) brightness(105%)';
-                    else if (activeFilterClass === 'filter-matte') ctx.filter = 'contrast(90%) brightness(110%) saturate(85%)';
-                    else ctx.filter = 'none';
-
-                    ctx.drawImage(img, startX, startY + idx * (slotHeight + 15), slotWidth, slotHeight);
-                    ctx.restore();
-
-                    loadedImgs++;
-                    if (loadedImgs === capturedPhotos.length) {
-                        drawFrameAndTextLayer(canvas, ctx);
+                let img = new Image();
+                img.onload = function() {
+                    imgObjs[idx] = img;
+                    loadedCount++;
+                    if (loadedCount === capturedPhotos.length) {
+                        drawAllElements(ctx, canvas, imgObjs);
                     }
                 };
                 img.src = src;
             });
         }
 
-        function drawFrameAndTextLayer(canvas, ctx) {
+        function drawAllElements(ctx, canvas, photos) {
+            ctx.save();
+            // Terapkan filter HD pilihan user pada canvas
+            if (activeFilterClass === 'filter-grayscale') ctx.filter = 'grayscale(100%) contrast(110%)';
+            else if (activeFilterClass === 'filter-sepia') ctx.filter = 'sepia(85%) contrast(105%)';
+            else if (activeFilterClass === 'filter-vintage') ctx.filter = 'contrast(125%) brightness(95%) sepia(35%)';
+            else if (activeFilterClass === 'filter-vivid') ctx.filter = 'saturate(160%) contrast(110%) brightness(105%)';
+            else if (activeFilterClass === 'filter-cool') ctx.filter = 'hue-rotate(180deg) saturate(120%) brightness(102%)';
+            else if (activeFilterClass === 'filter-warm') ctx.filter = 'sepia(40%) saturate(140%) brightness(105%)';
+            else if (activeFilterClass === 'filter-matte') ctx.filter = 'contrast(90%) brightness(110%) saturate(85%)';
+
+            // Gambar tata letak kotak foto
+            if (photos.length === 4) {
+                ctx.drawImage(photos[0], 90, 80, 1020, 360);
+                if (photos[1]) ctx.drawImage(photos[1], 90, 465, 1020, 360);
+                if (photos[2]) ctx.drawImage(photos[2], 90, 850, 1020, 360);
+                if (photos[3]) ctx.drawImage(photos[3], 90, 1235, 1020, 360);
+            } else if (photos.length === 6) {
+                photos.forEach((p, i) => {
+                    let yPos = 60 + (i * 270);
+                    ctx.drawImage(p, 90, yPos, 1020, 245);
+                });
+            } else {
+                photos.forEach((p, i) => {
+                    let yPos = 100 + (i * 780);
+                    ctx.drawImage(p, 90, yPos, 1020, 720);
+                });
+            }
+            ctx.restore();
+
+            // Timpa dengan Bingkai / Frame PNG Transparan di atasnya
             if (selectedFrameSrc) {
-                const frameImg = new Image();
+                let frameImg = new Image();
                 frameImg.crossOrigin = "anonymous";
-                frameImg.onload = () => {
+                frameImg.onload = function() {
                     ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                    drawCustomTextOverlay(ctx, canvas);
+                    drawCustomTextOverlay(ctx);
                 };
                 frameImg.src = selectedFrameSrc;
             } else {
-                drawCustomTextOverlay(ctx, canvas);
+                drawCustomTextOverlay(ctx);
             }
         }
 
-        function drawCustomTextOverlay(ctx, canvas) {
-            const text = document.getElementById('customTextInput').value.trim();
-            document.getElementById('overlayTextDisplay').innerText = text;
-            if (text) {
-                ctx.font = "bold 24px 'Inter', sans-serif";
+        function drawCustomTextOverlay(ctx) {
+            if (customTextValue) {
+                ctx.font = "bold 42px 'Inter', sans-serif";
                 ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#000000";
-                ctx.lineWidth = 4;
                 ctx.textAlign = "center";
-                ctx.strokeText(text, canvas.width / 2, canvas.height - 35);
-                ctx.fillText(text, canvas.width / 2, canvas.height - 35);
+                ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+                ctx.shadowBlur = 10;
+                ctx.fillText(customTextValue, 600, 1720);
             }
         }
 
-        function generateCloudinaryQR() {
+        function generateCloudinaryQRCodeAndUpload() {
+            const canvas = document.getElementById('compositeCanvas');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            const formData = new FormData();
+            formData.append('file', dataUrl);
+            formData.append('upload_preset', PRESET_NAME);
+
             const qrContainer = document.getElementById('cloudinaryQrCode');
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/`,
-                width: 80,
-                height: 80
+            qrContainer.innerHTML = `<div class="text-[8px] text-slate-500 animate-pulse">Uploading...</div>`;
+
+            fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                qrContainer.innerHTML = "";
+                if (data.secure_url) {
+                    new QRCode(qrContainer, {
+                        text: data.secure_url,
+                        width: 60,
+                        height: 60
+                    });
+                } else {
+                    qrContainer.innerHTML = `<span class="text-[7px] text-red-500">Gagal Cloud</span>`;
+                }
+            })
+            .catch(() => {
+                qrContainer.innerHTML = `<span class="text-[7px] text-red-500">Network Error</span>`;
             });
         }
 
         function executePrint() {
             if (editorTimerInterval) clearInterval(editorTimerInterval);
-            alert("🖨 Perintah cetak dikirim ke printer thermal/minilab! Silakan ambil hasil foto Anda.");
-            window.location.reload();
-        }
-
-        function requestExtraPrint() {
-            const price = localStorage.getItem('extra_print_price') || 10000;
-            currentPackage.prints++;
-            document.getElementById('printQuota').innerText = currentPackage.prints;
-            alert(`✓ Tambah 1 lembar cetak berhasil ditambahkan. Silakan bayar tambahan Rp ${parseInt(price).toLocaleString('id-ID')} kepada kasir.`);
+            window.print();
         }
     </script>
 </body>
