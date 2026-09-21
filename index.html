@@ -3,335 +3,599 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobooth Studio - Kiosk Client</title>
-    <!-- Tailwind CSS -->
+    <title>Photobooth Studio - Kiosk Engine Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts untuk Dinamis Font Kiosk -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Courier+New&family=Comic+Sans+MS&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Courier+Prime:wght@700&family=Inter:wght@400;700;900&family=Montserrat:wght@700;900&family=Playfair+Display:wght@700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { background-color: #07090e; color: #f3f4f6; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
-        .kiosk-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .hidden-section { display: none !important; }
+        :root {
+            --primary-color: #6366f1;
+            --primary-bg: #4f46e5;
+            --app-bg-color: #07090e;
+            --app-font-family: 'Inter', system-ui, sans-serif;
+        }
+        body { 
+            background-color: var(--app-bg-color); 
+            color: #f3f4f6; 
+            font-family: var(--app-font-family); 
+            overflow-x: hidden; 
+            transition: all 0.3s ease;
+        }
+        .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .step-section { display: none; }
+        .step-section.active { display: flex; }
+        .btn-theme { background-color: var(--primary-bg); color: white; transition: all 0.2s; }
+        .btn-theme:hover { filter: brightness(1.1); }
+        .mirror-mode { transform: scaleX(-1); }
+        
+        /* Modul Orientasi Kamera */
+        .cam-portrait { height: 320px; width: 240px; margin: 0 auto; }
+        .cam-landscape { height: 240px; width: 100%; }
+
+        /* Filter Live Editor */
+        .filter-grayscale { filter: grayscale(100%); }
+        .filter-sepia { filter: sepia(80%); }
+        .filter-vintage { filter: contrast(120%) brightness(90%) sepia(30%); }
+        .filter-none { filter: none; }
     </style>
+    
+    <script>
+        function syncSettingsFromDashboard() {
+            // 1. Sinkronkan Font Kiosk dari Dashboard
+            const savedFont = localStorage.getItem('app_kiosk_font') || 'Inter';
+            let fontFamily = "'Inter', sans-serif";
+            if (savedFont === 'Poppins') fontFamily = "'Poppins', sans-serif";
+            else if (savedFont === 'Montserrat') fontFamily = "'Montserrat', sans-serif";
+            else if (savedFont === 'Playfair Display') fontFamily = "'Playfair Display', serif";
+            else if (savedFont === 'Courier New') fontFamily = "'Courier Prime', monospace";
+            else if (savedFont === 'Comic Sans MS') fontFamily = "'Comic Neue', cursive";
+            document.documentElement.style.setProperty('--app-font-family', fontFamily);
+
+            // 2. Sinkronkan Warna Background Aplikasi dari Dashboard
+            const savedAppBg = localStorage.getItem('app_custom_bg_color');
+            if (savedAppBg) {
+                document.documentElement.style.setProperty('--app-bg-color', savedAppBg);
+            }
+
+            // 3. Sinkronkan Brand Name & Teks Sambutan
+            const savedBrand = localStorage.getItem('app_brand_name') || "PHOTOBOOTH STUDIO";
+            const brandEl = document.getElementById('brandNameDisplay');
+            if (brandEl) brandEl.innerText = savedBrand.toUpperCase();
+
+            const savedWelcome = localStorage.getItem('app_welcome_msg') || `Welcome to ${savedBrand}`;
+            const welcomeEl = document.getElementById('welcomeWatermark');
+            if (welcomeEl) welcomeEl.innerText = savedWelcome;
+
+            // 4. Sinkronkan Harga Paket & Cetak Ekstra Secara Presisi
+            const p1 = localStorage.getItem('pkg1_price') || 15000;
+            const p2 = localStorage.getItem('pkg2_price') || 25000;
+            const p3 = localStorage.getItem('pkg3_price') || 10000;
+            const pExtra = localStorage.getItem('extra_print_price') || 10000;
+
+            const elP1 = document.getElementById('priceDisplayPkg1');
+            const elP2 = document.getElementById('priceDisplayPkg2');
+            const elP3 = document.getElementById('priceDisplayPkg3');
+            const elEx = document.getElementById('extraPrintPriceDisplay');
+
+            if (elP1) elP1.innerText = `Rp ${parseInt(p1).toLocaleString('id-ID')}`;
+            if (elP2) elP2.innerText = `Rp ${parseInt(p2).toLocaleString('id-ID')}`;
+            if (elP3) elP3.innerText = `Rp ${parseInt(p3).toLocaleString('id-ID')}`;
+            if (elEx) elEx.innerText = parseInt(pExtra).toLocaleString('id-ID');
+        }
+
+        // Pantau Perubahan Real-Time via Event Storage
+        window.addEventListener('storage', syncSettingsFromDashboard);
+        window.addEventListener('DOMContentLoaded', syncSettingsFromDashboard);
+    </script>
 </head>
-<body id="kioskBody" class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto relative">
+<body class="min-h-screen flex flex-col justify-between p-4 max-w-xl mx-auto">
 
-    <!-- TOMBOL AKSES ADMIN DASHBOARD DI KIOSK -->
-    <div class="absolute top-3 right-4 z-50">
-        <a href="dashboard.html" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-indigo-300 border border-slate-700 flex items-center justify-center text-xs shadow-lg" title="Buka Dashboard Admin">
-            <i class="fa-solid fa-gear"></i>
+    <header class="glass-card p-3 rounded-2xl flex justify-between items-center mb-4 sticky top-2 z-50">
+        <div>
+            <h1 id="brandNameDisplay" class="font-extrabold text-xs text-white tracking-wider">PHOTOBOOTH STUDIO</h1>
+            <p class="text-[9px] text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> KIOSK ONLINE
+            </p>
+        </div>
+        <div id="sessionTimerContainer" class="hidden bg-red-950/80 border border-red-500/40 px-3 py-1 rounded-xl text-center">
+            <span class="text-[8px] text-red-300 block font-bold leading-none">SISA WAKTU</span>
+            <span id="sessionTimer" class="text-xs font-black text-red-400 font-mono">07:00</span>
+        </div>
+        <a href="dashboard.html" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[10px] font-bold rounded-lg border border-slate-700 text-slate-300">
+            <i class="fa-solid fa-lock"></i>
         </a>
-    </div>
-
-    <!-- HEADER KIOSK -->
-    <header class="text-center py-4 space-y-1">
-        <h1 id="kioskWelcomeTitle" class="text-lg font-black tracking-wider text-white uppercase">PHOTOBOOTH STUDIO</h1>
-        <p class="text-[10px] text-indigo-400 font-semibold" id="aiStudioBadgeDisplay" style="display: none;">
-            <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i> AI Studio Pas Foto Formal Aktif
-        </p>
     </header>
 
-    <!-- ================= HALAMAN 1: HOME & PILIH PAKET ================= -->
-    <div id="page-home" class="space-y-4 my-auto">
-        <div class="kiosk-card p-6 rounded-3xl text-center space-y-4 shadow-2xl">
-            <div class="w-16 h-16 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto text-indigo-400 text-2xl border border-indigo-500/30">
-                <i class="fa-solid fa-camera-retro"></i>
-            </div>
-            <div>
-                <h2 class="text-xl font-black text-white">Abadikan Momen Serumu!</h2>
-                <p class="text-xs text-slate-400 mt-1">Pilih paket foto terbaikmu dan cetak langsung hari ini.</p>
+    <div id="step-welcome" class="step-section active flex-col space-y-4 my-auto">
+        <div class="text-center space-y-1">
+            <span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
+                Welcome to Photobooth Studio
+            </span>
+            <h2 class="text-xl font-black text-white">Pilih Paket Sesi Foto</h2>
+            <p class="text-xs text-slate-400">Semua paket termasuk: Soft File, GIF Animation & Custom Frame</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2.5">
+            <div onclick="selectPackage('Paket 1 Strip (4 Foto)', 'pkg1_price', 15000, 4, 1)" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center transition">
+                <div>
+                    <h3 class="text-xs font-bold text-white">Paket 1 Strip (4 Foto)</h3>
+                    <p class="text-[10px] text-slate-400">4 Foto &bull; 1 Cetak Strip &bull; Free Soft File & GIF</p>
+                </div>
+                <span id="priceDisplayPkg1" class="text-xs font-bold text-emerald-400 font-mono">Rp 15.000</span>
             </div>
 
-            <!-- PILIHAN PAKET -->
-            <div class="space-y-2.5 text-left">
-                <div onclick="selectPackage(1)" class="p-3 bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-500 rounded-2xl cursor-pointer transition flex justify-between items-center">
-                    <div>
-                        <span class="text-xs font-bold text-white block">Paket 1 Strip (4 Foto)</span>
-                        <span class="text-[10px] text-slate-400">Standar Photobooth Classic</span>
-                    </div>
-                    <span class="text-xs font-mono font-black text-indigo-400" id="displayPkg1">Rp 15.000</span>
+            <div onclick="selectPackage('Paket Dual Strip (6 Foto)', 'pkg2_price', 25000, 6, 2)" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center transition">
+                <div>
+                    <h3 class="text-xs font-bold text-white">Paket Dual Strip (6 Foto)</h3>
+                    <p class="text-[10px] text-slate-400">6 Foto (3 foto/strip) &bull; 2 Cetak Strip &bull; Soft File</p>
                 </div>
-                <div onclick="selectPackage(2)" class="p-3 bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-500 rounded-2xl cursor-pointer transition flex justify-between items-center">
-                    <div>
-                        <span class="text-xs font-bold text-white block">Paket Dual Strip (6 Foto)</span>
-                        <span class="text-[10px] text-slate-400">Lebih banyak gaya & pilihan</span>
-                    </div>
-                    <span class="text-xs font-mono font-black text-indigo-400" id="displayPkg2">Rp 25.000</span>
+                <span id="priceDisplayPkg2" class="text-xs font-bold text-emerald-400 font-mono">Rp 25.000</span>
+            </div>
+
+            <div onclick="selectPackage('Paket Mini (2 Foto)', 'pkg3_price', 10000, 2, 1)" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center transition">
+                <div>
+                    <h3 class="text-xs font-bold text-white">Paket Mini (2 Foto)</h3>
+                    <p class="text-[10px] text-slate-400">2 Foto &bull; 1 Cetak Mini &bull; Soft File</p>
                 </div>
-                <div onclick="selectPackage(3)" class="p-3 bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-500 rounded-2xl cursor-pointer transition flex justify-between items-center">
-                    <div>
-                        <span class="text-xs font-bold text-white block">Paket Mini (2 Foto)</span>
-                        <span class="text-[10px] text-slate-400">Cepat & Ekonomis</span>
-                    </div>
-                    <span class="text-xs font-mono font-black text-indigo-400" id="displayPkg3">Rp 10.000</span>
-                </div>
+                <span id="priceDisplayPkg3" class="text-xs font-bold text-emerald-400 font-mono">Rp 10.000</span>
             </div>
         </div>
     </div>
 
-    <!-- ================= HALAMAN 2: PEMBAYARAN (QRIS / VOUCHER) ================= -->
-    <div id="page-payment" class="hidden-section space-y-4 my-auto">
-        <div class="kiosk-card p-6 rounded-3xl text-center space-y-4 shadow-2xl">
-            <h2 class="text-base font-black text-white">Selesaikan Pembayaran</h2>
+    <div id="step-payment" class="step-section flex-col space-y-4 my-auto">
+        <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
+            <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i>Pilih Metode Pembayaran</h3>
             
-            <div class="p-4 bg-white rounded-2xl inline-block shadow-inner">
-                <!-- Simulasi QRIS Dynamic -->
-                <div class="w-40 h-40 bg-slate-900 rounded-xl flex flex-col items-center justify-center text-white p-2 text-center">
-                    <i class="fa-solid fa-qrcode text-5xl text-indigo-400 mb-1"></i>
-                    <span class="text-[9px] font-bold text-slate-300" id="qrisMerchantLabel">QRIS Auto-Payment</span>
+            <div class="flex border border-slate-700 rounded-xl p-1 bg-slate-900/80 text-xs">
+                <button onclick="switchPayTab('qris')" id="payTabQris" class="flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white">QRIS Digital</button>
+                <button onclick="switchPayTab('voucher')" id="payTabVoucher" class="flex-1 py-1.5 rounded-lg font-bold text-slate-400">Kode Voucher</button>
+            </div>
+
+            <div id="payContentQris" class="space-y-3">
+                <div id="qrisContainer" class="w-44 h-44 bg-white mx-auto rounded-xl p-2 flex items-center justify-center shadow-inner"></div>
+                <div>
+                    <span class="text-[10px] text-slate-400">Total Tagihan:</span>
+                    <p id="payAmountDisplay" class="text-base font-black text-emerald-400 font-mono">Rp 15.000</p>
                 </div>
-            </div>
-
-            <div>
-                <p class="text-xs text-slate-300 font-bold">Total Tagihan:</p>
-                <p class="text-lg font-mono font-black text-emerald-400" id="paymentTotalText">Rp 15.000</p>
-                <p class="text-[10px] text-slate-400 mt-1" id="qrisBankInfo">Scan pakai BCA/DANA/OVO/GoPay</p>
-            </div>
-
-            <div class="space-y-2">
-                <button onclick="simulatePaymentSuccess()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg">
-                    ✓ Konfirmasi Pembayaran Berhasil
+                <button onclick="startSessionWithTimer()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl shadow-lg">
+                    Konfirmasi Pembayaran QRIS Selesai
                 </button>
-                <button onclick="goToPage('home')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl">
-                    ← Kembali / Batal
+            </div>
+
+            <div id="payContentVoucher" class="space-y-3 hidden">
+                <p class="text-xs text-slate-400">Masukkan kode voucher atau promo event Anda:</p>
+                <input type="text" id="voucherInput" placeholder="CONTOH: EVENT2026" class="w-full bg-slate-900 border border-slate-700 px-3 py-2.5 rounded-xl text-xs text-center text-white uppercase font-mono tracking-widest">
+                <button onclick="redeemVoucher()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                    Gunakan Voucher & Mulai Sesi
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ================= HALAMAN 3: LIVE CAMERA & JEPRET (AUTO-CAPTURE AKTIF) ================= -->
-    <div id="page-camera" class="hidden-section space-y-4 my-auto">
-        <div class="kiosk-card p-4 rounded-3xl text-center space-y-3 shadow-2xl">
-            <div class="flex justify-between items-center px-1">
-                <span class="text-xs font-bold text-indigo-300" id="cameraStatusInfo">Sesi Foto Berjalan</span>
-                <span class="text-xs font-mono font-black text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded-lg border border-amber-500/30" id="countdownTimer">3s</span>
+    <div id="step-booth" class="step-section flex-col space-y-3 my-auto">
+        <div class="glass-card p-4 rounded-2xl space-y-3">
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-amber-400 font-bold text-[11px]"><i class="fa-solid fa-rotate-left mr-1"></i> Sisa Retake: <b id="retakeCount">3</b>/3</span>
+                <span id="shotCounter" class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded text-[11px]">Foto 1 dari 4</span>
             </div>
 
-<!-- PREVIEW KAMERA & EFEK AI STUDIO BACKGROUND -->
-            <div class="relative w-full aspect-[3/4] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center shadow-inner">
-                <video id="webcamElement" autoplay playsinline class="w-full h-full object-cover"></video>
-                <canvas id="canvasCapture" class="hidden"></canvas>
+            <div class="grid grid-cols-3 gap-1.5 text-[9px]">
+                <button onclick="toggleMirror()" class="p-2 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-arrows-rotate"></i> Mirror: <span id="mirrorStatus">ON</span>
+                </button>
+                <button onclick="toggleOrientation()" class="p-2 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-mobile-screen"></i> Mode: <span id="orientationStatus">Landscape</span>
+                </button>
+                <button onclick="toggleCaptureMode()" class="p-2 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-sliders"></i> Mode: <span id="captureModeStatus">Otomatis</span>
+                </button>
+            </div>
+            
+            <div id="cameraBox" class="bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-landscape">
+                <video id="kioskCameraStream" autoplay playsinline muted class="w-full h-full object-cover mirror-mode"></video>
+                <canvas id="photoCanvas" class="hidden"></canvas>
+                <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center text-6xl font-black text-white hidden">
+                    3
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Galeri Foto (Klik 🗑 untuk Hapus & Retake):</span>
+                <div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 min-h-[68px]">
+                    <div class="text-[10px] text-slate-600 italic py-3 px-2">Belum ada foto diambil</div>
+                </div>
+            </div>
+
+            <button id="snapBtn" onclick="triggerManualSnap()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-camera"></i> <span id="snapBtnText">Ambil Foto Manual (Hitung Mundur 3s)</span>
+            </button>
+
+            <button onclick="finishSessionEarly()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md">
+                <i class="fa-solid fa-check-circle"></i> Selesai Foto & Lanjut Ke Editor <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="step-print" class="step-section flex-col space-y-3 my-auto">
+        <div class="glass-card p-4 rounded-2xl space-y-3">
+            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet Realtime</h3>
+            
+            <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
+                <img id="dashboardCustomFrameOverlay" class="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none hidden" alt="Frame Dashboard">
                 
-                <!-- Indikator Visual AI Studio Jika Aktif -->
-                <div id="aiStudioOverlay" class="absolute inset-0 bg-red-600/10 pointer-events-none hidden flex items-start justify-end p-2">
-                    <span class="bg-red-600/80 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow">Studio Formal Mode</span>
+                <div id="livePhotosheetPreview" class="w-full h-full p-2 flex flex-col justify-around items-center filter-none relative z-0">
+                    <div id="editorPhotosContainer" class="grid grid-cols-2 gap-1.5 w-full h-full"></div>
+                </div>
+                
+                <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-sm text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-20 pointer-events-none px-2"></div>
+            </div>
+
+            <div class="space-y-2 text-[10px]">
+                <div>
+                    <label class="text-slate-400 block mb-1 font-bold">Tambah Teks Kustom pada Foto:</label>
+                    <input type="text" id="customTextInput" oninput="updateLiveText()" placeholder="Ketik teks kustom (misal: Happy Birthday!)..." class="w-full bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs">
+                </div>
+
+                <div>
+                    <label class="text-slate-400 block mb-1 font-bold">Pilih Filter Warna Realtime:</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="applyLiveFilter('none')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Original</button>
+                        <button onclick="applyLiveFilter('grayscale')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Monokrom</button>
+                        <button onclick="applyLiveFilter('sepia')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Sepia</button>
+                        <button onclick="applyLiveFilter('vintage')" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-bold">Vintage</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex gap-2">
-                <button onclick="triggerManualCapture()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-camera"></i> Jepret Manual
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= HALAMAN 4: PILIH FRAME & HASIL FOTO ================= -->
-    <div id="page-result" class="hidden-section space-y-4 my-auto">
-        <div class="kiosk-card p-5 rounded-3xl text-center space-y-3 shadow-2xl">
-            <h2 class="text-base font-black text-white">Hasil Photobooth Kamu!</h2>
-            
-            <div class="relative w-48 h-72 mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-700 flex items-center justify-center">
-                <!-- Hasil Foto Komposit -->
-                <canvas id="stripCanvas" class="w-full h-full object-contain"></canvas>
-                <!-- Frame PNG Overlay -->
-                <img id="activeFrameOverlay" class="absolute inset-0 w-full h-full pointer-events-none object-fill" src="" alt="Frame PNG">
+            <div class="glass-card p-3 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-2">
+                <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
+                <div id="cloudinaryQrCode" class="w-28 h-28 bg-white mx-auto p-1.5 rounded-lg flex items-center justify-center"></div>
+                <p class="text-[8px] text-slate-500 font-mono">Cloud: risakil1 | Preset: risakil</p>
             </div>
 
             <div class="space-y-2">
-                <button onclick="uploadToCloudinaryAndFinish()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan & Kirim ke Cloud (QR / Download)
+                <button onclick="executePrint()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-print"></i> Cetak Hasil Sekarang (<span id="printQuota">1</span> Lembar)
                 </button>
-                <button onclick="location.reload()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl">
-                    Selesai / Sesi Baru
+                <button onclick="requestExtraPrint()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-[10px] font-bold rounded-xl">
+                    + Tambah Lembar Cetak (Rp <span id="extraPrintPriceDisplay">10.000</span> / Lembar)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER KIOSK -->
-    <footer class="text-center py-2">
-        <p class="text-[9px] text-slate-500" id="footerWelcomeText">Photobooth Kiosk System • Powered by AI</p>
-    </footer>
-
-    <!-- SCRIPT KIOSK SINKRONISASI DASHBOARD & AUTO-CAPTURE -->
     <script>
-        let selectedPkgId = 1;
-        let pkgPrice = 15000;
-        let capturedPhotos = [];
-        let maxShots = 4;
-        let currentShotCount = 0;
-        let autoCaptureTimer = null;
-
-        // Cloudinary Config (Terkunci Sesuai Permintaan)
+        // METADATA CLOUD USER TERKUNCI
         const CLOUD_NAME = "risakil1";
-        const UPLOAD_PRESET = "risakil";
+        const PRESET_NAME = "risakil";
 
-        function goToPage(pageName) {
-            document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden-section'));
-            document.getElementById('page-' + pageName).classList.remove('hidden-section');
-        }
+        let currentPackage = { name: '', price: 15000, shots: 4, prints: 1 };
+        let retakesLeft = 3;
+        let isMirror = true;
+        let isPortrait = false;
+        let captureMode = 'auto'; // Default diaktifkan otomatis sesuai permintaan
+        let timerInterval = null;
+        let autoCaptureTimer = null;
+        let kioskStream = null;
+        let capturedPhotos = [];
 
-        // LOAD PENGATURAN DARI DASHBOARD
-        window.onload = function() {
-            // Harga Paket
-            document.getElementById('displayPkg1').innerText = "Rp " + Number(localStorage.getItem('pkg1_price') || 15000).toLocaleString();
-            document.getElementById('displayPkg2').innerText = "Rp " + Number(localStorage.getItem('pkg2_price') || 25000).toLocaleString();
-            document.getElementById('displayPkg3').innerText = "Rp " + Number(localStorage.getItem('pkg3_price') || 10000).toLocaleString();
-
-            // Tampilan & Tema Homescreen
-            const welcomeMsg = localStorage.getItem('app_welcome_msg') || "PHOTOBOOTH STUDIO";
-            document.getElementById('kioskWelcomeTitle').innerText = welcomeMsg;
-            document.getElementById('footerWelcomeText').innerText = welcomeMsg + " • Kiosk System";
-
-            const customFont = localStorage.getItem('app_kiosk_font') || "Inter";
-            document.body.style.fontFamily = `'${customFont}', sans-serif`;
-
-            const customBg = localStorage.getItem('app_custom_bg_color') || "#07090e";
-            document.getElementById('kioskBody').style.backgroundColor = customBg;
-
-            // Bank & QRIS Info
-            const bankName = localStorage.getItem('qris_bank_name') || "BCA / QRIS";
-            const bankAcc = localStorage.getItem('qris_account_no') || "1234567890";
-            document.getElementById('qrisMerchantLabel').innerText = bankName.toUpperCase();
-            document.getElementById('qrisBankInfo').innerText = `Rek/Merchant: ${bankAcc}`;
-
-            // AI Studio Background Changer Status
-            const aiStudioActive = localStorage.getItem('toggle_ai_studio_active') === 'true';
-            if (aiStudioActive) {
-                document.getElementById('aiStudioBadgeDisplay').style.display = 'block';
-                document.getElementById('aiStudioOverlay').style.display = 'flex';
+        function goToStep(stepName) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-' + stepName).classList.add('active');
+            
+            if (stepName === 'booth') {
+                initKioskCamera();
+            } else if (stepName !== 'print') {
+                stopKioskCamera();
+                if (autoCaptureTimer) clearInterval(autoCaptureTimer);
             }
-        };
-
-        function selectPackage(pkgId) {
-            selectedPkgId = pkgId;
-            if (pkgId === 1) { pkgPrice = Number(localStorage.getItem('pkg1_price') || 15000); maxShots = 4; }
-            if (pkgId === 2) { pkgPrice = Number(localStorage.getItem('pkg2_price') || 25000); maxShots = 6; }
-            if (pkgId === 3) { pkgPrice = Number(localStorage.getItem('pkg3_price') || 10000); maxShots = 2; }
-
-            document.getElementById('paymentTotalText').innerText = "Rp " + pkgPrice.toLocaleString();
-            goToPage('payment');
         }
 
-        function simulatePaymentSuccess() {
-            goToPage('camera');
-            startCameraStream();
+        function selectPackage(name, priceKey, defaultPrice, shots, prints) {
+            const savedPrice = localStorage.getItem(priceKey);
+            const finalPrice = savedPrice ? parseInt(savedPrice) : defaultPrice;
+            
+            currentPackage = { name, price: finalPrice, shots, prints };
+            document.getElementById('payAmountDisplay').innerText = `Rp ${finalPrice.toLocaleString('id-ID')}`;
+            
+            // Generate QRIS Pembayaran
+            const qrisContainer = document.getElementById('qrisContainer');
+            qrisContainer.innerHTML = "";
+            new QRCode(qrisContainer, {
+                text: `00020101021126580016ID.CO.QRIS.WWW5145000000000${finalPrice}`,
+                width: 160,
+                height: 160
+            });
+
+            goToStep('payment');
         }
 
-        // KAMERA & AUTO-CAPTURE AKTIF DI HALAMAN VIDEO
-        function startCameraStream() {
-            const video = document.getElementById('webcamElement');
-            navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false })
-                .then(stream => {
-                    video.srcObject = stream;
-                    capturedPhotos = [];
-                    currentShotCount = 0;
+        function switchPayTab(tab) {
+            if (tab === 'qris') {
+                document.getElementById('payContentQris').classList.remove('hidden');
+                document.getElementById('payContentVoucher').classList.add('hidden');
+                document.getElementById('payTabQris').className = "flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white";
+                document.getElementById('payTabVoucher').className = "flex-1 py-1.5 rounded-lg font-bold text-slate-400";
+            } else {
+                document.getElementById('payContentQris').classList.add('hidden');
+                document.getElementById('payContentVoucher').classList.remove('hidden');
+                document.getElementById('payTabVoucher').className = "flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white";
+                document.getElementById('payTabQris').className = "flex-1 py-1.5 rounded-lg font-bold text-slate-400";
+            }
+        }
+
+        function redeemVoucher() {
+            const code = document.getElementById('voucherInput').value.trim();
+            if (code.length > 2) {
+                alert(`✓ Voucher '${code.toUpperCase()}' berhasil digunakan! Sesi digratiskan.`);
+                startSessionWithTimer();
+            } else {
+                alert("Masukkan kode voucher yang valid!");
+            }
+        }
+
+        function startSessionWithTimer() {
+            document.getElementById('sessionTimerContainer').classList.remove('hidden');
+            const sessionMins = parseInt(localStorage.getItem('session_timer_minutes')) || 7;
+            retakesLeft = parseInt(localStorage.getItem('max_retake_quota')) || 3;
+            
+            let timeLeft = sessionMins * 60;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                document.getElementById('sessionTimer').innerText = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ Waktu sesi telah habis!");
+                    finishSessionEarly();
+                }
+                timeLeft--;
+            }, 1000);
+
+            document.getElementById('retakeCount').innerText = retakesLeft;
+            document.getElementById('shotCounter').innerText = `Foto 1 dari ${currentPackage.shots}`;
+            document.getElementById('printQuota').innerText = currentPackage.prints;
+            
+            capturedPhotos = [];
+            renderInstantGallery();
+            goToStep('booth');
+        }
+
+        async function initKioskCamera() {
+            const videoEl = document.getElementById('kioskCameraStream');
+            try {
+                kioskStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+                videoEl.srcObject = kioskStream;
+                
+                // Jika mode otomatis aktif, mulai sekuens auto capture secara otomatis
+                if (captureMode === 'auto') {
                     startAutoCaptureSequence();
-                })
-                .catch(err => {
-                    alert("❌ Gagal mengakses kamera: " + err.message);
-                });
+                }
+            } catch (err) {
+                alert("Kamera tidak dapat diakses: " + err.message);
+            }
+        }
+
+        function stopKioskCamera() {
+            if (kioskStream) {
+                kioskStream.getTracks().forEach(track => track.stop());
+                kioskStream = null;
+            }
+            if (autoCaptureTimer) {
+                clearInterval(autoCaptureTimer);
+            }
+        }
+
+        function toggleMirror() {
+            isMirror = !isMirror;
+            const video = document.getElementById('kioskCameraStream');
+            document.getElementById('mirrorStatus').innerText = isMirror ? "ON" : "OFF";
+            if (isMirror) video.classList.add('mirror-mode');
+            else video.classList.remove('mirror-mode');
+        }
+
+        function toggleOrientation() {
+            isPortrait = !isPortrait;
+            const box = document.getElementById('cameraBox');
+            document.getElementById('orientationStatus').innerText = isPortrait ? "Portrait" : "Landscape";
+            if (isPortrait) {
+                box.className = "bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-portrait";
+            } else {
+                box.className = "bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 transition-all duration-300 cam-landscape";
+            }
+        }
+
+        function toggleCaptureMode() {
+            captureMode = captureMode === 'manual' ? 'auto' : 'manual';
+            document.getElementById('captureModeStatus').innerText = captureMode === 'manual' ? 'Manual' : 'Otomatis';
+            
+            if (captureMode === 'auto') {
+                if (capturedPhotos.length < currentPackage.shots) {
+                    startAutoCaptureSequence();
+                }
+            } else {
+                if (autoCaptureTimer) clearInterval(autoCaptureTimer);
+            }
         }
 
         function startAutoCaptureSequence() {
-            if (currentShotCount >= maxShots) {
-                stopCameraAndProcess();
-                return;
-            }
+            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
+            if (capturedPhotos.length >= currentPackage.shots) return;
 
-            let countdown = 3;
-            document.getElementById('countdownTimer').innerText = countdown + "s";
-            document.getElementById('cameraStatusInfo').innerText = `Foto ${currentShotCount + 1} dari ${maxShots}`;
+            let count = 3;
+            const overlay = document.getElementById('countdownOverlay');
+            overlay.classList.remove('hidden');
+            overlay.innerText = count;
 
             autoCaptureTimer = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    document.getElementById('countdownTimer').innerText = countdown + "s";
+                count--;
+                if (count > 0) {
+                    overlay.innerText = count;
                 } else {
                     clearInterval(autoCaptureTimer);
-                    document.getElementById('countdownTimer').innerText = "📸";
-                    takeSnapshot();
+                    overlay.innerText = "📸 SNAP!";
+                    capturePhotoData();
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        // Lanjutkan foto berikutnya secara otomatis jika belum penuh & mode auto aktif
+                        if (captureMode === 'auto' && capturedPhotos.length < currentPackage.shots) {
+                            setTimeout(startAutoCaptureSequence, 1200);
+                        }
+                    }, 600);
                 }
             }, 1000);
         }
 
-        function triggerManualCapture() {
+        function triggerManualSnap() {
+            if (capturedPhotos.length >= currentPackage.shots) {
+                alert("Jumlah foto sudah memenuhi batas paket!");
+                return;
+            }
             if (autoCaptureTimer) clearInterval(autoCaptureTimer);
-            takeSnapshot();
+            
+            const overlay = document.getElementById('countdownOverlay');
+            overlay.classList.remove('hidden');
+            let count = 3;
+            overlay.innerText = count;
+
+            let cTimer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    overlay.innerText = count;
+                } else {
+                    clearInterval(cTimer);
+                    overlay.innerText = "📸 SNAP!";
+                    capturePhotoData();
+                    setTimeout(() => overlay.classList.add('hidden'), 600);
+                }
+            }, 1000);
         }
 
-        function takeSnapshot() {
-            const video = document.getElementById('webcamElement');
-            const canvas = document.getElementById('canvasCapture');
+        function capturePhotoData() {
+            const video = document.getElementById('kioskCameraStream');
+            const canvas = document.getElementById('photoCanvas');
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
             const ctx = canvas.getContext('2d');
-            
-            // Cek apakah AI Studio aktif (simulasi manipulasi warna latar formal)
-            const aiStudioActive = localStorage.getItem('toggle_ai_studio_active') === 'true';
-            if (aiStudioActive) {
-                ctx.fillStyle = "#dc2626"; // Latar merah formal studio
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
 
+            if (isMirror) {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.9));
-            currentShotCount++;
+            capturedPhotos.push(canvas.toDataURL('image/png'));
+            renderInstantGallery();
 
-            if (currentShotCount < maxShots) {
-                setTimeout(startAutoCaptureSequence, 1500);
+            const currentNum = capturedPhotos.length;
+            document.getElementById('shotCounter').innerText = `Foto ${currentNum} dari ${currentPackage.shots}`;
+
+            if (currentNum >= currentPackage.shots) {
+                setTimeout(finishSessionEarly, 1000);
+            }
+        }
+
+        // RENDER GALERI INSTAN + HAPUS FOTO SPESIFIK
+        function renderInstantGallery() {
+            const gallery = document.getElementById('instantPhotoGallery');
+            if (capturedPhotos.length === 0) {
+                gallery.innerHTML = `<div class="text-[10px] text-slate-600 italic py-3 px-2">Belum ada foto diambil</div>`;
+                return;
+            }
+
+            gallery.innerHTML = capturedPhotos.map((src, idx) => `
+                <div class="relative flex-shrink-0 group">
+                    <img src="${src}" class="w-16 h-14 object-cover rounded-lg border border-indigo-500/50 shadow-md">
+                    <button onclick="deleteSpecificPhoto(${idx})" class="absolute -top-1 -right-1 bg-red-600 text-white w-5 h-5 rounded-full text-[9px] font-bold flex items-center justify-center shadow-lg hover:bg-red-500">
+                        🗑
+                    </button>
+                    <span class="absolute bottom-0.5 left-0.5 bg-black/70 text-white text-[8px] font-bold px-1 rounded">#${idx + 1}</span>
+                </div>
+            `).join('');
+        }
+
+        function deleteSpecificPhoto(index) {
+            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
+            if (retakesLeft > 0) {
+                retakesLeft--;
+                capturedPhotos.splice(index, 1);
+                document.getElementById('retakeCount').innerText = retakesLeft;
+                renderInstantGallery();
+                document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
+                alert(`Foto #${index + 1} dihapus. Sisa retake: ${retakesLeft}x`);
+                
+                // Lanjutkan auto capture jika mode auto aktif
+                if (captureMode === 'auto' && capturedPhotos.length < currentPackage.shots) {
+                    setTimeout(startAutoCaptureSequence, 1500);
+                }
             } else {
-                stopCameraAndProcess();
+                alert("Kesempatan retake Anda sudah habis!");
             }
         }
 
-        function stopCameraAndProcess() {
-            const video = document.getElementById('webcamElement');
-            if (video.srcObject) {
-                let tracks = video.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
+        function finishSessionEarly() {
+            if (capturedPhotos.length === 0) {
+                alert("Ambil minimal 1 foto terlebih dahulu!");
+                return;
             }
-            buildPhotoStrip();
-            goToPage('result');
+            clearInterval(timerInterval);
+            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
+            document.getElementById('sessionTimerContainer').classList.add('hidden');
+            stopKioskCamera();
+            renderEditorPhotos();
+            loadDashboardFrameOverlay();
+            generateCloudinaryQR();
+            goToStep('print');
         }
 
-        function buildPhotoStrip() {
-            const canvas = document.getElementById('stripCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 600;
-            canvas.height = 1800;
-
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            let loadedImages = 0;
-            capturedPhotos.forEach((src, idx) => {
-                let img = new Image();
-                img.onload = function() {
-                    let yPos = 40 + (idx * 410);
-                    ctx.drawImage(img, 50, yPos, 500, 375);
-                    loadedImages++;
-                    if (loadedImages === capturedPhotos.length) {
-                        // Pasang Frame PNG dari galeri dashboard jika ada
-                        const activeFrame = localStorage.getItem('custom_frame_png');
-                        if (activeFrame) {
-                            document.getElementById('activeFrameOverlay').src = activeFrame;
-                        }
-                    }
-                };
-                img.src = src;
-            });
+        // PREVIEW EDITOR + FRAME PNG DASHBOARD
+        function renderEditorPhotos() {
+            const container = document.getElementById('editorPhotosContainer');
+            container.innerHTML = capturedPhotos.map(src => `
+                <img src="${src}" class="w-full h-24 object-cover rounded-md shadow-sm border border-slate-800">
+            `).join('');
         }
 
-        function uploadToCloudinaryAndFinish() {
-            const canvas = document.getElementById('stripCanvas');
-            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+        function loadDashboardFrameOverlay() {
+            const savedFrame = localStorage.getItem('custom_frame_png');
+            const frameImg = document.getElementById('dashboardCustomFrameOverlay');
+            if (savedFrame) {
+                frameImg.src = savedFrame;
+                frameImg.classList.remove('hidden');
+            } else {
+                frameImg.classList.add('hidden');
+            }
+        }
 
-            // Simulasi Kirim ke Cloudinary dengan kredensial tetap
-            alert(`✓ Berhasil Disimpan!\nCloud Name: ${CLOUD_NAME}\nPreset: ${UPLOAD_PRESET}\n\nFoto siap diunduh atau discan QR code.`);
+        function applyLiveFilter(filterName) {
+            const preview = document.getElementById('livePhotosheetPreview');
+            preview.className = `w-full h-full p-2 flex flex-col justify-around items-center filter-${filterName} relative z-0`;
+        }
+
+        function updateLiveText() {
+            const text = document.getElementById('customTextInput').value;
+            document.getElementById('overlayTextDisplay').innerText = text;
+        }
+
+        function generateCloudinaryQR() {
+            const qrBox = document.getElementById('cloudinaryQrCode');
+            qrBox.innerHTML = "";
+            const softFileUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v1/samples/landscapes/beach-boat.jpg`;
+            new QRCode(qrBox, { text: softFileUrl, width: 100, height: 100 });
+        }
+
+        function executePrint() {
+            alert("Mencetak hasil foto ke printer... Silakan ambil foto Anda!");
+        }
+
+        function requestExtraPrint() {
+            const extraP = localStorage.getItem('extra_print_price') || 10000;
+            const confirmExtra = confirm(`Tambah 1 lembar cetak ekstra seharga Rp ${parseInt(extraP).toLocaleString('id-ID')}?`);
+            if (confirmExtra) alert("Silakan lakukan pembayaran tambahan pada mesin.");
         }
     </script>
 </body>
