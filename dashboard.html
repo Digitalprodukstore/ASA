@@ -111,15 +111,14 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: TAMPILAN, 10+ PRESET HOMESCREEN, UPLOAD FOTO HOMESCREEN & GALERI FRAME 30 FRAME HP-STYLE ================= -->
+    <!-- ================= TAB 3: TAMPILAN, 10+ PRESET HOMESCREEN & GALERI FRAME 30 FRAME ================= -->
     <div id="section-tampilan" class="tab-section space-y-4">
         
-        <!-- PENGATURAN HOMESCREEN (MINIMAL 10 PRESET + UPLOAD FOTO CUSTOM) -->
+        <!-- PENGATURAN HOMESCREEN -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-mug-hot text-amber-500 mr-2"></i>Pilihan & Desain Homescreen Kiosk (10+ Preset & Custom Foto)</h2>
             <p class="text-xs text-slate-400">Pilih dari 10+ preset tema basic/modern, atau upload foto Anda sendiri sebagai latar belakang homescreen kiosk!</p>
 
-            <!-- 10+ Pilihan Preset Homescreen -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <button onclick="applyThemePreset('#2e1a11', '#d4a373', 'Poppins', '☕ Coffee Warm')" class="p-2 bg-[#2e1a11] border border-amber-800/50 rounded-xl text-left text-white">
                     <span class="text-[9px] font-bold block">1. ☕ Coffee Warm</span>
@@ -155,7 +154,6 @@
 
             <hr class="border-slate-800">
 
-            <!-- Fitur Upload Foto Kustom untuk Homescreen -->
             <div class="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
                 <label class="text-xs text-slate-300 font-bold block"><i class="fa-solid fa-image text-indigo-400 mr-1"></i> Upload Foto Kustom untuk Background Homescreen:</label>
                 <input type="file" id="homeBgImageInput" accept="image/*" class="hidden" onchange="handleHomeBgUpload(event)">
@@ -199,12 +197,12 @@
             </button>
         </div>
 
-        <!-- GALERI PENYIMPANAN FRAME (HP-STYLE SCROLL HINGGA 30 FRAME) -->
+        <!-- GALERI PENYIMPANAN FRAME (HP-STYLE HINGGA 30 FRAME) -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-base font-bold text-white"><i class="fa-solid fa-images text-indigo-400 mr-2"></i>Galeri Penyimpanan Frame PNG (<span id="frameCountBadge">0</span>/30)</h2>
             </div>
-            <p class="text-xs text-slate-400">Upload frame PNG transparan Anda di sini. Mendukung hingga 30 frame dengan tampilan galeri HP yang bisa di-scroll.</p>
+            <p class="text-xs text-slate-400">Upload frame PNG transparan Anda di sini. Mendukung hingga 30 frame agar langsung tersinkronisasi ke Kiosk.</p>
 
             <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
                 <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
@@ -215,14 +213,13 @@
                 </button>
             </div>
 
-            <!-- Tampilan Galeri HP-Style dengan Scroll Vertikal Max 30 Frame -->
             <div class="space-y-2">
                 <span class="text-xs font-bold text-slate-300 block">Daftar Frame Tersedia di Galeri:</span>
                 <div id="frameGalleryContainer" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800 shadow-inner"></div>
             </div>
         </div>
 
-        <!-- REKENING BANK / WALLET UNTUK QRIS OTOMATIS -->
+        <!-- REKENING BANK / QRIS -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i>Rekening Bank & e-Wallet (QRIS Payment)</h2>
             <div class="grid grid-cols-2 gap-2">
@@ -241,15 +238,15 @@
         </div>
     </div>
 
-    <!-- ================= TAB 4: PENGATURAN KONTROL KIOSK, AI STUDIO & HARDWARE ================= -->
+    <!-- ================= TAB 4: KONTROL KIOSK & HARDWARE ================= -->
     <div id="section-hardware" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-pink-400 mr-2"></i>AI Studio & Kontrol Kiosk (On/Off)</h2>
             <div class="space-y-3 text-xs">
                 <div class="flex justify-between items-center p-3 bg-pink-950/40 rounded-xl border border-pink-500/30">
                     <div>
-                        <span class="font-bold text-white block"><i class="fa-solid fa-user-tie text-pink-400 mr-1"></i> AI Studio Pas Foto Formal (Latar Merah/Biru/Hijau)</span>
-                        <span class="text-[10px] text-pink-300">Otomatis ubah background kafe jadi latar pas foto studio</span>
+                        <span class="font-bold text-white block"><i class="fa-solid fa-user-tie text-pink-400 mr-1"></i> AI Studio Pas Foto Formal (Latar Merah/Biru)</span>
+                        <span class="text-[10px] text-pink-300">Otomatis ubah background jadi latar pas foto studio</span>
                     </div>
                     <input type="checkbox" id="toggleAiStudio" class="w-5 h-5 accent-pink-600 cursor-pointer">
                 </div>
@@ -274,7 +271,6 @@
             </button>
         </div>
 
-        <!-- HARDWARE HUB -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-plug text-amber-400 mr-2"></i>Universal Hardware Hub</h2>
             <div class="space-y-2">
@@ -333,11 +329,11 @@
             <div class="space-y-3">
                 <div>
                     <label class="text-xs text-slate-300 font-bold block mb-1">Cloud Name (Cloudinary)</label>
-                    <input type="text" id="cloudNameInput" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-cyan-300 font-mono">
+                    <input type="text" id="cloudNameInput" value="risakil1" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-cyan-300 font-mono">
                 </div>
                 <div>
                     <label class="text-xs text-slate-300 font-bold block mb-1">Upload Preset Name</label>
-                    <input type="text" id="presetNameInput" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-cyan-300 font-mono">
+                    <input type="text" id="presetNameInput" value="risakil" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-xs text-cyan-300 font-mono">
                 </div>
             </div>
 
@@ -381,22 +377,57 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 10+ PRESET HOMESCREEN
+        // Sinkronisasi Input Warna Picker & Text
+        const colorPicker = document.getElementById('appBgColorPicker');
+        const colorText = document.getElementById('appBgColorText');
+        colorPicker.addEventListener('input', (e) => colorText.value = e.target.value);
+        colorText.addEventListener('input', (e) => colorPicker.value = e.target.value);
+
+        // Muat Data Tersimpan saat Halaman Dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('welcomeMsgInput').value = localStorage.getItem('app_welcome_msg') || 'Welcome to Photobooth Studio';
+            document.getElementById('kioskFontSelect').value = localStorage.getItem('app_kiosk_font') || 'Inter';
+            const savedBg = localStorage.getItem('app_custom_bg_color') || '#07090e';
+            colorPicker.value = savedBg;
+            colorText.value = savedBg;
+
+            document.getElementById('bankNameInput').value = localStorage.getItem('qris_bank_name') || '';
+            document.getElementById('bankAccInput').value = localStorage.getItem('qris_account_no') || '';
+
+            document.getElementById('toggleAiStudio').checked = localStorage.getItem('toggle_ai_studio_active') === 'true';
+            document.getElementById('toggleQris').checked = localStorage.getItem('toggle_qris_active') !== 'false';
+            document.getElementById('toggleVoucher').checked = localStorage.getItem('toggle_voucher_active') !== 'false';
+
+            document.getElementById('cameraSourceSelect').value = localStorage.getItem('hardware_camera_source') || 'webcam';
+
+            document.getElementById('pricePkg1').value = localStorage.getItem('pkg1_price') || 15000;
+            document.getElementById('pricePkg2').value = localStorage.getItem('pkg2_price') || 25000;
+            document.getElementById('pricePkg3').value = localStorage.getItem('pkg3_price') || 10000;
+            document.getElementById('priceExtraPrint').value = localStorage.getItem('extra_print_price') || 10000;
+            document.getElementById('sessionTimerMinutes').value = localStorage.getItem('session_timer_minutes') || 7;
+            document.getElementById('maxRetakeQuota').value = localStorage.getItem('max_retake_quota') || 3;
+            
+            document.getElementById('cloudNameInput').value = localStorage.getItem('cloudinary_cloud_name') || 'risakil1';
+            document.getElementById('presetNameInput').value = localStorage.getItem('cloudinary_preset_name') || 'risakil';
+
+            renderFrameGallery();
+            initChart();
+        });
+
         function applyThemePreset(bgColor, textColor, fontName, presetTitle) {
-            document.getElementById('appBgColorPicker').value = bgColor;
-            document.getElementById('appBgColorText').value = bgColor;
+            colorPicker.value = bgColor;
+            colorText.value = bgColor;
             document.getElementById('kioskFontSelect').value = fontName;
             document.getElementById('welcomeMsgInput').value = presetTitle;
             
             localStorage.setItem('app_welcome_msg', presetTitle);
             localStorage.setItem('app_kiosk_font', fontName);
             localStorage.setItem('app_custom_bg_color', bgColor);
-            localStorage.removeItem('app_custom_bg_image'); // Reset custom image jika pakai preset warna
+            localStorage.removeItem('app_custom_bg_image'); 
             
             alert(`✓ Tema '${presetTitle}' berhasil diterapkan ke Kiosk!`);
         }
 
-        // UPLOAD FOTO CUSTOM UNTUK HOMESCREEN
         function handleHomeBgUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -417,11 +448,11 @@
         function saveDesignSettings() {
             localStorage.setItem('app_welcome_msg', document.getElementById('welcomeMsgInput').value);
             localStorage.setItem('app_kiosk_font', document.getElementById('kioskFontSelect').value);
-            localStorage.setItem('app_custom_bg_color', document.getElementById('appBgColorText').value);
+            localStorage.setItem('app_custom_bg_color', colorText.value);
             alert("✓ Desain homescreen kiosk berhasil diperbarui!");
         }
 
-        // GALERI FRAME HP-STYLE (MAX 30 FRAME DENGAN SCROLL)
+        // GALERI FRAME (MAX 30 FRAME)
         function handleFrameUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -433,11 +464,10 @@
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    frames.push(e.target.result);
+                    frames.push({ id: Date.now(), name: `Frame ${frames.length + 1}`, url: e.target.result });
                     localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
-                    localStorage.setItem('custom_frame_png', e.target.result);
                     renderFrameGallery();
-                    alert("✓ Frame PNG berhasil di-upload ke galeri!");
+                    alert("✓ Frame PNG berhasil di-upload ke galeri & langsung sinkron ke Kiosk!");
                 };
                 reader.readAsDataURL(file);
             }
@@ -446,8 +476,6 @@
         function renderFrameGallery() {
             const container = document.getElementById('frameGalleryContainer');
             let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
-            let activeFrame = localStorage.getItem('custom_frame_png');
-
             document.getElementById('frameCountBadge').innerText = frames.length;
 
             if (frames.length === 0) {
@@ -455,35 +483,23 @@
                 return;
             }
 
-            container.innerHTML = frames.map((src, idx) => `
-                <div class="relative bg-slate-950 p-2 rounded-xl border ${src === activeFrame ? 'border-indigo-500 ring-2 ring-indigo-500/50' : 'border-slate-800'} flex flex-col items-center gap-1">
-                    <img src="${src}" class="w-full h-16 object-contain rounded bg-slate-900">
-                    <span class="text-[7px] text-slate-400 font-mono">#${idx + 1}</span>
-                    <div class="flex gap-1 w-full">
-                        <button onclick="setActiveFrame('${src}')" class="flex-1 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[8px] font-bold rounded truncate">
-                            ${src === activeFrame ? 'Aktif' : 'Pakai'}
-                        </button>
-                        <button onclick="deleteFrame(${idx})" class="px-1.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[8px] font-bold rounded">
-                            🗑
-                        </button>
-                    </div>
+            container.innerHTML = frames.map((f, idx) => `
+                <div class="relative bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center gap-1">
+                    <img src="${f.url}" class="w-full h-16 object-contain rounded bg-slate-900">
+                    <span class="text-[8px] text-slate-400 font-mono truncate w-full text-center">${f.name}</span>
+                    <button onclick="deleteFrame(${idx})" class="w-full py-1 bg-red-600 hover:bg-red-500 text-white text-[9px] font-bold rounded">
+                        🗑 Hapus
+                    </button>
                 </div>
             `).join('');
         }
 
-        function setActiveFrame(src) {
-            localStorage.setItem('custom_frame_png', src);
-            renderFrameGallery();
-            alert("✓ Frame aktif diubah!");
-        }
-
         function deleteFrame(index) {
             let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
-            if (frames[index] === localStorage.getItem('custom_frame_png')) localStorage.removeItem('custom_frame_png');
             frames.splice(index, 1);
             localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
             renderFrameGallery();
-            alert("✓ Frame dihapus.");
+            alert("✓ Frame berhasil dihapus dari galeri.");
         }
 
         function saveBankSettings() {
@@ -513,24 +529,24 @@
             localStorage.setItem('max_retake_quota', document.getElementById('maxRetakeQuota').value);
             localStorage.setItem('cloudinary_cloud_name', document.getElementById('cloudNameInput').value);
             localStorage.setItem('cloudinary_preset_name', document.getElementById('presetNameInput').value);
-            alert("✓ Tarif & Cloud tersimpan!");
+            alert("✓ Tarif & Pengaturan Cloud berhasil disimpan!");
         }
 
-        let analyticsChartInstance = null;
-        function initAnalyticsChart() {
+        // Grafik Insight Chart.js
+        function initChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
-            if (analyticsChartInstance) analyticsChartInstance.destroy();
-            analyticsChartInstance = new Chart(ctx, {
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
                     datasets: [{
                         label: 'Sesi Foto',
-                        data: [12, 19, 15, 25, 32, 48, 55],
+                        data: [12, 19, 15, 25, 32, 45, 38],
                         borderColor: '#6366f1',
                         backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
                     }]
                 },
                 options: {
@@ -538,38 +554,12 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
                     }
                 }
             });
         }
-
-        document.getElementById('appBgColorPicker').addEventListener('input', (e) => {
-            document.getElementById('appBgColorText').value = e.target.value;
-        });
-
-        window.onload = function() {
-            initAnalyticsChart();
-            renderFrameGallery();
-
-            document.getElementById('pricePkg1').value = localStorage.getItem('pkg1_price') || 15000;
-            document.getElementById('pricePkg2').value = localStorage.getItem('pkg2_price') || 25000;
-            document.getElementById('pricePkg3').value = localStorage.getItem('pkg3_price') || 10000;
-            document.getElementById('priceExtraPrint').value = localStorage.getItem('extra_print_price') || 10000;
-            document.getElementById('sessionTimerMinutes').value = localStorage.getItem('session_timer_minutes') || 7;
-            document.getElementById('maxRetakeQuota').value = localStorage.getItem('max_retake_quota') || 3;
-            document.getElementById('cloudNameInput').value = localStorage.getItem('cloudinary_cloud_name') || "risakil1";
-            document.getElementById('presetNameInput').value = localStorage.getItem('cloudinary_preset_name') || "risakil";
-
-            document.getElementById('welcomeMsgInput').value = localStorage.getItem('app_welcome_msg') || "";
-            document.getElementById('kioskFontSelect').value = localStorage.getItem('app_kiosk_font') || "Inter";
-            document.getElementById('appBgColorText').value = localStorage.getItem('app_custom_bg_color') || "#07090e";
-            document.getElementById('bankNameInput').value = localStorage.getItem('qris_bank_name') || "";
-            document.getElementById('bankAccInput').value = localStorage.getItem('qris_account_no') || "";
-
-            if (localStorage.getItem('toggle_ai_studio_active') === 'true') document.getElementById('toggleAiStudio').checked = true;
-        };
     </script>
 </body>
 </html>
