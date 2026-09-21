@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobooth Studio - Kiosk Engine Pro</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts untuk Dukungan Font Dashboard -->
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Courier+Prime:wght@700&family=Inter:wght@400;700;900&family=Montserrat:wght@700;900&family=Playfair+Display:wght@700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <!-- QRCode JS Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -40,9 +44,9 @@
         .filter-none { filter: none; }
     </style>
     
+    <!-- SINKRONISASI OTOMATIS DARI DASHBOARD SEBELUM KIOSK DILOAD -->
     <script>
         function syncSettingsFromDashboard() {
-            // 1. Sinkronkan Font Kiosk dari Dashboard
             const savedFont = localStorage.getItem('app_kiosk_font') || 'Inter';
             let fontFamily = "'Inter', sans-serif";
             if (savedFont === 'Poppins') fontFamily = "'Poppins', sans-serif";
@@ -52,13 +56,11 @@
             else if (savedFont === 'Comic Sans MS') fontFamily = "'Comic Neue', cursive";
             document.documentElement.style.setProperty('--app-font-family', fontFamily);
 
-            // 2. Sinkronkan Warna Background Aplikasi dari Dashboard
             const savedAppBg = localStorage.getItem('app_custom_bg_color');
             if (savedAppBg) {
                 document.documentElement.style.setProperty('--app-bg-color', savedAppBg);
             }
 
-            // 3. Sinkronkan Brand Name & Teks Sambutan
             const savedBrand = localStorage.getItem('app_brand_name') || "PHOTOBOOTH STUDIO";
             const brandEl = document.getElementById('brandNameDisplay');
             if (brandEl) brandEl.innerText = savedBrand.toUpperCase();
@@ -67,7 +69,6 @@
             const welcomeEl = document.getElementById('welcomeWatermark');
             if (welcomeEl) welcomeEl.innerText = savedWelcome;
 
-            // 4. Sinkronkan Harga Paket & Cetak Ekstra Secara Presisi
             const p1 = localStorage.getItem('pkg1_price') || 15000;
             const p2 = localStorage.getItem('pkg2_price') || 25000;
             const p3 = localStorage.getItem('pkg3_price') || 10000;
@@ -84,13 +85,13 @@
             if (elEx) elEx.innerText = parseInt(pExtra).toLocaleString('id-ID');
         }
 
-        // Pantau Perubahan Real-Time via Event Storage
         window.addEventListener('storage', syncSettingsFromDashboard);
         window.addEventListener('DOMContentLoaded', syncSettingsFromDashboard);
     </script>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 max-w-xl mx-auto">
 
+    <!-- HEADER KIOSK & SESSION TIMER -->
     <header class="glass-card p-3 rounded-2xl flex justify-between items-center mb-4 sticky top-2 z-50">
         <div>
             <h1 id="brandNameDisplay" class="font-extrabold text-xs text-white tracking-wider">PHOTOBOOTH STUDIO</h1>
@@ -107,6 +108,7 @@
         </a>
     </header>
 
+    <!-- ================= STEP 1: WELCOME & PILIH PAKET ================= -->
     <div id="step-welcome" class="step-section active flex-col space-y-4 my-auto">
         <div class="text-center space-y-1">
             <span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
@@ -143,6 +145,7 @@
         </div>
     </div>
 
+    <!-- ================= STEP 2: METODE PEMBAYARAN ================= -->
     <div id="step-payment" class="step-section flex-col space-y-4 my-auto">
         <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
             <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i>Pilih Metode Pembayaran</h3>
@@ -173,6 +176,7 @@
         </div>
     </div>
 
+    <!-- ================= STEP 3: STUDIO KAMERA ================= -->
     <div id="step-booth" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <div class="flex justify-between items-center text-xs">
@@ -217,11 +221,13 @@
         </div>
     </div>
 
+    <!-- ================= STEP 4: EDITOR FOTO REALTIME & PILIH MULTI-FRAME DASHBOARD ================= -->
     <div id="step-print" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
-            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet Realtime</h3>
+            <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Pilih Frame</h3>
             
-            <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
+            <!-- LIVE PREVIEW SHEET DENGAN OVERLAY FRAME -->
+            <div class="relative w-full h-56 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
                 <img id="dashboardCustomFrameOverlay" class="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none hidden" alt="Frame Dashboard">
                 
                 <div id="livePhotosheetPreview" class="w-full h-full p-2 flex flex-col justify-around items-center filter-none relative z-0">
@@ -231,6 +237,15 @@
                 <div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-sm text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-20 pointer-events-none px-2"></div>
             </div>
 
+            <!-- MODUL PILIHAN FRAME DARI GALERI DASHBOARD -->
+            <div class="space-y-1">
+                <label class="text-[10px] text-slate-400 font-bold block"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame dari Galeri Dashboard:</label>
+                <div id="kioskFrameSelectorGallery" class="flex gap-2 overflow-x-auto py-1.5 px-1 bg-slate-900 rounded-xl border border-slate-800 min-h-[50px]">
+                    <!-- Javascript merender opsi frame di sini -->
+                </div>
+            </div>
+
+            <!-- KONTROL EDITOR REALTIME -->
             <div class="space-y-2 text-[10px]">
                 <div>
                     <label class="text-slate-400 block mb-1 font-bold">Tambah Teks Kustom pada Foto:</label>
@@ -248,9 +263,10 @@
                 </div>
             </div>
 
+            <!-- QR Code Soft File Cloudinary -->
             <div class="glass-card p-3 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-2">
                 <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
-                <div id="cloudinaryQrCode" class="w-28 h-28 bg-white mx-auto p-1.5 rounded-lg flex items-center justify-center"></div>
+                <div id="cloudinaryQrCode" class="w-24 h-24 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div>
                 <p class="text-[8px] text-slate-500 font-mono">Cloud: risakil1 | Preset: risakil</p>
             </div>
 
@@ -265,8 +281,8 @@
         </div>
     </div>
 
+    <!-- SCRIPT LOGIKA KIOSK -->
     <script>
-        // METADATA CLOUD USER TERKUNCI
         const CLOUD_NAME = "risakil1";
         const PRESET_NAME = "risakil";
 
@@ -274,7 +290,7 @@
         let retakesLeft = 3;
         let isMirror = true;
         let isPortrait = false;
-        let captureMode = 'auto'; // Default diaktifkan otomatis sesuai permintaan
+        let captureMode = 'auto';
         let timerInterval = null;
         let autoCaptureTimer = null;
         let kioskStream = null;
@@ -299,7 +315,6 @@
             currentPackage = { name, price: finalPrice, shots, prints };
             document.getElementById('payAmountDisplay').innerText = `Rp ${finalPrice.toLocaleString('id-ID')}`;
             
-            // Generate QRIS Pembayaran
             const qrisContainer = document.getElementById('qrisContainer');
             qrisContainer.innerHTML = "";
             new QRCode(qrisContainer, {
@@ -371,11 +386,7 @@
             try {
                 kioskStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
                 videoEl.srcObject = kioskStream;
-                
-                // Jika mode otomatis aktif, mulai sekuens auto capture secara otomatis
-                if (captureMode === 'auto') {
-                    startAutoCaptureSequence();
-                }
+                if (captureMode === 'auto') startAutoCaptureSequence();
             } catch (err) {
                 alert("Kamera tidak dapat diakses: " + err.message);
             }
@@ -386,9 +397,7 @@
                 kioskStream.getTracks().forEach(track => track.stop());
                 kioskStream = null;
             }
-            if (autoCaptureTimer) {
-                clearInterval(autoCaptureTimer);
-            }
+            if (autoCaptureTimer) clearInterval(autoCaptureTimer);
         }
 
         function toggleMirror() {
@@ -413,11 +422,8 @@
         function toggleCaptureMode() {
             captureMode = captureMode === 'manual' ? 'auto' : 'manual';
             document.getElementById('captureModeStatus').innerText = captureMode === 'manual' ? 'Manual' : 'Otomatis';
-            
-            if (captureMode === 'auto') {
-                if (capturedPhotos.length < currentPackage.shots) {
-                    startAutoCaptureSequence();
-                }
+            if (captureMode === 'auto' && capturedPhotos.length < currentPackage.shots) {
+                startAutoCaptureSequence();
             } else {
                 if (autoCaptureTimer) clearInterval(autoCaptureTimer);
             }
@@ -442,7 +448,6 @@
                     capturePhotoData();
                     setTimeout(() => {
                         overlay.classList.add('hidden');
-                        // Lanjutkan foto berikutnya secara otomatis jika belum penuh & mode auto aktif
                         if (captureMode === 'auto' && capturedPhotos.length < currentPackage.shots) {
                             setTimeout(startAutoCaptureSequence, 1200);
                         }
@@ -499,7 +504,6 @@
             }
         }
 
-        // RENDER GALERI INSTAN + HAPUS FOTO SPESIFIK
         function renderInstantGallery() {
             const gallery = document.getElementById('instantPhotoGallery');
             if (capturedPhotos.length === 0) {
@@ -528,7 +532,6 @@
                 document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
                 alert(`Foto #${index + 1} dihapus. Sisa retake: ${retakesLeft}x`);
                 
-                // Lanjutkan auto capture jika mode auto aktif
                 if (captureMode === 'auto' && capturedPhotos.length < currentPackage.shots) {
                     setTimeout(startAutoCaptureSequence, 1500);
                 }
@@ -547,12 +550,11 @@
             document.getElementById('sessionTimerContainer').classList.add('hidden');
             stopKioskCamera();
             renderEditorPhotos();
-            loadDashboardFrameOverlay();
+            loadDashboardFramesSelector();
             generateCloudinaryQR();
             goToStep('print');
         }
 
-        // PREVIEW EDITOR + FRAME PNG DASHBOARD
         function renderEditorPhotos() {
             const container = document.getElementById('editorPhotosContainer');
             container.innerHTML = capturedPhotos.map(src => `
@@ -560,11 +562,36 @@
             `).join('');
         }
 
-        function loadDashboardFrameOverlay() {
-            const savedFrame = localStorage.getItem('custom_frame_png');
+        // LOAD DAFTAR PILIHAN FRAME DARI GALERI DASHBOARD
+        function loadDashboardFramesSelector() {
+            const selectorContainer = document.getElementById('kioskFrameSelectorGallery');
+            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery') || '[]');
+            let activeFrame = localStorage.getItem('custom_frame_png');
+
+            if (frames.length === 0) {
+                selectorContainer.innerHTML = `<span class="text-[9px] text-slate-500 italic py-2 px-2">Belum ada frame di galeri dashboard.</span>`;
+                return;
+            }
+
+            selectorContainer.innerHTML = frames.map((src, idx) => `
+                <div onclick="selectKioskFrame('${src}')" class="relative cursor-pointer flex-shrink-0 p-1 bg-slate-950 rounded-lg border ${src === activeFrame ? 'border-indigo-500 ring-2 ring-indigo-500/50' : 'border-slate-800'}">
+                    <img src="${src}" class="w-12 h-10 object-contain rounded">
+                    <span class="text-[7px] text-slate-400 block text-center">#${idx + 1}</span>
+                </div>
+            `).join('');
+
+            applyFrameOverlay(activeFrame);
+        }
+
+        function selectKioskFrame(src) {
+            localStorage.setItem('custom_frame_png', src);
+            loadDashboardFramesSelector();
+        }
+
+        function applyFrameOverlay(src) {
             const frameImg = document.getElementById('dashboardCustomFrameOverlay');
-            if (savedFrame) {
-                frameImg.src = savedFrame;
+            if (src) {
+                frameImg.src = src;
                 frameImg.classList.remove('hidden');
             } else {
                 frameImg.classList.add('hidden');
@@ -585,7 +612,7 @@
             const qrBox = document.getElementById('cloudinaryQrCode');
             qrBox.innerHTML = "";
             const softFileUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v1/samples/landscapes/beach-boat.jpg`;
-            new QRCode(qrBox, { text: softFileUrl, width: 100, height: 100 });
+            new QRCode(qrBox, { text: softFileUrl, width: 90, height: 90 });
         }
 
         function executePrint() {
