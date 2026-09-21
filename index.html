@@ -35,7 +35,7 @@
         .cam-portrait { height: 320px; width: 240px; margin: 0 auto; }
         .cam-landscape { height: 220px; width: 100%; }
 
-        /* Filter HD & Efek Dasar Real-Time */
+        /* Filter HD & Efek Real-Time */
         .filter-none { filter: none; }
         .filter-grayscale { filter: grayscale(100%) contrast(110%); }
         .filter-sepia { filter: sepia(85%) contrast(105%); }
@@ -182,7 +182,7 @@
         </div>
     </div>
 
-    <!-- STEP 3: STUDIO KAMERA & GALERI FRAME -->
+    <!-- STEP 3: STUDIO KAMERA & PEMILIHAN FRAME DI AWAL -->
     <div id="step-booth" class="step-section flex-col space-y-2.5 my-auto">
         <div class="glass-card p-3 rounded-2xl space-y-2.5">
             <div class="flex justify-between items-center text-xs">
@@ -211,14 +211,14 @@
                 </div>
             </div>
 
-            <!-- GALERI FRAME PRO-LEVEL -->
+            <!-- PILIHAN FRAME DI AWAL (BISA PILIH FRAME ATAU TANPA FRAME) -->
             <div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
                 <div class="flex justify-between items-center text-[10px]">
-                    <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Galeri Frame Pro (Sinkron Dashboard):</span>
-                    <span class="text-slate-400 text-[9px]">Geser ke samping 👉</span>
+                    <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame / Bingkai Sesi Ini:</span>
+                    <span class="text-slate-400 text-[9px]">Geser 👉</span>
                 </div>
                 <div id="kioskLiveFrameGallery" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[58px] max-h-20 items-center">
-                    <div class="text-[9px] text-slate-500 italic">Memuat frame dari dashboard...</div>
+                    <div class="text-[9px] text-slate-500 italic">Memuat frame...</div>
                 </div>
             </div>
 
@@ -237,18 +237,17 @@
                 <i class="fa-solid fa-camera"></i> <span id="snapBtnText">Ambil Foto (Hitung Mundur 3s)</span>
             </button>
 
-            <!-- TOMBOL MANUAL KE EDITOR DENGAN JEDA WAKTU AMAN -->
             <button onclick="finishSessionEarly()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md">
                 <i class="fa-solid fa-check-circle"></i> Selesai Foto & Lanjut Ke Editor <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>
 
-    <!-- STEP 4: EDITOR FOTO, FILTER HD REAL-TIME, 10+ TEKS, & TIMER 1 MENIT -->
+    <!-- STEP 4: EDITOR FOTO (HANYA EFEK, URUTAN & TEKS) & TIMER 1 MENIT -->
     <div id="step-print" class="step-section flex-col space-y-3 my-auto">
         <div class="glass-card p-4 rounded-2xl space-y-3">
             <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Photosheet & Filter HD</h3>
+                <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-1.5"></i>Editor Efek & Teks Photosheet</h3>
                 <div class="bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center">
                     <span class="text-[7px] text-amber-300 block font-bold leading-none">WAKTU EDIT</span>
                     <span id="editorCountdownTimer" class="text-xs font-black text-amber-400 font-mono">01:00</span>
@@ -299,14 +298,6 @@
                 <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Atau ketik teks kustom Anda sendiri..." class="w-full mt-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs">
             </div>
 
-            <div class="space-y-1">
-                <div class="flex justify-between items-center text-[10px]">
-                    <label class="text-slate-400 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Ganti Frame di Editor:</label>
-                    <span id="orientationBadge" class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded">Format: Landscape</span>
-                </div>
-                <div id="kioskFrameSelectorGallery" class="flex gap-2 overflow-x-auto py-1.5 px-1 bg-slate-900 rounded-xl border border-slate-800 min-h-[60px] max-h-24"></div>
-            </div>
-
             <div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1">
                 <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i>Scan QR Soft File (Foto + GIF Video)</span>
                 <div id="cloudinaryQrCode" class="w-16 h-16 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div>
@@ -338,7 +329,7 @@
         let editorTimerInterval = null;
         let kioskStream = null;
         let capturedPhotos = [];
-        let selectedFrameSrc = '';
+        let selectedFrameSrc = ''; // Kosong berarti tanpa frame / polos
         let activeFilterClass = 'filter-none';
 
         function goToStep(stepName) {
@@ -591,14 +582,7 @@
         }
 
         function getDashboardFramesList() {
-            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery'));
-            if (!frames || frames.length === 0) {
-                frames = [
-                    { id: 1, name: "Minimalist Black", url: "" },
-                    { id: 2, name: "Cute Pink", url: "" },
-                    { id: 3, name: "Neon Cyber", url: "" }
-                ];
-            }
+            let frames = JSON.parse(localStorage.getItem('saved_frames_gallery')) || [];
             return frames.slice(0, 30);
         }
 
@@ -606,49 +590,36 @@
             const container = document.getElementById('kioskLiveFrameGallery');
             const frames = getDashboardFramesList();
 
-            if (frames.length === 0) {
-                container.innerHTML = `<div class="text-[9px] text-slate-500 italic">Belum ada frame diunggah di dashboard.</div>`;
-                return;
-            }
-
-            if (!selectedFrameSrc && frames[0].url) {
-                selectedFrameSrc = frames[0].url;
-            }
-
-            container.innerHTML = frames.map((f, idx) => `
-                <div onclick="selectLiveFrame('${f.url || ''}', this)" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border-2 ${selectedFrameSrc === f.url ? 'border-indigo-500 ring-2 ring-indigo-500/40' : 'border-slate-700'} overflow-hidden relative flex items-center justify-center transition">
-                    ${f.url ? `<img src="${f.url}" class="w-full h-full object-cover">` : `<span class="text-[8px] text-white font-bold text-center px-0.5">${f.name}</span>`}
+            let html = `
+                <div onclick="selectLiveFrame('', this)" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border-2 ${selectedFrameSrc === '' ? 'border-emerald-500 ring-2 ring-emerald-500/40' : 'border-slate-700'} flex flex-col items-center justify-center transition">
+                    <i class="fa-solid fa-ban text-xs text-slate-400 mb-0.5"></i>
+                    <span class="text-[7px] text-white font-bold text-center">Tanpa Frame</span>
                 </div>
-            `).join('');
-            
-            loadDashboardFramesSelectorForPrint();
+            `;
+
+            if (frames.length > 0) {
+                html += frames.map((f, idx) => `
+                    <div onclick="selectLiveFrame('${f.url}', this)" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border-2 ${selectedFrameSrc === f.url ? 'border-indigo-500 ring-2 ring-indigo-500/40' : 'border-slate-700'} overflow-hidden relative flex items-center justify-center transition">
+                        <img src="${f.url}" class="w-full h-full object-cover">
+                    </div>
+                `).join('');
+            }
+
+            container.innerHTML = html;
         }
 
         function selectLiveFrame(url, el) {
             selectedFrameSrc = url;
             document.querySelectorAll('#kioskLiveFrameGallery > div').forEach(d => {
-                d.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-500/40');
+                d.classList.remove('border-indigo-500', 'border-emerald-500', 'ring-2', 'ring-indigo-500/40', 'ring-emerald-500/40');
                 d.classList.add('border-slate-700');
             });
             el.classList.remove('border-slate-700');
-            el.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500/40');
-        }
-
-        function loadDashboardFramesSelectorForPrint() {
-            const selectorContainer = document.getElementById('kioskFrameSelectorGallery');
-            const frames = getDashboardFramesList();
-
-            selectorContainer.innerHTML = frames.map((f) => `
-                <div onclick="selectFrameForPrint('${f.url || ''}')" class="cursor-pointer flex-shrink-0 w-12 h-14 bg-slate-800 rounded-lg border ${selectedFrameSrc === f.url ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-slate-700'} overflow-hidden relative flex items-center justify-center">
-                    ${f.url ? `<img src="${f.url}" class="w-full h-full object-cover">` : `<span class="text-[8px] text-white font-bold text-center">${f.name}</span>`}
-                </div>
-            `).join('');
-        }
-
-        function selectFrameForPrint(url) {
-            selectedFrameSrc = url;
-            updateCompositeCanvas();
-            loadDashboardFramesSelectorForPrint();
+            if (url === '') {
+                el.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/40');
+            } else {
+                el.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500/40');
+            }
         }
 
         function finishSessionEarly() {
@@ -660,8 +631,11 @@
             document.getElementById('sessionTimerContainer').classList.add('hidden');
             stopKioskCamera();
             renderSlotMovers();
-            loadDashboardFramesSelectorForPrint();
-            updateCompositeCanvas();
+            
+            setTimeout(() => {
+                updateCompositeCanvas();
+            }, 100);
+
             generateCloudinaryQR();
             goToStep('print');
         }
@@ -740,7 +714,6 @@
                 img.crossOrigin = "anonymous";
                 img.onload = () => {
                     ctx.save();
-                    // Terapkan filter HD secara real-time pada canvas
                     if (activeFilterClass === 'filter-grayscale') ctx.filter = 'grayscale(100%) contrast(110%)';
                     else if (activeFilterClass === 'filter-sepia') ctx.filter = 'sepia(85%) contrast(105%)';
                     else if (activeFilterClass === 'filter-vintage') ctx.filter = 'contrast(125%) brightness(95%) sepia(35%)';
