@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photobooth Studio - Admin Pro Dashboard</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js untuk Grafik Insight -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -22,7 +19,6 @@
         .nav-item.active .nav-icon { background: var(--primary-bg); color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
         .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
-    <!-- KEAMANAN PIN ADMIN -->
     <script>
         (function() {
             if (sessionStorage.getItem('admin_authenticated') !== 'true') {
@@ -40,7 +36,6 @@
 </head>
 <body class="min-h-screen p-4 max-w-2xl mx-auto">
 
-    <!-- HEADER DASHBOARD PRO -->
     <div class="glass-card p-4 rounded-2xl mb-4 flex justify-between items-center">
         <div>
             <h1 class="font-extrabold text-sm text-white tracking-wide" id="brandTitle">PHOTOBOOTH STUDIO PRO</h1>
@@ -53,7 +48,6 @@
         </a>
     </div>
 
-    <!-- ================= TAB 1: ANALITIK & INSIGHT PEMBUKUAN ================= -->
     <div id="section-insight" class="tab-section active space-y-4">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div class="glass-card p-3 rounded-xl border border-indigo-500/20">
@@ -82,7 +76,6 @@
         </div>
     </div>
 
-    <!-- ================= TAB 2: MANAGEMENT CABANG & PROFIT SHARING ================= -->
     <div id="section-cabang" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-store text-emerald-400 mr-2"></i>Manajemen Cabang / Vendor Partner</h2>
@@ -111,10 +104,8 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: TAMPILAN, 10+ PRESET HOMESCREEN & GALERI FRAME 30 FRAME ================= -->
     <div id="section-tampilan" class="tab-section space-y-4">
         
-        <!-- PENGATURAN HOMESCREEN -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-mug-hot text-amber-500 mr-2"></i>Pilihan & Desain Homescreen Kiosk (10+ Preset & Custom Foto)</h2>
             <p class="text-xs text-slate-400">Pilih dari 10+ preset tema basic/modern, atau upload foto Anda sendiri sebagai latar belakang homescreen kiosk!</p>
@@ -197,12 +188,11 @@
             </button>
         </div>
 
-        <!-- GALERI PENYIMPANAN FRAME PNG (TRANSPARAN) -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-base font-bold text-white"><i class="fa-solid fa-images text-indigo-400 mr-2"></i>Galeri Penyimpanan Frame PNG (<span id="frameCountBadge">0</span>/30)</h2>
             </div>
-            <p class="text-xs text-slate-400"><b>Catatan Penting:</b> Upload file <b class="text-indigo-400">PNG Transparan (Lubang Foto Bolong)</b> agar hasil foto asli pelanggan muncul sempurna di dalam bingkai tanpa tertutup warna putih.</p>
+            <p class="text-xs text-slate-400"><b>Catatan Penting:</b> Upload file <b class="text-indigo-400">PNG Transparan (Lubang Foto Bolong)</b> agar hasil foto asli dan live preview kamera menyatu sempurna.</p>
 
             <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
                 <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
@@ -219,7 +209,6 @@
             </div>
         </div>
 
-        <!-- REKENING BANK / QRIS -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i>Rekening Bank & e-Wallet (QRIS Payment)</h2>
             <div class="grid grid-cols-2 gap-2">
@@ -238,7 +227,6 @@
         </div>
     </div>
 
-    <!-- ================= TAB 4: KONTROL KIOSK & HARDWARE ================= -->
     <div id="section-hardware" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-wand-magic-sparkles text-pink-400 mr-2"></i>AI Studio & Kontrol Kiosk (On/Off)</h2>
@@ -287,7 +275,6 @@
         </div>
     </div>
 
-    <!-- ================= TAB 5: TARIF, SESI & CLOUD ================= -->
     <div id="section-tarif" class="tab-section space-y-4">
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <h2 class="text-base font-bold text-white"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i>Tarif, Timer & Cloud Storage</h2>
@@ -343,7 +330,6 @@
         </div>
     </div>
 
-    <!-- NAVIGATION BOTTOM BAR -->
     <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass-card border-t border-slate-800 px-2 py-2 flex justify-around items-center z-50">
         <button onclick="switchTab('insight')" id="nav-insight" class="nav-item active flex flex-col items-center gap-1 text-[9px] font-bold text-slate-400">
             <div class="nav-icon w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 text-slate-300"><i class="fa-solid fa-chart-pie"></i></div>
@@ -367,7 +353,6 @@
         </button>
     </nav>
 
-    <!-- SCRIPT LOGIKA DASHBOARD -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
