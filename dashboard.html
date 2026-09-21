@@ -197,16 +197,16 @@
             </button>
         </div>
 
-        <!-- GALERI PENYIMPANAN FRAME (HP-STYLE HINGGA 30 FRAME) -->
+        <!-- GALERI PENYIMPANAN FRAME PNG (TRANSPARAN) -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-base font-bold text-white"><i class="fa-solid fa-images text-indigo-400 mr-2"></i>Galeri Penyimpanan Frame PNG (<span id="frameCountBadge">0</span>/30)</h2>
             </div>
-            <p class="text-xs text-slate-400">Upload frame PNG transparan Anda di sini. Mendukung hingga 30 frame agar langsung tersinkronisasi ke Kiosk.</p>
+            <p class="text-xs text-slate-400"><b>Catatan Penting:</b> Upload file <b class="text-indigo-400">PNG Transparan (Lubang Foto Bolong)</b> agar hasil foto asli pelanggan muncul sempurna di dalam bingkai tanpa tertutup warna putih.</p>
 
             <div class="border border-dashed border-slate-700 p-4 rounded-xl text-center space-y-2 bg-slate-900/50">
                 <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400"></i>
-                <span class="text-xs font-bold text-slate-300 block">Tambah / Upload Frame PNG Baru</span>
+                <span class="text-xs font-bold text-slate-300 block">Tambah / Upload Frame PNG Transparan Baru</span>
                 <input type="file" id="frameFileInput" accept="image/png" class="hidden" onchange="handleFrameUpload(event)">
                 <button onclick="document.getElementById('frameFileInput').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
                     Pilih File PNG Transparan
@@ -377,13 +377,11 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Sinkronisasi Input Warna Picker & Text
         const colorPicker = document.getElementById('appBgColorPicker');
         const colorText = document.getElementById('appBgColorText');
         colorPicker.addEventListener('input', (e) => colorText.value = e.target.value);
         colorText.addEventListener('input', (e) => colorPicker.value = e.target.value);
 
-        // Muat Data Tersimpan saat Halaman Dimuat
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('welcomeMsgInput').value = localStorage.getItem('app_welcome_msg') || 'Welcome to Photobooth Studio';
             document.getElementById('kioskFontSelect').value = localStorage.getItem('app_kiosk_font') || 'Inter';
@@ -467,7 +465,7 @@
                     frames.push({ id: Date.now(), name: `Frame ${frames.length + 1}`, url: e.target.result });
                     localStorage.setItem('saved_frames_gallery', JSON.stringify(frames));
                     renderFrameGallery();
-                    alert("✓ Frame PNG berhasil di-upload ke galeri & langsung sinkron ke Kiosk!");
+                    alert("✓ Frame PNG transparan berhasil di-upload ke galeri & langsung sinkron ke Kiosk!");
                 };
                 reader.readAsDataURL(file);
             }
@@ -532,7 +530,6 @@
             alert("✓ Tarif & Pengaturan Cloud berhasil disimpan!");
         }
 
-        // Grafik Insight Chart.js
         function initChart() {
             const ctx = document.getElementById('analyticsChart').getContext('2d');
             new Chart(ctx, {
