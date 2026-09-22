@@ -3,479 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Photobooth Kiosk Pro - Web Edition</title>
+    <title>Photobooth Studio - Kiosk Pro Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.0.0/qrcode.min.js"></script>
     <style>
-        body { background-color: #090d16; font-family: 'Inter', sans-serif; color: white; overflow-x: hidden; }
-        .glass-box { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .step-panel { display: none; }
-        .step-panel.active { display: flex; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        :root {
+            --primary-color: #6366f1;
+            --app-bg-color: #0f172a;
+        }
+        body {
+            background-color: var(--app-bg-color);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            color: white;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .step-section { display: none; }
+        .step-section.active { display: flex; }
+        .btn-theme { background-color: var(--primary-color); color: white; transition: all 0.2s; }
+        .cam-portrait { height: 340px; width: 240px; margin: 0 auto; }
+        .cam-landscape { height: 240px; width: 100%; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-3 md:p-6">
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-4">
 
     <!-- HEADER -->
-    <header class="glass-box px-4 py-3 rounded-2xl flex justify-between items-center max-w-4xl mx-w-full w-full mx-auto mb-3 shadow-xl">
+    <header class="glass-card px-4 py-2.5 rounded-2xl flex justify-between items-center mb-3 sticky top-2 z-50">
         <div>
-            <h1 id="appTitleDisplay" class="font-extrabold text-sm md:text-base tracking-wider uppercase text-indigo-400">PHOTOBOOTH STUDIO</h1>
+            <h1 id="brandNameDisplay" class="font-extrabold text-base md:text-lg tracking-wider uppercase">PHOTOBOOTH STUDIO</h1>
             <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Kiosk Engine Online Ready
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                KIOSK ONLINE &bull; AI FRAME READY
             </p>
         </div>
-        <button onclick="toggleAdminModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700 text-slate-300 flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-gear text-indigo-400"></i> <span>Admin</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleAdminDashboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-[11px] font-bold rounded-xl border border-slate-700 text-slate-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-gear"><span>Admin</span></i>
+            </button>
+        </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
+    <!-- MAIN -->
     <main class="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center">
 
-        <!-- STEP 1: PILIH PAKET (DIJAMIN TIDAK STUCK) -->
-        <section id="panel-package" class="step-panel active flex-col space-y-4 my-auto">
+        <!-- STEP 1: WELCOME / PAKET -->
+        <section id="step-welcome" class="step-section active flex-col space-y-3 my-auto">
             <div class="text-center space-y-1">
-                <span class="text-[10px] font-bold tracking-widest text-indigo-300 uppercase bg-indigo-950/80 border border-indigo-500/30 px-3 py-1 rounded-full inline-block">
-                    Pilih Paket Foto Anda
+                <span class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
+                    Welcome to Photobooth
                 </span>
-                <h2 class="text-2xl md:text-3xl font-black">Mulai Sesi Photobooth</h2>
-                <p class="text-xs text-slate-400">Sentuh paket di bawah untuk melanjutkan ke pembayaran</p>
+                <h2 class="text-2xl md:text-3xl font-black">Pilih Paket Sesi Foto</h2>
+                <p class="text-xs text-slate-400">Sentuh salah satu paket untuk memulai</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div onclick="selectPackage('Paket Standard Strip', 15000, 4)" class="glass-box p-4 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <div onclick="selectPackage('Paket 1 Strip', 'pkg1_price', 15000, 4, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <div class="text-indigo-400 font-bold text-xs uppercase">Standard</div>
-                        <h3 class="font-black text-white text-lg mt-1 group-hover:text-indigo-300">4 Foto Strip</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">4x Pose &bull; 1 Lembar Cetak Strip &bull; QR Cloud</p>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket 1 Strip (4 Foto)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">4 Foto &bull; 1 Cetak Strip &bull; Soft File</p>
                     </div>
-                    <div class="mt-6 flex justify-between items-center border-t border-slate-800 pt-3">
-                        <span class="text-[10px] text-slate-500">Durasi: ±3 Menit</span>
-                        <span class="text-base font-bold text-emerald-400 font-mono">Rp 15.000</span>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-mono">Standard</span>
+                        <span id="priceDisplayPkg1" class="text-base font-bold text-emerald-400 font-mono">Rp 15.000</span>
                     </div>
                 </div>
-
-                <div onclick="selectPackage('Paket Double Strip', 25000, 6)" class="glass-box p-4 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+                <div onclick="selectPackage('Paket Dual Strip', 'pkg2_price', 25000, 6, 2)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <div class="text-indigo-400 font-bold text-xs uppercase">Double Pro</div>
-                        <h3 class="font-black text-white text-lg mt-1 group-hover:text-indigo-300">6 Foto Strip</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">6x Pose &bull; 2 Lembar Cetak Strip &bull; QR Cloud</p>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket Dual Strip (6 Foto)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">6 Foto &bull; 2 Cetak Strip &bull; Soft File</p>
                     </div>
-                    <div class="mt-6 flex justify-between items-center border-t border-slate-800 pt-3">
-                        <span class="text-[10px] text-slate-500">Durasi: ±5 Menit</span>
-                        <span class="text-base font-bold text-emerald-400 font-mono">Rp 25.000</span>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-mono">Double</span>
+                        <span id="priceDisplayPkg2" class="text-base font-bold text-emerald-400 font-mono">Rp 25.000</span>
                     </div>
                 </div>
-
-                <div onclick="selectPackage('Paket Express Mini', 10000, 2)" class="glass-box p-4 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+                <div onclick="selectPackage('Paket Mini', 'pkg3_price', 10000, 2, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <div class="text-indigo-400 font-bold text-xs uppercase">Express</div>
-                        <h3 class="font-black text-white text-lg mt-1 group-hover:text-indigo-300">2 Foto Mini</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">2x Pose &bull; 1 Lembar Cetak Mini &bull; QR Cloud</p>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket Mini (2 Foto)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">2 Foto &bull; 1 Cetak Mini &bull; Soft File</p>
                     </div>
-                    <div class="mt-6 flex justify-between items-center border-t border-slate-800 pt-3">
-                        <span class="text-[10px] text-slate-500">Durasi: ±2 Menit</span>
-                        <span class="text-base font-bold text-emerald-400 font-mono">Rp 10.000</span>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-500 font-mono">Express</span>
+                        <span id="priceDisplayPkg3" class="text-base font-bold text-emerald-400 font-mono">Rp 10.000</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- STEP 2: PEMBAYARAN QRIS / SIMULASI -->
-        <section id="panel-payment" class="step-panel flex-col space-y-3 my-auto">
-            <div class="glass-box p-5 rounded-2xl space-y-4 text-center max-w-sm mx-auto w-full shadow-2xl">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-qrcode mr-2 text-indigo-400"></i> Scan QRIS Pembayaran</h3>
-                <div id="qrisCodeBox" class="w-44 h-44 bg-white mx-auto rounded-xl flex items-center justify-center p-2 shadow-inner"></div>
+        <!-- STEP 2: PEMBAYARAN -->
+        <section id="step-payment" class="step-section flex-col space-y-3 my-auto">
+            <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i> Konfirmasi Pembayaran</h3>
+                <div id="qrisContainer" class="w-40 h-40 bg-white mx-auto rounded-xl flex items-center justify-center p-2"></div>
                 <div>
-                    <span class="text-[11px] text-slate-400">Total Pembayaran:</span>
-                    <div id="priceDisplay" class="text-xl font-black text-emerald-400 font-mono">Rp 15.000</div>
+                    <span class="text-[11px] text-slate-400">Total Tagihan:</span>
+                    <div id="payAmountDisplay" class="text-xl font-black text-emerald-400 font-mono">Rp 15.000</div>
                 </div>
-                <button onclick="proceedToBooth()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg transition">
-                    Konfirmasi & Mulai Kamera <i class="fa-solid fa-arrow-right ml-1"></i>
+                <button onclick="confirmPaymentAndStartSession()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl shadow-lg">
+                    Pembayaran Selesai & Mulai Foto <i class="fa-solid fa-arrow-right ml-1"></i>
                 </button>
             </div>
         </section>
 
-        <!-- STEP 3: LIVE CAMERA & PHOTO SESSION -->
-        <section id="panel-booth" class="step-panel flex-col space-y-3 my-auto">
-            <div class="glass-box p-3.5 rounded-2xl space-y-3">
+        <!-- STEP 3: KIOSK BOOTH (TANPA BURAM SAAT TIMER) -->
+        <section id="step-booth" class="step-section flex-col space-y-2.5 my-auto">
+            <div class="glass-card p-3 rounded-2xl space-y-2.5">
                 <div class="flex justify-between items-center text-xs">
-                    <span id="shotIndicator" class="text-indigo-300 font-bold">Foto 0 dari 4</span>
-                    <span class="text-emerald-400 font-mono font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded text-[10px] border border-emerald-500/30">Kamera Aktif</span>
+                    <span id="shotCounter" class="text-slate-400 font-bold">Foto 0 dari 4</span>
+                    <span class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded text-[11px]">Sesi Aktif</span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <div class="flex md:flex-col gap-2 justify-center">
-                        <button onclick="toggleMirrorMode()" class="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl font-bold text-slate-300 text-xs flex items-center justify-center gap-2 flex-1">
-                            <i class="fa-solid fa-arrows-left-right text-indigo-400"></i> <span id="mirrorText">Mirror: ON</span>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5">
+                    <div class="flex md:flex-col gap-1.5 justify-center">
+                        <button onclick="toggleMirror()" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg font-bold text-slate-300 text-xs flex items-center justify-center gap-1.5 flex-1">
+                            <i class="fa-solid fa-arrows-left-right"></i> <span id="mirrorStatus">Mirror: ON</span>
                         </button>
-                        <button onclick="switchCameraDevice()" class="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl font-bold text-slate-300 text-xs flex items-center justify-center gap-2 flex-1">
-                            <i class="fa-solid fa-camera-rotate text-indigo-400"></i> <span>Ganti Kamera</span>
+                        <button onclick="toggleOrientation()" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg font-bold text-slate-300 text-xs flex items-center justify-center gap-1.5 flex-1">
+                            <i class="fa-solid fa-mobile-screen"></i> <span id="orientationStatus">Landscape</span>
                         </button>
                     </div>
 
-                    <!-- KAMERA VIEWPORT -->
-                    <div class="md:col-span-3 bg-black rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 h-[320px]">
-                        <video id="liveCameraFeed" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover"></video>
-                        <img id="activeFrameOverlay" class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 opacity-95" src="">
-                        <canvas id="hiddenCaptureCanvas" class="hidden"></canvas>
+                    <!-- KOTAK KAMERA BERSIH TANPA BLUR/BURAM -->
+                    <div id="camerabox" class="md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-landscape">
+                        <video id="kioskCameraStream" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover bg-black"></video>
+                        <img id="activeStaticFrameOverlay" class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 opacity-95" src="">
+                        <canvas id="photoCanvas" class="hidden"></canvas>
                         
-                        <!-- HITUNG MUNDUR -->
-                        <div id="countdownBox" class="absolute inset-0 flex items-center justify-center text-8xl font-black text-white bg-black/50 backdrop-blur-xs hidden z-30">
+                        <!-- Hitung Mundur Tanpa Background Blur / Jernih di atas kamera -->
+                        <div id="countdownOverlay" class="absolute inset-0 flex items-center justify-center text-7xl font-black text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] hidden z-30">
                             3
                         </div>
                     </div>
                 </div>
 
-                <!-- PILIHAN FRAME & AI FRAME -->
-                <div class="space-y-1 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                <!-- GALERI FRAME KIOSK TERHUBUNG FULL -->
+                <div class="space-y-1 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
                     <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-indigo-300 font-bold"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Pilih Frame / AI Template</span>
+                        <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame & AI Frame Kiosk</span>
                     </div>
-                    <div id="frameGalleryScroll" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[60px] items-center hide-scroll"></div>
+                    <div id="kioskLiveFrameGallery" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[58px] items-center hide-scrollbar"></div>
                 </div>
 
-                <!-- MINI GALERI FOTO SESI -->
                 <div class="space-y-1">
-                    <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Foto Terkumpul</span>
-                    <div id="capturedGalleryPreview" class="flex gap-2 overflow-x-auto py-1 px-1 h-[60px] hide-scroll bg-slate-900/40 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-slate-500 italic py-3 px-2">Belum ada foto diambil</div>
+                    <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Galeri Foto</span>
+                    <div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 px-1 h-[58px] hide-scrollbar bg-slate-900/40 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto</div>
                     </div>
                 </div>
 
                 <div class="pt-1">
-                    <button id="triggerCaptureBtn" onclick="startCountdownAndCapture()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-camera"></i> Ambil Foto (Countdown 3 Detik)
+                    <button id="startPhotoSessionBtn" onclick="startPhotoSessionAction()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-camera"></i> Ambil Foto Sekarang (3 Detik)
                     </button>
-                    <button id="finishSessionBtn" onclick="finishAndOpenEditor()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl items-center justify-center gap-2 shadow-md hidden mt-1">
-                        <i class="fa-solid fa-check-circle"></i> Selesai & Lanjut Cetak / Unduh <i class="fa-solid fa-arrow-right"></i>
+                    <button id="finishSessionEarlyBtn" onclick="finishSessionEarly()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl items-center justify-center gap-2 shadow-md hidden mt-1">
+                        <i class="fa-solid fa-check-circle"></i> Selesai & Lanjut Editor <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- STEP 4: EDITOR, QR CLOUD & PRINT -->
-        <section id="panel-editor" class="step-panel flex-col space-y-3 my-auto">
-            <div class="glass-box p-4 rounded-2xl space-y-3 max-w-md mx-auto w-full shadow-2xl">
+        <!-- STEP 4: EDITOR & PRINT -->
+        <section id="step-print" class="step-section flex-col space-y-3 my-auto">
+            <div class="glass-card p-4 rounded-2xl space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                    <h3 class="font-bold text-white text-xs flex items-center gap-1.5"><i class="fa-solid fa-print text-indigo-400"></i> Hasil Strip & Cloud Upload</h3>
+                    <h3 class="font-bold text-white text-xs flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Editor Hasil Foto</h3>
                 </div>
 
-                <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-1">
-                    <canvas id="finalResultCanvas" class="w-auto h-full max-h-60 rounded shadow-md object-contain bg-white"></canvas>
+                <div class="relative w-full h-52 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-1">
+                    <canvas id="compositeCanvas" class="w-auto h-full max-h-48 rounded shadow-md object-contain bg-white"></canvas>
                 </div>
 
-                <input type="text" id="watermarkTextInput" oninput="renderFinalStrip()" placeholder="Ketik teks kustom (cth: Wedding / Birthday)..." class="w-full bg-slate-950 border border-slate-700 px-3 py-2.5 rounded-xl text-xs text-white">
+                <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Ketik teks kustom di sini..." class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
 
-                <div class="glass-box p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1">
-                    <span class="text-[10px] font-bold text-indigo-300 block">Scan QR untuk Download Soft File (Cloudinary)</span>
-                    <div id="qrCloudContainer" class="w-24 h-24 bg-white mx-auto rounded-lg flex items-center justify-center p-1"></div>
-                    <div id="cloudUrlDisplay" class="text-[9px] text-slate-400 truncate font-mono">Menyiapkan link cloud...</div>
+                <div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1">
+                    <span class="text-[10px] font-bold text-indigo-300 block">Scan QR untuk Download Soft File</span>
+                    <div id="localQrCodeContainer" class="w-24 h-24 bg-white mx-auto rounded-lg flex items-center justify-center p-1"></div>
                 </div>
 
-                <div class="flex gap-2">
-                    <button onclick="window.print()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
-                        <i class="fa-solid fa-print"></i> Cetak Hardware
-                    </button>
-                    <button onclick="resetAppCompletely()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl">
-                        Ulangi Sesi
-                    </button>
-                </div>
+                <button onclick="executePrint()" class="w-full py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
+                    Cetak Sekarang <i class="fa-solid fa-print ml-1"></i>
+                </button>
             </div>
         </section>
 
-        <!-- ADMIN MODAL -->
-        <div id="adminModalBox" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
-            <div class="glass-box w-full max-w-lg p-5 rounded-3xl border border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <!-- ADMIN DASHBOARD MODAL (DENGAN KONTROL AI FRAME & FRAME GALLERY) -->
+        <div id="adminDashboardModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
+            <div class="glass-card w-full max-w-lg p-5 rounded-3xl border border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h2 class="text-base font-black text-indigo-400">Admin Panel & AI Generator</h2>
-                    <button onclick="toggleAdminModal()" class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    <h2 class="text-base font-black text-indigo-400">Admin Dashboard & AI Frame Control</h2>
+                    <button onclick="toggleAdminDashboard()" class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="space-y-3 text-xs">
                     <div>
-                        <label class="text-[10px] text-slate-400 block mb-1">Judul / Brand Studio</label>
-                        <input type="text" id="adminBrandInput" value="PHOTOBOOTH STUDIO" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white">
+                        <label class="text-[10px] text-slate-400 block mb-1">Nama Brand Studio</label>
+                        <input type="text" id="adminBrandNameInput" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white">
                     </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block mb-1">Cloudinary Cloud Name</label>
-                        <input type="text" id="adminCloudNameInput" value="demo" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white font-mono text-[11px]">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block mb-1">Cloudinary Upload Preset</label>
-                        <input type="text" id="adminPresetInput" value="ml_default" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white font-mono text-[11px]">
-                    </div>
-
-                    <!-- AI FRAME GENERATOR GRATIS -->
-                    <div class="p-3.5 bg-indigo-950/50 border border-indigo-500/30 rounded-2xl space-y-2">
-                        <span class="text-xs font-bold text-indigo-300 block"><i class="fa-solid fa-robot mr-1"></i> AI Frame Generator (Gratis & Unlimited)</span>
-                        <p class="text-[10px] text-slate-400">Buat desain frame instan berdasarkan tema teks:</p>
-                        <div class="flex gap-2">
-                            <input type="text" id="aiPromptField" placeholder="Contoh: Gold floral wedding frame, elegant" class="flex-1 bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white">
-                            <button onclick="generateAIFrameAsset()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">Buat AI</button>
+                    
+                    <!-- PENGATURAN AI FRAME GENERATOR UNLIMITED -->
+                    <div class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl space-y-2">
+                        <span class="text-xs font-bold text-indigo-300 block"><i class="fa-solid fa-robot mr-1"></i> Generator AI Frame Gratis & Unlimited</span>
+                        <p class="text-[10px] text-slate-400">Pilih tema AI Frame untuk ditambahkan otomatis ke Kiosk:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="generateAiFrame('Cyberpunk Neon')" class="py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-[11px]">✨ AI Cyberpunk Neon</button>
+                            <button onclick="generateAiFrame('Floral Aesthetic')" class="py-2 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-[11px]">🌸 AI Floral Aesthetic</button>
+                            <button onclick="generateAiFrame('Minimalist Aesthetic')" class="py-2 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-[11px]">🤍 AI Minimalist White</button>
+                            <button onclick="generateAiFrame('Golden Luxury')" class="py-2 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold text-[11px]">👑 AI Golden Luxury</button>
                         </div>
                     </div>
 
-                    <div class="pt-2">
-                        <button onclick="saveAdminChanges()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Simpan Perubahan</button>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Daftar Frame Tersimpan di Kiosk</label>
+                        <div id="adminFrameListContainer" class="space-y-1.5 max-h-32 overflow-y-auto p-2 bg-slate-950 rounded-xl border border-slate-800 text-[11px]"></div>
                     </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button onclick="saveAdminSettings()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">Simpan Pengaturan</button>
                 </div>
             </div>
         </div>
+
     </main>
 
-    <!-- CORE SCRIPT LOGIC -->
+    <!-- SCRIPT UTAMA -->
     <script>
-        let currentPackageData = { name: 'Standard', price: 15000, totalShots: 4 };
-        let photoStorage = [];
-        let currentShotIdx = 0;
-        let isMirrorActive = true;
-        let activeCameraStream = null;
-        let useFrontCam = true;
-        let selectedFrameUrl = '';
-
-        let frameTemplates = [
-            { name: 'Classic Black', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60' },
-            { name: 'Neon Cyber', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=600&auto=format&fit=crop&q=60' }
+        const DEFAULT_FRAMES = [
+            { name: "White Minimalist", url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjE4MDAiPjxyZWN0IHg9IjgwIiB5PSI3MCIgd2lkdGg9IjEwNDAiIGhlaWdodD0iMTY2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiByeD0iMjQiLz48L3N2Zz4=" },
+            { name: "Gold Elegant", url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjE4MDAiPjxyZWN0IHg9IjcwIiB5PSI2MCIgd2lkdGg9IjEwNjAiIGhlaWdodD0iMTY4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDRhZjM3IiBzdHJva2Utd2lkdGg9IjIwIiByeD0iMzAiLz48L3N2Zz4=" }
         ];
 
-        function selectPackage(name, price, shots) {
-            currentPackageData = { name, price, totalShots: shots };
-            document.getElementById('priceDisplay').innerText = `Rp ${price.toLocaleString('id-ID')}`;
-            renderQrisCode(`PAYMENT-${name}-${price}`);
-            switchPanel('panel-payment');
+        let currentPackage = { name: "Paket 1 Strip", price: 15000, shots: 4, prints: 1 };
+        let isMirror = true, isPortrait = false, kioskStream = null, capturedPhotos = [], selectedFrameSrc = DEFAULT_FRAMES[0].url;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadAppSettings();
+            loadKioskFrames();
+        });
+
+        function loadAppSettings() {
+            const savedBrand = localStorage.getItem('pb_brand_name') || "PHOTOBOOTH STUDIO";
+            if (document.getElementById('brandNameDisplay')) document.getElementById('brandNameDisplay').innerText = savedBrand.toUpperCase();
         }
 
-        function switchPanel(panelId) {
-            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(panelId).classList.add('active');
-            if(panelId === 'panel-booth') {
-                startCameraFeed();
-                renderFrameGallery();
+        function goToStep(stepName) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(stepName).classList.add('active');
+            if(stepName === 'step-print') {
+                updateCompositeCanvas();
+                generateLocalQR();
+            } else if(stepName === 'step-booth') {
+                initIphoneCameraSafe();
+                loadKioskFrames();
+            } else {
+                stopKioskCamera();
             }
         }
 
-        function renderQrisCode(text) {
-            const box = document.getElementById('qrisCodeBox');
-            box.innerHTML = '';
-            new QRCode(box, { text: text, width: 140, height: 140 });
+        function selectPackage(name, priceKey, defaultPrice, shots, prints) {
+            const savedPrice = localStorage.getItem(priceKey);
+            const finalPrice = savedPrice ? parseInt(savedPrice) : defaultPrice;
+            currentPackage = { name, price: finalPrice, shots, prints };
+            document.getElementById('payAmountDisplay').innerText = `Rp ${finalPrice.toLocaleString('id-ID')}`;
+            const qrisContainer = document.getElementById('qrisContainer');
+            qrisContainer.innerHTML = "";
+            new QRCode(qrisContainer, { text: `QRIS-${currentPackage.price}`, width: 140, height: 140 });
+            goToStep('step-payment');
         }
 
-        function proceedToBooth() {
-            photoStorage = [];
-            currentShotIdx = 0;
-            switchPanel('panel-booth');
+        function confirmPaymentAndStartSession() {
+            capturedPhotos = [];
+            renderInstantGallery();
+            goToStep('step-booth');
         }
 
-        async function startCameraFeed() {
+        async function initIphoneCameraSafe() {
+            const videoEl = document.getElementById('kioskCameraStream');
             try {
-                if(activeCameraStream) {
-                    activeCameraStream.getTracks().forEach(t => t.stop());
-                }
-                const constraints = {
-                    video: { facingMode: useFrontCam ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                if (kioskStream) kioskStream.getTracks().forEach(t => t.stop());
+                kioskStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
                     audio: false
-                };
-                activeCameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-                const videoEl = document.getElementById('liveCameraFeed');
-                videoEl.srcObject = activeCameraStream;
-                updateMirrorStyle();
+                });
+                videoEl.srcObject = kioskStream;
+                await videoEl.play();
             } catch (err) {
-                alert("Peringatan Kamera: Pastikan Anda memberikan izin akses kamera (Permission) pada browser atau gunakan HTTPS.");
-                console.error(err);
+                alert("Gagal mengakses kamera: " + err.message);
             }
         }
 
-        function toggleMirrorMode() {
-            isMirrorActive = !isMirrorActive;
-            document.getElementById('mirrorText').innerText = `Mirror: ${isMirrorActive ? 'ON' : 'OFF'}`;
-            updateMirrorStyle();
-        }
-
-        function updateMirrorStyle() {
-            const videoEl = document.getElementById('liveCameraFeed');
-            videoEl.style.transform = isMirrorActive ? 'scaleX(-1)' : 'scaleX(1)';
-        }
-
-        function switchCameraDevice() {
-            useFrontCam = !useFrontCam;
-            startCameraFeed();
-        }
-
-        function renderFrameGallery() {
-            const container = document.getElementById('frameGalleryScroll');
-            container.innerHTML = '';
-            frameTemplates.forEach(f => {
-                const item = document.createElement('div');
-                item.className = `w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer flex-shrink-0 ${selectedFrameUrl === f.url ? 'border-indigo-500 scale-105' : 'border-slate-700'}`;
-                item.innerHTML = `<img src="${f.url}" class="w-full h-full object-cover">`;
-                item.onclick = () => {
-                    selectedFrameUrl = f.url;
-                    document.getElementById('activeFrameOverlay').src = f.url;
-                    renderFrameGallery();
-                };
-                container.appendChild(item);
-            });
-            if(!selectedFrameUrl && frameTemplates.length > 0) {
-                selectedFrameUrl = frameTemplates[0].url;
-                document.getElementById('activeFrameOverlay').src = selectedFrameUrl;
+        function stopKioskCamera() {
+            if(kioskStream) {
+                kioskStream.getTracks().forEach(t => t.stop());
+                kioskStream = null;
             }
         }
 
-        function startCountdownAndCapture() {
-            if(currentShotIdx >= currentPackageData.totalShots) return;
-            const btn = document.getElementById('triggerCaptureBtn');
-            btn.disabled = true;
-            let counter = 3;
-            const box = document.getElementById('countdownBox');
-            box.classList.remove('hidden');
-            box.innerText = counter;
+        function toggleMirror() {
+            isMirror = !isMirror;
+            document.getElementById('mirrorStatus').innerText = isMirror ? "Mirror: ON" : "OFF";
+            document.getElementById('kioskCameraStream').style.transform = isMirror ? "scaleX(-1)" : "scaleX(1)";
+        }
 
-            const interval = setInterval(() => {
-                counter--;
-                if(counter > 0) {
-                    box.innerText = counter;
+        function toggleOrientation() {
+            isPortrait = !isPortrait;
+            document.getElementById('orientationStatus').innerText = isPortrait ? "Portrait" : "Landscape";
+            document.getElementById('camerabox').className = isPortrait 
+                ? "md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-portrait"
+                : "md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam_landscape";
+        }
+
+        function loadKioskFrames() {
+            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
+            let allFrames = [...DEFAULT_FRAMES, ...customFrames];
+            const container = document.getElementById('kioskLiveFrameGallery');
+            if(!container) return;
+
+            container.innerHTML = allFrames.map((f, i) => `
+                <div onclick="selectKioskFrame('${f.url}', this)" class="cursor-pointer bg-slate-900 p-1 rounded-lg border ${selectedFrameSrc === f.url ? 'border-indigo-500 bg-indigo-950/40' : 'border-slate-800'} text-center shrink-0 kiosk-frame-item" style="width: 50px;">
+                    <img src="${f.url}" class="w-full h-11 object-contain rounded bg-black">
+                </div>
+            `).join('');
+        }
+
+        function selectKioskFrame(url, element) {
+            document.querySelectorAll('.kiosk-frame-item').forEach(el => el.classList.remove('border-indigo-500', 'bg-indigo-950/40'));
+            if(element) element.classList.add('border-indigo-500', 'bg-indigo-950/40');
+            selectedFrameSrc = url;
+            const activeOverlay = document.getElementById('activeStaticFrameOverlay');
+            if(activeOverlay) activeOverlay.src = url;
+            if(capturedPhotos.length > 0) updateCompositeCanvas();
+        }
+
+        /* HITUNG MUNDUR BERSIH TANPA BLUR DI LAYAR KAMERA */
+        function startPhotoSessionAction() {
+            if(capturedPhotos.length >= currentPackage.shots) {
+                finishSessionEarly();
+                return;
+            }
+            let count = 3;
+            const overlay = document.getElementById('countdownOverlay');
+            overlay.classList.remove('hidden');
+            overlay.innerText = count;
+
+            let cInterval = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    overlay.innerText = count;
                 } else {
-                    clearInterval(interval);
-                    box.classList.add('hidden');
-                    captureCurrentFrame();
-                    btn.disabled = false;
+                    clearInterval(cInterval);
+                    overlay.classList.add('hidden');
+                    takeSnapshot();
+                    if(capturedPhotos.length >= currentPackage.shots) {
+                        document.getElementById('startPhotoSessionBtn').innerText = "Selesai & Lanjut Editor";
+                        document.getElementById('finishSessionEarlyBtn').classList.remove('hidden');
+                    }
                 }
             }, 1000);
         }
 
-        function captureCurrentFrame() {
-            const video = document.getElementById('liveCameraFeed');
-            const canvas = document.getElementById('hiddenCaptureCanvas');
+        function takeSnapshot() {
+            const video = document.getElementById('kioskCameraStream');
+            const canvas = document.getElementById('photoCanvas');
             canvas.width = video.videoWidth || 1280;
             canvas.height = video.videoHeight || 720;
             const ctx = canvas.getContext('2d');
-
-            if(isMirrorActive && useFrontCam) {
+            ctx.save();
+            if(isMirror) {
                 ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            photoStorage.push(dataUrl);
-            currentShotIdx++;
+            ctx.restore();
 
-            document.getElementById('shotIndicator').innerText = `Foto ${currentShotIdx} dari ${currentPackageData.totalShots}`;
-            renderCapturedThumbnails();
-
-            if(currentShotIdx >= currentPackageData.totalShots) {
-                document.getElementById('triggerCaptureBtn').classList.add('hidden');
-                document.getElementById('finishSessionBtn').classList.remove('hidden');
-            }
+            capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.9));
+            document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
+            renderInstantGallery();
         }
 
-        function renderCapturedThumbnails() {
-            const gallery = document.getElementById('capturedGalleryPreview');
-            gallery.innerHTML = '';
-            photoStorage.forEach(imgData => {
-                const img = document.createElement('img');
-                img.src = imgData;
-                img.className = 'w-12 h-12 object-cover rounded-lg border border-slate-700 flex-shrink-0';
-                gallery.appendChild(img);
-            });
-        }
-
-        function finishAndOpenEditor() {
-            if(activeCameraStream) activeCameraStream.getTracks().forEach(t => t.stop());
-            switchPanel('panel-editor');
-            renderFinalStrip();
-            uploadToCloudinaryAndGenerateQR();
-        }
-
-        function renderFinalStrip() {
-            const canvas = document.getElementById('finalResultCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 600;
-            canvas.height = 900;
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            let startY = 35;
-            let photoH = 160;
-            let photoW = 520;
-            let startX = 40;
-
-            photoStorage.forEach((src, idx) => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => {
-                    ctx.drawImage(img, startX, startY + (idx * (photoH + 18)), photoW, photoH);
-                    if(idx === photoStorage.length - 1) {
-                        ctx.fillStyle = '#0f172a';
-                        ctx.font = 'bold 20px Inter, sans-serif';
-                        ctx.textAlign = 'center';
-                        const customText = document.getElementById('watermarkTextInput').value || document.getElementById('appTitleDisplay').innerText;
-                        ctx.fillText(customText, canvas.width / 2, canvas.height - 35);
-                    }
-                };
-            });
-        }
-
-        async function uploadToCloudinaryAndGenerateQR() {
-            const canvas = document.getElementById('finalResultCanvas');
-            canvas.toBlob(async (blob) => {
-                const cloudName = document.getElementById('adminCloudNameInput').value || 'demo';
-                const preset = document.getElementById('adminPresetInput').value || 'ml_default';
-
-                const fd = new FormData();
-                fd.append('file', blob);
-                fd.append('upload_preset', preset);
-
-                try {
-                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: fd });
-                    const json = await res.json();
-                    if(json.secure_url) {
-                        document.getElementById('cloudUrlDisplay').innerText = json.secure_url;
-                        const qrBox = document.getElementById('qrCloudContainer');
-                        qrBox.innerHTML = '';
-                        new QRCode(qrBox, { text: json.secure_url, width: 90, height: 90 });
-                    }
-                } catch (e) {
-                    console.log("Cloud upload fallback active", e);
-                    const dummyUrl = "https://github.com/photobooth-studio";
-                    document.getElementById('cloudUrlDisplay').innerText = "Mode Offline Cloud";
-                    const qrBox = document.getElementById('qrCloudContainer');
-                    qrBox.innerHTML = '';
-                    new QRCode(qrBox, { text: dummyUrl, width: 90, height: 90 });
-                }
-            }, 'image/jpeg', 0.95);
-        }
-
-        function generateAIFrameAsset() {
-            const prompt = document.getElementById('aiPromptField').value;
-            if(!prompt) {
-                alert("Masukkan teks prompt tema AI terlebih dahulu!");
+        function renderInstantGallery() {
+            const gallery = document.getElementById('instantPhotoGallery');
+            if(capturedPhotos.length === 0) {
+                gallery.innerHTML = `<div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto</div>`;
                 return;
             }
-            const encoded = encodeURIComponent(prompt + " photobooth layout frame template vector minimalist");
-            const url = `https://pollinations.ai/p/${encoded}?width=800&height=1200&nologo=true`;
-            frameTemplates.push({ name: 'AI: ' + prompt, url: url });
-            renderFrameGallery();
-            alert("AI Frame berhasil dibuat dan ditambahkan ke galeri kiosk!");
+            gallery.innerHTML = capturedPhotos.map((photo, index) => `
+                <div class="relative shrink-0 w-14 h-14 bg-slate-950 rounded border border-slate-700 overflow-hidden group">
+                    <img src="${photo}" class="w-full h-full object-cover">
+                    <button onclick="retakePhoto(${index})" class="absolute inset-0 bg-black/60 text-white text-[9px] opacity-0 group-hover:opacity-100 font-bold flex items-center justify-center">Ulang</button>
+                </div>
+            `).join('');
         }
 
-        function toggleAdminModal() {
-            document.getElementById('adminModalBox').classList.toggle('hidden');
+        function retakePhoto(index) {
+            capturedPhotos.splice(index, 1);
+            document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
+            renderInstantGallery();
         }
 
-        function saveAdminChanges() {
-            const title = document.getElementById('adminBrandInput').value;
-            if(title) document.getElementById('appTitleDisplay').innerText = title;
-            toggleAdminModal();
+        function finishSessionEarly() {
+            if(capturedPhotos.length === 0) {
+                alert("Ambil minimal 1 foto dulu!");
+                return;
+            }
+            stopKioskCamera();
+            updateCompositeCanvas();
+            goToStep('step-print');
+        }
+
+        function loadImageForCanvas(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(e);
+                img.src = src;
+            });
+        }
+
+        async function updateCompositeCanvas() {
+            const canvas = document.getElementById('compositeCanvas'), ctx = canvas.getContext('2d');
+            canvas.width = 1200; canvas.height = 1800;
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let customText = document.getElementById('customTextInput').value;
+
+            if(capturedPhotos.length === 0) return;
+            let photos = [];
+            try {
+                photos = await Promise.all(capturedPhotos.map(src => loadImageForCanvas(src)));
+            } catch(e) {}
+
+            let frameImg = null;
+            if(selectedFrameSrc) {
+                try { frameImg = await loadImageForCanvas(selectedFrameSrc); } catch(e) {}
+            }
+
+            const slots = [{x: 90, y: 90, w: 1020, h: 360}, {x: 90, y: 495, w: 1020, h: 360}, {x: 90, y: 900, w: 1020, h: 360}, {x: 90, y: 1305, w: 1020, h: 360}];
+            for(let i=0; i<slots.length; i++) {
+                if(photos[i]) {
+                    let s = slots[i];
+                    ctx.drawImage(photos[i], s.x, s.y, s.w, s.h);
+                }
+            }
+            if(frameImg) ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+            if(customText) {
+                ctx.save();
+                ctx.font = "bold 42px Inter, sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.shadowColor = "rgba(0,0,0,0.9)";
+                ctx.shadowBlur = 10;
+                ctx.fillText(customText, canvas.width / 2, 1720);
+                ctx.restore();
+            }
+        }
+
+        function generateLocalQR() {
+            const dataUrl = document.getElementById('compositeCanvas').toDataURL('image/jpeg', 0.9);
+            const qrContainer = document.getElementById('localQrCodeContainer');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: dataUrl, width: 90, height: 90 });
+        }
+
+        function executePrint() { window.print(); }
+
+        function toggleAdminDashboard() {
+            const modal = document.getElementById('adminDashboardModal');
+            modal.classList.toggle('hidden');
+            if(!modal.classList.contains('hidden')) {
+                document.getElementById('adminBrandNameInput').value = localStorage.getItem('pb_brand_name') || "PHOTOBOOTH STUDIO";
+                loadAdminFrameList();
+            }
+        }
+
+        /* FITUR AI FRAME GENERATOR UNLIMITED */
+        function generateAiFrame(themeName) {
+            let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1800">
+                <rect x="70" y="60" width="1060" height="1680" fill="none" stroke="${themeName.includes('Cyber') ? '#06b6d4' : themeName.includes('Pink') ? '#ec4899' : themeName.includes('Gold') ? '#d4af37' : '#ffffff'}" stroke-width="24" rx="30"/>
+                <text x="600" y="45" font-family="sans-serif" font-weight="bold" font-size="32" fill="${themeName.includes('Cyber') ? '#06b6d4' : '#ffffff'}" text-anchor="middle">✨ AI Theme: ${themeName} ✨</text>
+            </svg>`;
+            let encodedUrl = "data:image/svg+xml;base64," + btoa(svgContent);
+
+            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
+            customFrames.push({ name: `AI - ${themeName}`, url: encodedUrl });
+            localStorage.setItem('saved_frames_gallery', JSON.stringify(customFrames));
+            loadAdminFrameList();
+            loadKioskFrames();
+            alert(`AI Frame "${themeName}" berhasil dibuat dan ditambahkan secara instan!`);
+        }
+
+        function loadAdminFrameList() {
+            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
+            const container = document.getElementById('adminFrameListContainer');
+            if(customFrames.length === 0) {
+                container.innerHTML = `<span class="text-slate-500 italic">Belum ada AI/Custom frame. Silakan buat di atas.</span>`;
+                return;
+            }
+            container.innerHTML = customFrames.map((f, index) => `
+                <div class="flex justify-between items-center bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <img src="${f.url}" class="w-8 h-8 object-contain bg-black rounded">
+                        <span class="font-bold text-white">${f.name}</span>
+                    </div>
+                    <button onclick="deleteCustomFrame(${index})" class="px-2 py-1 bg-red-950 text-red-400 rounded text-[10px] font-bold">Hapus</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteCustomFrame(index) {
+            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
+            customFrames.splice(index, 1);
+            localStorage.setItem('saved_frames_gallery', JSON.stringify(customFrames));
+            loadAdminFrameList();
+            loadKioskFrames();
+        }
+
+        function saveAdminSettings() {
+            localStorage.setItem('pb_brand_name', document.getElementById('adminBrandNameInput').value);
+            loadAppSettings();
+            toggleAdminDashboard();
             alert("Pengaturan berhasil disimpan!");
-        }
-
-        function resetAppCompletely() {
-            location.reload();
         }
     </script>
 </body>
-</html>
+</html>s
