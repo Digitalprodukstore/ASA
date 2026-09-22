@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Photobooth Studio - Kiosk Pro Engine</title>
+    <title>Photobooth Studio - Kiosk Engine Pro</title>
+    <!-- Tailwind CSS v3 via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Courier+Prime:wght@700&family=Inter:wght@400;700;900&family=Montserrat:wght@700&family=Playfair+Display:wght@700&family=Poppins:wght@400;700;900&family=Fredoka:wght@600&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --primary-color: #6366f1;
             --app-bg-color: #0f172a;
+            --app-font-family: 'Inter', sans-serif;
         }
         body {
             background-color: var(--app-bg-color);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--app-font-family);
             overflow-x: hidden;
-            color: white;
+            transition: all 0.3s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         .glass-card {
             background: rgba(15, 23, 42, 0.85);
@@ -27,67 +35,84 @@
         .step-section { display: none; }
         .step-section.active { display: flex; }
         .btn-theme { background-color: var(--primary-color); color: white; transition: all 0.2s; }
+        .btn-theme:hover { filter: brightness(1.1); }
         .cam-portrait { height: 340px; width: 240px; margin: 0 auto; }
         .cam-landscape { height: 240px; width: 100%; }
+        
+        .filter-none { filter: none; }
+        .filter-grayscale { filter: grayscale(100%) contrast(110%); }
+        .filter-sepia { filter: sepia(85%) contrast(105%); }
+        .filter-vintage { filter: contrast(125%) brightness(95%) sepia(35%); }
+        .filter-vivid { filter: saturate(160%) contrast(110%) brightness(105%); }
+        .filter-cool { filter: hue-rotate(180deg) saturate(120%) brightness(102%); }
+        .filter-warm { filter: sepia(40%) saturate(140%) brightness(105%); }
+        .filter-matte { filter: contrast(90%) brightness(110%) saturate(85%); }
+
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-3 md:p-4">
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-4 text-white">
 
-    <!-- HEADER -->
+    <!-- TOP HEADER NAVBAR -->
     <header class="glass-card px-4 py-2.5 rounded-2xl flex justify-between items-center mb-3 sticky top-2 z-50">
-        <div>
-            <h1 id="brandNameDisplay" class="font-extrabold text-base md:text-lg tracking-wider uppercase">PHOTOBOOTH STUDIO</h1>
-            <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
-                KIOSK ONLINE &bull; AI FRAME READY
-            </p>
+        <div class="flex items-center gap-3">
+            <div>
+                <h1 id="brandNameDisplay" class="font-extrabold text-base md:text-lg tracking-wider uppercase">PHOTOBOOTH STUDIO</h1>
+                <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                    KIOSK ONLINE &bull; IPHONE OPTIMIZED
+                </p>
+            </div>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="toggleAdminDashboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-[11px] font-bold rounded-xl border border-slate-700 text-slate-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-gear"><span>Admin</span></i>
+            <div id="sessionTimerContainer" class="hidden bg-red-950/80 border border-red-500/40 px-2.5 py-1 rounded-xl text-center">
+                <span class="text-[9px] text-red-300 block font-bold leading-none">SISA WAKTU</span>
+                <span id="sessionTimer" class="text-xs font-mono text-red-400 font-bold">07:00</span>
+            </div>
+            <button onclick="toggleAdminDashboard()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-[11px] font-bold rounded-xl border border-slate-700 text-slate-300 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Admin</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN -->
+    <!-- MAIN CONTAINER -->
     <main class="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center">
 
-        <!-- STEP 1: WELCOME / PAKET -->
+        <!-- STEP 1: WELCOME & PAKET -->
         <section id="step-welcome" class="step-section active flex-col space-y-3 my-auto">
             <div class="text-center space-y-1">
-                <span class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
-                    Welcome to Photobooth
+                <span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">
+                    Welcome to Photobooth Studio
                 </span>
                 <h2 class="text-2xl md:text-3xl font-black">Pilih Paket Sesi Foto</h2>
-                <p class="text-xs text-slate-400">Sentuh salah satu paket untuk memulai</p>
+                <p class="text-xs text-slate-400">Pilih paket di bawah untuk langsung mulai di iPhone Anda</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                <div onclick="selectPackage('Paket 1 Strip', 'pkg1_price', 15000, 4, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+                <div onclick="selectPackage('Paket 1 Strip (4 Foto)', 'pkg1_price', 15000, 4, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket 1 Strip (4 Foto)</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">4 Foto &bull; 1 Cetak Strip &bull; Soft File</p>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400 transition">Paket 1 Strip (4 Foto)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">4 Foto &bull; 1 Cetak Strip &bull; Free Soft File</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[10px] text-slate-500 font-mono">Standard</span>
+                        <span class="text-[10px] text-slate-500 font-mono">1x Sesi</span>
                         <span id="priceDisplayPkg1" class="text-base font-bold text-emerald-400 font-mono">Rp 15.000</span>
                     </div>
                 </div>
-                <div onclick="selectPackage('Paket Dual Strip', 'pkg2_price', 25000, 6, 2)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+                <div onclick="selectPackage('Paket Dual Strip (6 Foto)', 'pkg2_price', 25000, 6, 2)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket Dual Strip (6 Foto)</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">6 Foto &bull; 2 Cetak Strip &bull; Soft File</p>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400 transition">Paket Dual Strip (6 Foto)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">6 Foto &bull; 2 Cetak Strip &bull; Free Soft File</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[10px] text-slate-500 font-mono">Double</span>
+                        <span class="text-[10px] text-slate-500 font-mono">2x Sesi</span>
                         <span id="priceDisplayPkg2" class="text-base font-bold text-emerald-400 font-mono">Rp 25.000</span>
                     </div>
                 </div>
-                <div onclick="selectPackage('Paket Mini', 'pkg3_price', 10000, 2, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
+                <div onclick="selectPackage('Paket Mini (2 Foto)', 'pkg3_price', 10000, 2, 1)" class="glass-card p-3.5 rounded-2xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex flex-col justify-between transition group">
                     <div>
-                        <h3 class="font-bold text-white group-hover:text-indigo-400">Paket Mini (2 Foto)</h3>
+                        <h3 class="font-bold text-white group-hover:text-indigo-400 transition">Paket Mini (2 Foto)</h3>
                         <p class="text-[11px] text-slate-400 mt-1">2 Foto &bull; 1 Cetak Mini &bull; Soft File</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center">
@@ -101,24 +126,40 @@
         <!-- STEP 2: PEMBAYARAN -->
         <section id="step-payment" class="step-section flex-col space-y-3 my-auto">
             <div class="glass-card p-5 rounded-2xl space-y-4 text-center">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i> Konfirmasi Pembayaran</h3>
-                <div id="qrisContainer" class="w-40 h-40 bg-white mx-auto rounded-xl flex items-center justify-center p-2"></div>
-                <div>
-                    <span class="text-[11px] text-slate-400">Total Tagihan:</span>
-                    <div id="payAmountDisplay" class="text-xl font-black text-emerald-400 font-mono">Rp 15.000</div>
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i> Konfirmasi Sesi</h3>
+                
+                <div class="flex border border-slate-700 rounded-xl p-1 bg-slate-900/60">
+                    <button onclick="switchPayTab('qris')" id="payTabQris" class="flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white text-xs transition">QRIS Digital</button>
+                    <button onclick="switchPayTab('voucher')" id="payTabVoucher" class="flex-1 py-1.5 rounded-lg font-bold text-slate-400 text-xs transition">Voucher</button>
                 </div>
-                <button onclick="confirmPaymentAndStartSession()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl shadow-lg">
-                    Pembayaran Selesai & Mulai Foto <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
+
+                <div id="payContentQris" class="space-y-3">
+                    <div id="qrisContainer" class="w-40 h-40 bg-white mx-auto rounded-xl flex items-center justify-center p-2"></div>
+                    <div>
+                        <span class="text-[11px] text-slate-400">Total Tagihan:</span>
+                        <div id="payAmountDisplay" class="text-xl font-black text-emerald-400 font-mono">Rp 15.000</div>
+                    </div>
+                    <button onclick="confirmPaymentAndStartSession()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl shadow-lg">
+                        Mulai Sesi Foto Sekarang <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <div id="payContentVoucher" class="space-y-3 hidden">
+                    <p class="text-[11px] text-slate-400">Masukkan kode voucher:</p>
+                    <input type="text" id="voucherInput" placeholder="CONTOH: GRATIS" class="w-full bg-slate-900 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs text-center text-white uppercase font-mono tracking-widest">
+                    <button onclick="redeemVoucher()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg">
+                        Gunakan Voucher & Mulai
+                    </button>
+                </div>
             </div>
         </section>
 
-        <!-- STEP 3: KIOSK BOOTH (TANPA BURAM SAAT TIMER) -->
+        <!-- STEP 3: KIOSK & FRAME GALLERY -->
         <section id="step-booth" class="step-section flex-col space-y-2.5 my-auto">
             <div class="glass-card p-3 rounded-2xl space-y-2.5">
                 <div class="flex justify-between items-center text-xs">
                     <span id="shotCounter" class="text-slate-400 font-bold">Foto 0 dari 4</span>
-                    <span class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded text-[11px]">Sesi Aktif</span>
+                    <span id="sessionTimerBooth" class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded text-[11px]">Sesi Aktif</span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5">
@@ -131,29 +172,26 @@
                         </button>
                     </div>
 
-                    <!-- KOTAK KAMERA BERSIH TANPA BLUR/BURAM -->
                     <div id="camerabox" class="md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-landscape">
                         <video id="kioskCameraStream" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover bg-black"></video>
-                        <img id="activeStaticFrameOverlay" class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 opacity-95" src="">
+                        <img id="activeStaticFrameOverlay" class="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 opacity-90" src="">
                         <canvas id="photoCanvas" class="hidden"></canvas>
                         
-                        <!-- Hitung Mundur Tanpa Background Blur / Jernih di atas kamera -->
-                        <div id="countdownOverlay" class="absolute inset-0 flex items-center justify-center text-7xl font-black text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] hidden z-30">
+                        <div id="countdownOverlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center text-6xl font-black text-white hidden z-30">
                             3
                         </div>
                     </div>
                 </div>
 
-                <!-- GALERI FRAME KIOSK TERHUBUNG FULL -->
                 <div class="space-y-1 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
                     <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame & AI Frame Kiosk</span>
+                        <span class="text-indigo-300 font-bold"><i class="fa-solid fa-border-all mr-1"></i> Pilih Frame</span>
                     </div>
                     <div id="kioskLiveFrameGallery" class="flex gap-2 overflow-x-auto py-1 px-0.5 min-h-[58px] items-center hide-scrollbar"></div>
                 </div>
 
                 <div class="space-y-1">
-                    <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Galeri Foto</span>
+                    <span class="text-[10px] font-bold text-slate-400 block"><i class="fa-solid fa-images mr-1"></i> Galeri Foto (Klik untuk hapus/ulang)</span>
                     <div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 px-1 h-[58px] hide-scrollbar bg-slate-900/40 rounded-xl border border-slate-800">
                         <div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto</div>
                     </div>
@@ -170,22 +208,42 @@
             </div>
         </section>
 
-        <!-- STEP 4: EDITOR & PRINT -->
+        <!-- STEP 4: EDITOR PRO -->
         <section id="step-print" class="step-section flex-col space-y-3 my-auto">
             <div class="glass-card p-4 rounded-2xl space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                    <h3 class="font-bold text-white text-xs flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Editor Hasil Foto</h3>
+                    <h3 class="font-bold text-white text-xs flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Editor & Teks</h3>
                 </div>
 
                 <div class="relative w-full h-52 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-1">
                     <canvas id="compositeCanvas" class="w-auto h-full max-h-48 rounded shadow-md object-contain bg-white"></canvas>
+                    <div id="overlayTextDisplay" class="absolute bottom-2 left-0 right-0 text-center font-bold text-xs/tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] px-3 pointer-events-none"></div>
                 </div>
 
-                <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Ketik teks kustom di sini..." class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-xs text-white">
+                <div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-indigo-300 block">Pilih Filter</span>
+                    <div class="grid grid-cols-4 gap-1 text-[10px]">
+                        <button onclick="applyFilter('none')" class="py-1 bg-slate-800 rounded text-white font-bold">Normal</button>
+                        <button onclick="applyFilter('grayscale')" class="py-1 bg-slate-800 rounded text-slate-300 font-bold">Monotone</button>
+                        <button onclick="applyFilter('sepia')" class="py-1 bg-slate-800 rounded text-amber-300 font-bold">Sepia</button>
+                        <button onclick="applyFilter('vivid')" class="py-1 bg-slate-800 rounded text-emerald-300 font-bold">Vivid HD</button>
+                    </div>
+                </div>
 
-                <div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1">
-                    <span class="text-[10px] font-bold text-indigo-300 block">Scan QR untuk Download Soft File</span>
-                    <div id="localQrCodeContainer" class="w-24 h-24 bg-white mx-auto rounded-lg flex items-center justify-center p-1"></div>
+                <div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-indigo-300 block">Teks & Stiker Kustom</span>
+                    <div class="flex gap-1 pt-1 overflow-x-auto hide-scrollbar">
+                        <button onclick="selectQuickText('Happy Birthday')" class="px-2 py-1 bg-slate-800 rounded text-[9px] text-white">🎉 HBD</button>
+                        <button onclick="selectQuickText('Lovely Day')" class="px-2 py-1 bg-slate-800 rounded text-[9px] text-white">✨ Lovely</button>
+                        <button onclick="selectQuickText('Besties Forever')" class="px-2 py-1 bg-slate-800 rounded text-[9px] text-white">❤️ Besties</button>
+                        <button onclick="selectQuickText('Weekend Vibe')" class="px-2 py-1 bg-slate-800 rounded text-[9px] text-white">🔥 Weekend</button>
+                    </div>
+                    <input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Ketik teks kustom..." class="w-full mt-1.5 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-xl text-xs text-white">
+                </div>
+
+                <div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-1.5">
+                    <span class="text-[10px] font-bold text-indigo-300 block"><i class="fa-solid fa-qrcode mr-1"></i> Scan QR untuk Download Soft File</span>
+                    <div id="cloudinaryQrCode" class="w-28 h-28 bg-white mx-auto rounded-lg flex items-center justify-center p-1"></div>
                 </div>
 
                 <button onclick="executePrint()" class="w-full py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
@@ -194,11 +252,11 @@
             </div>
         </section>
 
-        <!-- ADMIN DASHBOARD MODAL (DENGAN KONTROL AI FRAME & FRAME GALLERY) -->
+        <!-- ADMIN DASHBOARD MODAL -->
         <div id="adminDashboardModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
             <div class="glass-card w-full max-w-lg p-5 rounded-3xl border border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h2 class="text-base font-black text-indigo-400">Admin Dashboard & AI Frame Control</h2>
+                    <h2 class="text-base font-black text-indigo-400">Admin Dashboard</h2>
                     <button onclick="toggleAdminDashboard()" class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="space-y-3 text-xs">
@@ -206,22 +264,19 @@
                         <label class="text-[10px] text-slate-400 block mb-1">Nama Brand Studio</label>
                         <input type="text" id="adminBrandNameInput" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-xl text-white">
                     </div>
-                    
-                    <!-- PENGATURAN AI FRAME GENERATOR UNLIMITED -->
-                    <div class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl space-y-2">
-                        <span class="text-xs font-bold text-indigo-300 block"><i class="fa-solid fa-robot mr-1"></i> Generator AI Frame Gratis & Unlimited</span>
-                        <p class="text-[10px] text-slate-400">Pilih tema AI Frame untuk ditambahkan otomatis ke Kiosk:</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="generateAiFrame('Cyberpunk Neon')" class="py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-[11px]">✨ AI Cyberpunk Neon</button>
-                            <button onclick="generateAiFrame('Floral Aesthetic')" class="py-2 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-[11px]">🌸 AI Floral Aesthetic</button>
-                            <button onclick="generateAiFrame('Minimalist Aesthetic')" class="py-2 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-[11px]">🤍 AI Minimalist White</button>
-                            <button onclick="generateAiFrame('Golden Luxury')" class="py-2 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold text-[11px]">👑 AI Golden Luxury</button>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">Harga Pkg 1</label>
+                            <input type="number" id="adminPkg1Price" class="w-full bg-slate-950 border border-slate-700 px-2 py-2 rounded-xl text-white">
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="text-[10px] text-slate-400 block mb-1">Daftar Frame Tersimpan di Kiosk</label>
-                        <div id="adminFrameListContainer" class="space-y-1.5 max-h-32 overflow-y-auto p-2 bg-slate-950 rounded-xl border border-slate-800 text-[11px]"></div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">Harga Pkg 2</label>
+                            <input type="number" id="adminPkg2Price" class="w-full bg-slate-950 border border-slate-700 px-2 py-2 rounded-xl text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">Harga Pkg 3</label>
+                            <input type="number" id="adminPkg3Price" class="w-full bg-slate-950 border border-slate-700 px-2 py-2 rounded-xl text-white">
+                        </div>
                     </div>
                 </div>
                 <div class="pt-2 flex gap-2">
@@ -232,7 +287,7 @@
 
     </main>
 
-    <!-- SCRIPT UTAMA -->
+    <!-- MAIN SCRIPT -->
     <script>
         const DEFAULT_FRAMES = [
             { name: "White Minimalist", url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjE4MDAiPjxyZWN0IHg9IjgwIiB5PSI3MCIgd2lkdGg9IjEwNDAiIGhlaWdodD0iMTY2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiByeD0iMjQiLz48L3N2Zz4=" },
@@ -240,27 +295,37 @@
         ];
 
         let currentPackage = { name: "Paket 1 Strip", price: 15000, shots: 4, prints: 1 };
-        let isMirror = true, isPortrait = false, kioskStream = null, capturedPhotos = [], selectedFrameSrc = DEFAULT_FRAMES[0].url;
+        let isMirror = true, isPortrait = false, kioskStream = null, capturedPhotos = [], selectedFrameSrc = DEFAULT_FRAMES[0].url, activeFilterClass = 'filter-none';
 
         document.addEventListener("DOMContentLoaded", () => {
             loadAppSettings();
-            loadKioskFrames();
+            loadDashboardFramesForBooth();
         });
 
         function loadAppSettings() {
             const savedBrand = localStorage.getItem('pb_brand_name') || "PHOTOBOOTH STUDIO";
-            if (document.getElementById('brandNameDisplay')) document.getElementById('brandNameDisplay').innerText = savedBrand.toUpperCase();
+            const brandEl = document.getElementById('brandNameDisplay');
+            if (brandEl) brandEl.innerText = savedBrand.toUpperCase();
+
+            const p1 = localStorage.getItem('pkg1_price') || 15000;
+            const p2 = localStorage.getItem('pkg2_price') || 25000;
+            const p3 = localStorage.getItem('pkg3_price') || 10000;
+
+            if(document.getElementById('priceDisplayPkg1')) document.getElementById('priceDisplayPkg1').innerText = `Rp ${Number(p1).toLocaleString('id-ID')}`;
+            if(document.getElementById('priceDisplayPkg2')) document.getElementById('priceDisplayPkg2').innerText = `Rp ${Number(p2).toLocaleString('id-ID')}`;
+            if(document.getElementById('priceDisplayPkg3')) document.getElementById('priceDisplayPkg3').innerText = `Rp ${Number(p3).toLocaleString('id-ID')}`;
         }
 
         function goToStep(stepName) {
             document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
             document.getElementById(stepName).classList.add('active');
+
             if(stepName === 'step-print') {
                 updateCompositeCanvas();
-                generateLocalQR();
+                generateCloudinaryQRCodeAndUpload();
             } else if(stepName === 'step-booth') {
                 initIphoneCameraSafe();
-                loadKioskFrames();
+                loadDashboardFramesForBooth();
             } else {
                 stopKioskCamera();
             }
@@ -270,11 +335,36 @@
             const savedPrice = localStorage.getItem(priceKey);
             const finalPrice = savedPrice ? parseInt(savedPrice) : defaultPrice;
             currentPackage = { name, price: finalPrice, shots, prints };
+            
             document.getElementById('payAmountDisplay').innerText = `Rp ${finalPrice.toLocaleString('id-ID')}`;
             const qrisContainer = document.getElementById('qrisContainer');
             qrisContainer.innerHTML = "";
             new QRCode(qrisContainer, { text: `QRIS-${currentPackage.price}`, width: 140, height: 140 });
             goToStep('step-payment');
+        }
+
+        function switchPayTab(tab) {
+            if(tab === 'qris') {
+                document.getElementById('payContentQris').classList.remove('hidden');
+                document.getElementById('payContentVoucher').classList.add('hidden');
+                document.getElementById('payTabQris').className = "flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white text-xs transition";
+                document.getElementById('payTabVoucher').className = "flex-1 py-1.5 rounded-lg font-bold text-slate-400 text-xs transition";
+            } else {
+                document.getElementById('payContentQris').classList.add('hidden');
+                document.getElementById('payContentVoucher').classList.remove('hidden');
+                document.getElementById('payTabQris').className = "flex-1 py-1.5 rounded-lg font-bold text-slate-400 text-xs transition";
+                document.getElementById('payTabVoucher').className = "flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white text-xs transition";
+            }
+        }
+
+        function redeemVoucher() {
+            const code = document.getElementById('voucherInput').value.trim();
+            if(code.length >= 2) {
+                alert("Voucher berhasil digunakan!");
+                confirmPaymentAndStartSession();
+            } else {
+                alert("Masukkan kode voucher yang valid!");
+            }
         }
 
         function confirmPaymentAndStartSession() {
@@ -283,10 +373,13 @@
             goToStep('step-booth');
         }
 
+        // FUNGSI KAMERA AMAN DI IPHONE X (TIDAK STUCK)
         async function initIphoneCameraSafe() {
             const videoEl = document.getElementById('kioskCameraStream');
             try {
-                if (kioskStream) kioskStream.getTracks().forEach(t => t.stop());
+                if (kioskStream) {
+                    kioskStream.getTracks().forEach(t => t.stop());
+                }
                 kioskStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
                     audio: false
@@ -294,13 +387,13 @@
                 videoEl.srcObject = kioskStream;
                 await videoEl.play();
             } catch (err) {
-                alert("Gagal mengakses kamera: " + err.message);
+                alert("Kamera tidak dapat diakses. Pastikan izin kamera di browser iPhone Anda aktif: " + err.message);
             }
         }
 
         function stopKioskCamera() {
             if(kioskStream) {
-                kioskStream.getTracks().forEach(t => t.stop());
+                kioskStream.getTracks().forEach(track => track.stop());
                 kioskStream = null;
             }
         }
@@ -316,32 +409,32 @@
             document.getElementById('orientationStatus').innerText = isPortrait ? "Portrait" : "Landscape";
             document.getElementById('camerabox').className = isPortrait 
                 ? "md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-portrait"
-                : "md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam_landscape";
+                : "md:col-span-3 bg-slate-950 rounded-2xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-landscape";
         }
 
-        function loadKioskFrames() {
+        function loadDashboardFramesForBooth() {
             let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
             let allFrames = [...DEFAULT_FRAMES, ...customFrames];
             const container = document.getElementById('kioskLiveFrameGallery');
             if(!container) return;
 
             container.innerHTML = allFrames.map((f, i) => `
-                <div onclick="selectKioskFrame('${f.url}', this)" class="cursor-pointer bg-slate-900 p-1 rounded-lg border ${selectedFrameSrc === f.url ? 'border-indigo-500 bg-indigo-950/40' : 'border-slate-800'} text-center shrink-0 kiosk-frame-item" style="width: 50px;">
+                <div onclick="selectKioskFrame('${f.url}', this)" class="cursor-pointer bg-slate-900 p-1 rounded-lg border ${i===0?'border-indigo-500 bg-indigo-950/40':'border-slate-800'} text-center shrink-0 kiosk-frame-item" style="width: 50px;">
                     <img src="${f.url}" class="w-full h-11 object-contain rounded bg-black">
                 </div>
             `).join('');
+            if(allFrames.length > 0) selectKioskFrame(allFrames[0].url, container.querySelector('.kiosk-frame-item'));
         }
 
         function selectKioskFrame(url, element) {
             document.querySelectorAll('.kiosk-frame-item').forEach(el => el.classList.remove('border-indigo-500', 'bg-indigo-950/40'));
             if(element) element.classList.add('border-indigo-500', 'bg-indigo-950/40');
             selectedFrameSrc = url;
-            const activeOverlay = document.getElementById('activeStaticFrameOverlay');
-            if(activeOverlay) activeOverlay.src = url;
+            const activeFrameOverlay = document.getElementById('activeStaticFrameOverlay');
+            if(activeFrameOverlay) activeFrameOverlay.src = url;
             if(capturedPhotos.length > 0) updateCompositeCanvas();
         }
 
-        /* HITUNG MUNDUR BERSIH TANPA BLUR DI LAYAR KAMERA */
         function startPhotoSessionAction() {
             if(capturedPhotos.length >= currentPackage.shots) {
                 finishSessionEarly();
@@ -390,18 +483,18 @@
         function renderInstantGallery() {
             const gallery = document.getElementById('instantPhotoGallery');
             if(capturedPhotos.length === 0) {
-                gallery.innerHTML = `<div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto</div>`;
+                gallery.innerHTML = `<div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto diambil</div>`;
                 return;
             }
             gallery.innerHTML = capturedPhotos.map((photo, index) => `
                 <div class="relative shrink-0 w-14 h-14 bg-slate-950 rounded border border-slate-700 overflow-hidden group">
                     <img src="${photo}" class="w-full h-full object-cover">
-                    <button onclick="retakePhoto(${index})" class="absolute inset-0 bg-black/60 text-white text-[9px] opacity-0 group-hover:opacity-100 font-bold flex items-center justify-center">Ulang</button>
+                    <button onclick="retakePhotoIndex(${index})" class="absolute inset-0 bg-black/60 text-white text-[9px] opacity-0 group-hover:opacity-150 flex items-center justify-center font-bold">Ulang</button>
                 </div>
             `).join('');
         }
 
-        function retakePhoto(index) {
+        function retakePhotoIndex(index) {
             capturedPhotos.splice(index, 1);
             document.getElementById('shotCounter').innerText = `Foto ${capturedPhotos.length} dari ${currentPackage.shots}`;
             renderInstantGallery();
@@ -409,12 +502,22 @@
 
         function finishSessionEarly() {
             if(capturedPhotos.length === 0) {
-                alert("Ambil minimal 1 foto dulu!");
+                alert("Harap ambil minimal 1 foto terlebih dahulu!");
                 return;
             }
             stopKioskCamera();
             updateCompositeCanvas();
             goToStep('step-print');
+        }
+
+        function applyFilter(type) {
+            activeFilterClass = `filter-${type}`;
+            updateCompositeCanvas();
+        }
+
+        function selectQuickText(txt) {
+            document.getElementById('customTextInput').value = txt;
+            updateCompositeCanvas();
         }
 
         function loadImageForCanvas(src) {
@@ -432,7 +535,8 @@
             canvas.width = 1200; canvas.height = 1800;
             ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let customText = document.getElementById('customTextInput').value;
+            let customTextValue = document.getElementById('customTextInput').value;
+            document.getElementById('overlayTextDisplay').innerText = customTextValue;
 
             if(capturedPhotos.length === 0) return;
             let photos = [];
@@ -454,23 +558,24 @@
             }
             if(frameImg) ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
-            if(customText) {
+            if(customTextValue) {
                 ctx.save();
                 ctx.font = "bold 42px Inter, sans-serif";
                 ctx.fillStyle = "#ffffff";
                 ctx.textAlign = "center";
                 ctx.shadowColor = "rgba(0,0,0,0.9)";
                 ctx.shadowBlur = 10;
-                ctx.fillText(customText, canvas.width / 2, 1720);
+                ctx.fillText(customTextValue, canvas.width / 2, 1720);
                 ctx.restore();
             }
         }
 
-        function generateLocalQR() {
-            const dataUrl = document.getElementById('compositeCanvas').toDataURL('image/jpeg', 0.9);
-            const qrContainer = document.getElementById('localQrCodeContainer');
+        function generateCloudinaryQRCodeAndUpload() {
+            const canvas = document.getElementById('compositeCanvas');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            const qrContainer = document.getElementById('cloudinaryQrCode');
             qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: dataUrl, width: 90, height: 90 });
+            new QRCode(qrContainer, { text: dataUrl, width: 100, height: 100 });
         }
 
         function executePrint() { window.print(); }
@@ -480,58 +585,21 @@
             modal.classList.toggle('hidden');
             if(!modal.classList.contains('hidden')) {
                 document.getElementById('adminBrandNameInput').value = localStorage.getItem('pb_brand_name') || "PHOTOBOOTH STUDIO";
-                loadAdminFrameList();
+                document.getElementById('adminPkg1Price').value = localStorage.getItem('pkg1_price') || 15000;
+                document.getElementById('adminPkg2Price').value = localStorage.getItem('pkg2_price') || 25000;
+                document.getElementById('adminPkg3Price').value = localStorage.getItem('pkg3_price') || 10000;
             }
-        }
-
-        /* FITUR AI FRAME GENERATOR UNLIMITED */
-        function generateAiFrame(themeName) {
-            let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1800">
-                <rect x="70" y="60" width="1060" height="1680" fill="none" stroke="${themeName.includes('Cyber') ? '#06b6d4' : themeName.includes('Pink') ? '#ec4899' : themeName.includes('Gold') ? '#d4af37' : '#ffffff'}" stroke-width="24" rx="30"/>
-                <text x="600" y="45" font-family="sans-serif" font-weight="bold" font-size="32" fill="${themeName.includes('Cyber') ? '#06b6d4' : '#ffffff'}" text-anchor="middle">✨ AI Theme: ${themeName} ✨</text>
-            </svg>`;
-            let encodedUrl = "data:image/svg+xml;base64," + btoa(svgContent);
-
-            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
-            customFrames.push({ name: `AI - ${themeName}`, url: encodedUrl });
-            localStorage.setItem('saved_frames_gallery', JSON.stringify(customFrames));
-            loadAdminFrameList();
-            loadKioskFrames();
-            alert(`AI Frame "${themeName}" berhasil dibuat dan ditambahkan secara instan!`);
-        }
-
-        function loadAdminFrameList() {
-            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
-            const container = document.getElementById('adminFrameListContainer');
-            if(customFrames.length === 0) {
-                container.innerHTML = `<span class="text-slate-500 italic">Belum ada AI/Custom frame. Silakan buat di atas.</span>`;
-                return;
-            }
-            container.innerHTML = customFrames.map((f, index) => `
-                <div class="flex justify-between items-center bg-slate-900 p-1.5 rounded-lg border border-slate-800">
-                    <div class="flex items-center gap-2">
-                        <img src="${f.url}" class="w-8 h-8 object-contain bg-black rounded">
-                        <span class="font-bold text-white">${f.name}</span>
-                    </div>
-                    <button onclick="deleteCustomFrame(${index})" class="px-2 py-1 bg-red-950 text-red-400 rounded text-[10px] font-bold">Hapus</button>
-                </div>
-            `).join('');
-        }
-
-        function deleteCustomFrame(index) {
-            let customFrames = JSON.parse(localStorage.getItem('saved_frames_gallery') || "[]");
-            customFrames.splice(index, 1);
-            localStorage.setItem('saved_frames_gallery', JSON.stringify(customFrames));
-            loadAdminFrameList();
-            loadKioskFrames();
         }
 
         function saveAdminSettings() {
             localStorage.setItem('pb_brand_name', document.getElementById('adminBrandNameInput').value);
+            localStorage.setItem('pkg1_price', document.getElementById('adminPkg1Price').value);
+            localStorage.setItem('pkg2_price', document.getElementById('adminPkg2Price').value);
+            localStorage.setItem('pkg3_price', document.getElementById('adminPkg3Price').value);
             loadAppSettings();
             toggleAdminDashboard();
             alert("Pengaturan berhasil disimpan!");
         }
     </script>
 </body>
-</html>s
+</html>
