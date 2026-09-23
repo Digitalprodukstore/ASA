@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090e">
+<title>Photobooth Studio - BoothPro Kiosk v2.9.4 Phase B.2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Courier+Prime:wght@700&family=Inter:wght@400;700;900&family=Montserrat:wght@700;900&family=Playfair+Display:wght@700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+<style>
+:root{--primary-bg:#4f46e5;--app-bg-color:#07090e;--app-font-family:'Inter',system-ui,sans-serif}
+html,body{min-height:100%;background:var(--app-bg-color)}
+body{color:#f3f4f6;font-family:var(--app-font-family);overflow-x:hidden;background-size:cover;background-position:center;background-repeat:no-repeat}
+.glass-card{background:rgba(15,23,42,.88);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1)}
+.step-section{display:none}.step-section.active{display:flex}.btn-theme{background:var(--primary-bg);color:#fff;transition:.2s}.btn-theme:hover{filter:brightness(1.1)}
+.cam-portrait{width:100%;aspect-ratio:2/3;margin:0 auto}.cam-landscape{width:100%;aspect-ratio:3/2;margin:0 auto}.template-stage{width:100%;aspect-ratio:3/2;max-width:100%;margin:0 auto}.template-stage img{width:100%;height:100%;object-fit:fill}.template-stage video{width:100%;height:100%;object-fit:cover}
+.filter-none{filter:none}.filter-grayscale{filter:grayscale(100%) contrast(110%)}.filter-sepia{filter:sepia(85%) contrast(105%)}.filter-vintage{filter:contrast(125%) brightness(95%) sepia(35%)}.filter-vivid{filter:saturate(160%) contrast(110%) brightness(105%)}.filter-cool{filter:hue-rotate(180deg) saturate(120%) brightness(102%)}.filter-warm{filter:sepia(40%) saturate(140%) brightness(105%)}.filter-matte{filter:contrast(90%) brightness(110%) saturate(85%)}
+.hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}.editor-frame-card{scroll-snap-align:start}.layout-select{background:#020617;border:1px solid #334155;color:#fff;border-radius:.5rem;padding:.35rem .45rem;font-size:10px;width:100%}
+#cameraStatusPanel{display:none}.camera-status-ready{display:flex!important}.camera-status-error{display:flex!important}.camera-status-warn{display:flex!important}
+#boothproPrintSheet{display:none}
+@media print{
+ html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:4in!important;max-width:4in!important;min-height:6in!important}
+ body>*{display:none!important}
+ #boothproPrintSheet{display:block!important;width:4in!important;height:6in!important;margin:0!important;padding:0!important;background:#fff!important;overflow:hidden!important}
+ #boothproPrintImage{display:block!important;width:4in!important;height:6in!important;max-width:none!important;max-height:none!important;object-fit:fill!important;margin:0!important;padding:0!important}
+ @page{size:4in 6in;margin:0}
+}
+
+</style>
+<script>
+function syncSettingsFromDashboard(){
+ const savedFont=localStorage.getItem('app_kiosk_font')||'Inter';let font="'Inter',sans-serif";
+ if(savedFont==='Poppins')font="'Poppins',sans-serif";else if(savedFont==='Montserrat')font="'Montserrat',sans-serif";else if(savedFont==='Playfair Display')font="'Playfair Display',serif";else if(savedFont==='Courier New')font="'Courier Prime',monospace";else if(savedFont==='Comic Sans MS')font="'Comic Neue',cursive";
+ document.documentElement.style.setProperty('--app-font-family',font);
+ const bg=localStorage.getItem('app_custom_bg_color');const img=localStorage.getItem('app_custom_bg_image');
+ if(img)document.body.style.backgroundImage=`linear-gradient(rgba(7,9,14,.85),rgba(7,9,14,.85)),url('${img}')`;else if(bg){document.body.style.backgroundImage='none';document.documentElement.style.setProperty('--app-bg-color',bg);document.body.style.backgroundColor=bg}
+ const brand=localStorage.getItem('app_brand_name')||'PHOTOBOOTH STUDIO';const b=document.getElementById('brandNameDisplay');if(b)b.innerText=brand.toUpperCase();const w=document.getElementById('welcomeWatermark');if(w)w.innerText=localStorage.getItem('app_welcome_msg')||`Welcome to ${brand}`;
+ [['pkg1_price', 'priceDisplayPkg1'],['pkg2_price','priceDisplayPkg2'],['pkg3_price','priceDisplayPkg3']].forEach(([k,id])=>{const e=document.getElementById(id);if(e)e.innerText=`Rp ${parseInt(localStorage.getItem(k)||({'pkg1_price':15000,'pkg2_price':25000,'pkg3_price':10000}[k])).toLocaleString('id-ID')}`});
+ const ex=document.getElementById('extraPrintPriceDisplay');if(ex)ex.innerText=parseInt(localStorage.getItem('extra_print_price')||10000).toLocaleString('id-ID');
+}
+window.addEventListener('storage',syncSettingsFromDashboard);window.addEventListener('DOMContentLoaded',syncSettingsFromDashboard);
+</script>
+<meta name="boothpro-kiosk-version" content="2.9.4-phaseB2-camera-stable-print-layout">
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 max-w-xl mx-auto">
+<div id="boothproPrintSheet" aria-hidden="true"><img id="boothproPrintImage" alt="BoothPro 4R photo strip print"></div>
+<header class="glass-card p-3 rounded-2xl flex justify-between items-center mb-4 sticky top-2 z-50 no-print">
+<div><h1 id="brandNameDisplay" class="font-extrabold text-xs tracking-wider">PHOTOBOOTH STUDIO</h1><p class="text-[9px] text-emerald-400 font-semibold"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> KIOSK ONLINE</p></div>
+<div class="flex items-center gap-2"><div id="sessionTimerContainer" class="hidden bg-red-950/80 border border-red-500/40 px-3 py-1 rounded-xl text-center"><span class="text-[8px] text-red-300 block font-bold">SISA WAKTU SESI</span><span id="sessionTimer" class="text-xs font-black text-red-400 font-mono">07:00</span></div><a href="dashboard.html" class="px-2.5 py-1 bg-slate-800 text-[10px] font-bold rounded-lg border border-slate-700 text-slate-300"><i class="fa-solid fa-lock"></i></a></div>
+</header>
+
+<div id="step-welcome" class="step-section active flex-col space-y-4 my-auto">
+<div class="text-center space-y-1"><span id="welcomeWatermark" class="text-[11px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block mb-1">Welcome to Photobooth Studio</span><h2 class="text-xl font-black">Pilih Paket Sesi Foto</h2><p class="text-xs text-slate-400">Semua paket termasuk: Soft File, GIF Animation & Custom Frame</p></div>
+<div class="grid grid-cols-1 gap-2.5">
+<div onclick="selectPackage('Paket 1 Strip (2 Foto)','pkg1_price',15000,2,1,'STRIP_1')" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center"><div><h3 class="text-xs font-bold">Paket 1 Strip (2 Foto)</h3><p class="text-[10px] text-slate-400">2 Foto • 1 Cetak Strip • Free Soft File & GIF</p></div><span id="priceDisplayPkg1" class="text-xs font-bold text-emerald-400 font-mono">Rp 15.000</span></div>
+<div onclick="selectPackage('Paket Dual Strip (4 Foto)','pkg2_price',25000,4,2,'STRIP_2')" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center"><div><h3 class="text-xs font-bold">Paket Dual Strip (4 Foto)</h3><p class="text-[10px] text-slate-400">4 Foto (2 foto/strip) • 2 Cetak Strip • Soft File</p></div><span id="priceDisplayPkg2" class="text-xs font-bold text-emerald-400 font-mono">Rp 25.000</span></div>
+<div onclick="selectPackage('Paket Mini (2 Foto)','pkg3_price',10000,2,1)" class="glass-card p-3.5 rounded-xl border border-slate-700 hover:border-indigo-500 cursor-pointer flex justify-between items-center"><div><h3 class="text-xs font-bold">Paket Mini (2 Foto)</h3><p class="text-[10px] text-slate-400">2 Foto • 1 Cetak Mini • Soft File</p></div><span id="priceDisplayPkg3" class="text-xs font-bold text-emerald-400 font-mono">Rp 10.000</span></div>
+</div></div>
+
+<div id="step-payment" class="step-section flex-col space-y-4 my-auto"><div class="glass-card p-5 rounded-2xl space-y-4 text-center"><h3 class="text-sm font-bold"><i class="fa-solid fa-credit-card mr-2 text-indigo-400"></i>Pilih Metode Pembayaran</h3><div id="transactionStatus" class="hidden mt-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-950/80 text-left"><div class="flex justify-between items-center"><span class="text-[9px] text-slate-400">TRANSAKSI</span><span id="transactionStatusBadge" class="text-[8px] font-bold px-2 py-0.5 rounded-full bg-amber-950 text-amber-300">PENDING</span></div><div id="transactionIdDisplay" class="text-[10px] font-mono text-indigo-300 mt-1">-</div><div id="transactionAmountDisplay" class="text-[9px] text-slate-500 mt-0.5">-</div></div><div class="flex border border-slate-700 rounded-xl p-1 bg-slate-900/80 text-xs"><button onclick="switchPayTab('qris')" id="payTabQris" class="flex-1 py-1.5 rounded-lg font-bold bg-indigo-600">QRIS Digital</button><button onclick="switchPayTab('voucher')" id="payTabVoucher" class="flex-1 py-1.5 rounded-lg font-bold text-slate-400">Kode Voucher</button></div>
+<div id="payContentQris" class="space-y-3"><div id="qrisContainer" class="w-44 h-44 bg-white mx-auto rounded-xl p-2 flex items-center justify-center"></div><div><span class="text-[10px] text-slate-400">Total Tagihan:</span><p id="payAmountDisplay" class="text-base font-black text-emerald-400 font-mono">Rp 15.000</p></div><button onclick="confirmPaymentAndStartSession()" class="w-full py-3 btn-theme text-xs font-bold rounded-xl">Konfirmasi Pembayaran QRIS Selesai</button><p id="qrisPaymentNotice" class="text-[8px] text-slate-500 leading-relaxed">Pembayaran QRIS pada versi ini dikonfirmasi operator/user secara manual. Verifikasi otomatis gateway akan dibuat pada integrasi pembayaran berikutnya.</p></div>
+<div id="payContentVoucher" class="space-y-3 hidden"><p class="text-xs text-slate-400">Masukkan kode voucher atau promo event Anda:</p><input type="text" id="voucherInput" placeholder="CONTOH: EVENT2026" class="w-full bg-slate-900 border border-slate-700 px-3 py-2.5 rounded-xl text-xs text-center uppercase font-mono tracking-widest"><button onclick="redeemVoucher()" class="w-full py-3 bg-emerald-600 text-xs font-bold rounded-xl">Gunakan Voucher & Konfirmasi Sesi</button></div></div></div>
+
+<div id="step-booth" class="step-section flex-col space-y-2.5 my-auto">
+<div class="glass-card p-3 rounded-2xl space-y-2.5">
+<div id="activeTransactionBar" class="hidden px-2 py-1.5 rounded-lg bg-indigo-950/50 border border-indigo-500/20 text-[8px] text-indigo-300 font-mono"><span id="activeTransactionText">TRANSAKSI -</span></div><div class="flex justify-between items-center text-xs"><span class="text-amber-400 font-bold text-[11px]"><i class="fa-solid fa-rotate-left mr-1"></i>Sisa Retake: <b id="retakeCount">3</b>/3</span><span id="shotCounter" class="text-emerald-400 font-mono font-bold bg-emerald-950 px-2 py-0.5 rounded text-[11px]">Foto 0 dari 4</span></div>
+<div class="grid grid-cols-3 gap-1.5 text-[9px]"><button onclick="toggleMirror()" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300">Mirror: <span id="mirrorStatus">ON</span></button><button onclick="toggleOrientation()" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300">Mode: <span id="orientationStatus">Landscape</span></button><button onclick="toggleCaptureMode()" class="p-1.5 bg-slate-900 border border-slate-700 rounded-lg font-bold text-slate-300">Capture: <span id="captureModeStatus">Otomatis</span></button></div>
+<div id="cameraBox" class="template-stage bg-slate-950 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-800 cam-landscape">
+<video id="kioskCameraStream" autoplay playsinline muted webkit-playsinline class="absolute inset-0 w-full h-full object-cover -scale-x-100 bg-black"></video><img id="activeStaticFrameOverlay" src="" aria-hidden="true" class="hidden"><canvas id="photoCanvas" class="hidden"></canvas>
+<div id="countdownOverlay" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center text-6xl font-black hidden z-30">3</div><div id="cameraFlash" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-40"></div>
+<div id="cameraReadyBadge" class="absolute top-2 left-2 z-30 hidden px-2 py-1 rounded-lg bg-emerald-950/90 border border-emerald-500/50 text-[9px] font-bold text-emerald-300"><i class="fa-solid fa-camera mr-1"></i>KAMERA SIAP</div>
+<div id="cameraStatusPanel" class="absolute inset-3 z-50 items-center justify-center"><div class="max-w-xs w-full bg-slate-950/95 border border-slate-700 rounded-2xl p-4 text-center shadow-2xl"><div id="cameraStatusIcon" class="text-2xl mb-2">📷</div><div id="cameraStatusTitle" class="text-sm font-black">Menyiapkan kamera...</div><p id="cameraStatusText" class="text-[10px] text-slate-400 mt-1 leading-relaxed"></p><div id="cameraStatusActions" class="mt-3 flex gap-2 justify-center"></div></div></div>
+</div>
+<div id="cameraDeviceArea" class="hidden bg-slate-900 p-2 rounded-xl border border-slate-800"><label class="text-[9px] text-slate-400 block mb-1">Pilih kamera</label><select id="cameraDeviceSelect" onchange="switchCameraDevice(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg text-[10px] p-2"></select></div>
+<div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800"><div class="flex items-center justify-between gap-2"><div><span class="text-indigo-300 font-bold text-[10px] block">📸 Foto dulu • Bingkai nanti</span><span class="text-slate-500 text-[8px]">Frame tidak menutupi kamera. Setelah semua foto selesai, tamu memilih frame di halaman editor.</span></div><span class="text-emerald-400 text-[9px] font-bold whitespace-nowrap">AMAN</span></div></div>
+<div class="space-y-1"><span class="text-[10px] font-bold text-slate-400 block">Galeri Foto (hapus = retake slot)</span><div id="instantPhotoGallery" class="flex gap-2 overflow-x-auto py-1 min-h-[58px] hide-scrollbar"></div></div>
+<button id="startPhotoSessionBtn" onclick="startPhotoSessionAction()" class="w-full py-3 bg-indigo-600 text-xs font-bold rounded-xl shadow-lg"><i class="fa-solid fa-play"></i> Mulai Ambil Foto Sekarang</button>
+<button id="snapBtn" onclick="triggerManualSnap()" class="w-full py-2.5 btn-theme text-xs font-bold rounded-xl hidden items-center justify-center gap-2"><i class="fa-solid fa-camera"></i><span id="snapBtnText">Ambil Foto (3s)</span></button>
+<button onclick="finishSessionEarly()" class="w-full py-2.5 bg-emerald-600 text-xs font-bold rounded-xl flex items-center justify-center gap-2">Selesai Foto & Lanjut Ke Editor <i class="fa-solid fa-arrow-right"></i></button>
+</div></div>
+
+<div id="step-print" class="step-section flex-col space-y-3 my-auto"><div class="glass-card p-4 rounded-2xl space-y-3"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-xs font-bold">Editor Efek & Teks Photosheet</h3><div class="bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center"><span class="text-[7px] text-amber-300 block font-bold">WAKTU EDIT</span><span id="editorCountdownTimer" class="text-xs font-black text-amber-400 font-mono">01:00</span></div></div>
+<div class="relative w-full h-52 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center p-2"><canvas id="compositeCanvas" class="w-auto h-full max-h-44 rounded shadow-md object-contain bg-white"></canvas><div id="overlayTextDisplay" class="absolute bottom-3 left-0 right-0 text-center font-bold text-xs text-white pointer-events-none px-2"></div></div>
+<div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-indigo-500/30"><div class="flex items-center justify-between"><div><span class="text-[10px] text-indigo-300 font-bold block">1. Pilih Bingkai / Template</span><span class="text-[8px] text-slate-500">Preview langsung • Portrait/Landscape mengikuti ukuran template</span></div><span id="editorFrameStatus" class="text-[8px] text-emerald-400 font-bold">Belum dipilih</span></div><div id="editorFrameGallery" class="flex gap-2 overflow-x-auto py-1.5 min-h-[74px] hide-scrollbar"></div></div>
+<div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800"><div class="mb-1"><span class="text-[10px] text-indigo-300 font-bold block">3. Pilih Filter & Efek HD</span><span class="text-[8px] text-slate-500">Tap filter untuk melihat hasilnya langsung.</span></div><div class="grid grid-cols-4 gap-1 text-[9px]"><button onclick="applyFilter('none')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Normal</button><button onclick="applyFilter('grayscale')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Monokrom</button><button onclick="applyFilter('sepia')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Sepia</button><button onclick="applyFilter('vintage')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Vintage</button><button onclick="applyFilter('vivid')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Vivid HD</button><button onclick="applyFilter('cool')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Cool Tone</button><button onclick="applyFilter('warm')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Warm Glow</button><button onclick="applyFilter('matte')" class="py-1 bg-slate-800 rounded text-white font-bold border border-slate-700">Matte Soft</button></div></div>
+<div class="space-y-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-800"><div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-indigo-300 font-bold block">2. Atur Tata Letak Foto</span><span class="text-[8px] text-slate-500">Pilih foto untuk setiap kotak. Perubahan langsung terlihat di preview.</span></div><button onclick="autoArrangeTemplatePhotos()" class="px-2 py-1 rounded-lg bg-indigo-600 text-[8px] font-bold">Auto Susun</button></div><div id="slotMoverContainer" class="grid grid-cols-2 gap-1.5 pt-1"></div></div>
+<div class="space-y-1 bg-slate-900/90 p-2 rounded-xl border border-slate-800"><span class="text-[10px] text-indigo-300 font-bold block">Template Teks Cepat</span><div class="flex flex-wrap gap-1 pt-1 max-h-20 overflow-y-auto hide-scrollbar"><button onclick="selectQuickText('✨ Best Memories')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">✨ Best Memories</button><button onclick="selectQuickText('💖 Happy Birthday')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">💖 Happy Birthday</button><button onclick="selectQuickText('🎉 Party Time 2026')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">🎉 Party Time 2026</button><button onclick="selectQuickText('🌸 Lovely Day')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">🌸 Lovely Day</button><button onclick="selectQuickText('🔥 Besties Forever')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">🔥 Besties Forever</button><button onclick="selectQuickText('🌟 Shine Bright')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">🌟 Shine Bright</button><button onclick="selectQuickText('☕ Weekend Vibe')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">☕ Weekend Vibe</button><button onclick="selectQuickText('🎓 Graduation Day')" class="px-2 py-1 bg-slate-800 rounded text-[9px]">🎓 Graduation Day</button></div><input type="text" id="customTextInput" oninput="updateCompositeCanvas()" placeholder="Atau ketik teks kustom..." class="w-full mt-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-white text-xs"></div>
+<div class="glass-card p-2.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-center space-y-2"><div class="flex items-center justify-center gap-2"><span class="text-[10px] font-bold text-indigo-300 block">4. Soft File & Cetak</span><span id="finalOutputBadge" class="text-[8px] text-amber-300">Belum disiapkan</span></div><div id="cloudinaryQrCode" class="w-16 h-16 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div><div id="gifQrArea" class="hidden"><span class="text-[9px] text-pink-300 block mb-1">QR GIF Animation</span><div id="gifQrCode" class="w-16 h-16 bg-white mx-auto p-1 rounded-lg flex items-center justify-center"></div></div><p id="uploadStatus" class="text-[8px] text-slate-500 font-mono">Pilih frame dan filter terlebih dahulu.</p></div>
+<button id="prepareFinalBtn" onclick="prepareFinalOutput()" class="w-full py-2.5 bg-indigo-600 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"><i class="fa-solid fa-cloud-arrow-up"></i> Siapkan Soft File & QR</button>
+<button onclick="executePrint()" class="w-full py-2.5 bg-emerald-600 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"><i class="fa-solid fa-print"></i>Cetak Hasil Sekarang (<span id="printQuota">1</span> Lembar)</button></div></div>
+
+<script>
+const CLOUD_NAME='risakil1', PRESET_NAME='risakil';
+let currentPackage={name:'',price:15000,shots:2,prints:1,printLayout:'STRIP_1'},retakesLeft=3,isMirror=true,isPortrait=false,captureMode='auto';
+let timerInterval=null,autoCaptureTimer=null,editorTimerInterval=null,kioskStream=null,capturedPhotos=[],selectedFrameSrc='',selectedFrameMeta=null,activeFilterClass='filter-none',customTextValue='';
+let cameraStarting=false,cameraReady=false,activeCameraDeviceId='',cameraDeviceChangeHandler=null,sessionFinishing=false,sessionSecondsLeft=0,editorSecondsLeft=60,retakeTargetIndex=null;
+let compositeRenderPromise=Promise.resolve(),compositeRenderVersion=0;const frameSlotCache=new Map();let slotAssignments=[];let finalOutputReady=false;
+function frameOrientation(w,h){return (Number(h)||0)>(Number(w)||0)?'portrait':'landscape'}
+function setTemplateStageAspect(w,h){const box=document.getElementById('cameraBox');if(!box)return;const fw=Number(w)||3,fh=Number(h)||2;box.style.aspectRatio=`${fw} / ${fh}`;box.classList.remove('cam-portrait','cam-landscape');box.classList.add(frameOrientation(fw,fh)==='portrait'?'cam-portrait':'cam-landscape')}
+function normalizeFrameMeta(f){if(!f)return null;const w=Number(f.width||f.naturalWidth||0),h=Number(f.height||f.naturalHeight||0);if(!w||!h)return null;return {id:f.id||'',name:f.name||'Frame',width:w,height:h,orientation:f.orientation||frameOrientation(w,h),slots:Array.isArray(f.slots)?f.slots:[],slotSource:f.slotSource||'auto'}}
+
+
+function goToStep(name){document.querySelectorAll('.step-section').forEach(e=>e.classList.remove('active'));const el=document.getElementById('step-'+name);if(!el)return;el.classList.add('active');if(name!=='print')clearInterval(editorTimerInterval);if(name==='booth'){loadDashboardFramesForBooth();setTimeout(()=>{if(document.getElementById('step-booth')?.classList.contains('active')&&!cameraReady&&!cameraStarting)initKioskCamera()},0)}else if(name==='print'){stopKioskCamera();startEditorCountdownTimer();finalOutputReady=false;renderEditorFrameGallery();renderSlotMoverButtons();setTimeout(()=>updateCompositeCanvas(),30)}else stopKioskCamera()}
+function selectPackage(name,key,def,shots,prints,printLayout='AUTO'){const price=parseInt(localStorage.getItem(key)||def);currentPackage={name,price,shots,prints,printLayout};document.getElementById('payAmountDisplay').innerText=`Rp ${price.toLocaleString('id-ID')}`;const q=document.getElementById('qrisContainer');q.innerHTML='';new QRCode(q,{text:`00020101021126580016ID.CO.QRIS.WWW5145000000000${price}`,width:160,height:160});goToStep('payment')}
+function switchPayTab(tab){const q=document.getElementById('payContentQris'),v=document.getElementById('payContentVoucher');q.classList.toggle('hidden',tab!=='qris');v.classList.toggle('hidden',tab!=='voucher');document.getElementById('payTabQris').className=tab==='qris'?'flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white':'flex-1 py-1.5 rounded-lg font-bold text-slate-400';document.getElementById('payTabVoucher').className=tab==='voucher'?'flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white':'flex-1 py-1.5 rounded-lg font-bold text-slate-400'}
+function generateTransactionId(){
+const now=new Date();
+const stamp=now.getFullYear().toString().slice(-2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+const time=String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0')+String(now.getSeconds()).padStart(2,'0');
+const rand=Math.random().toString(36).slice(2,7).toUpperCase();
+return `BP-${stamp}-${time}-${rand}`;
+}
+function getVoucherList(){
+let raw=localStorage.getItem('voucher_codes')||localStorage.getItem('saved_voucher_codes')||localStorage.getItem('dashboard_vouchers')||'';
+if(!raw)return [];
+try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed.map(v=>typeof v==='string'?v:(v.code||'')).filter(Boolean).map(v=>v.toUpperCase())}catch(e){}
+return raw.split(/[,\n|;]/).map(v=>v.trim().toUpperCase()).filter(Boolean);
+}
+function findVoucher(code){
+const list=getVoucherList();
+if(!list.length)return null;
+return list.includes(code.toUpperCase())?code.toUpperCase():null;
+}
+function createTransaction(method,status='PENDING',voucherCode=''){
+const tx={
+ id:generateTransactionId(),
+ createdAt:new Date().toISOString(),
+ packageName:currentPackage.name,
+ amount:Number(currentPackage.price)||0,
+ shots:Number(currentPackage.shots)||0,
+ prints:Number(currentPackage.prints)||0,
+ paymentMethod:method,
+ paymentStatus:status,
+ voucherCode:voucherCode||'',
+ sessionStatus:'CREATED'
+};
+localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));
+return tx;
+}
+function updateTransaction(patch){
+let tx=null;try{tx=JSON.parse(localStorage.getItem('boothpro_current_transaction')||'null')}catch(e){}
+if(!tx)return null;
+tx={...tx,...patch,updatedAt:new Date().toISOString()};
+localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));
+return tx;
+}
+function getCurrentTransaction(){try{return JSON.parse(localStorage.getItem('boothpro_current_transaction')||'null')}catch(e){return null}}
+function saveTransactionToLog(tx){
+if(!tx)return;
+let list=[];try{list=JSON.parse(localStorage.getItem('boothpro_transaction_log')||'[]')}catch(e){list=[]}
+const idx=list.findIndex(x=>x.id===tx.id);
+if(idx>=0)list[idx]=tx;else list.unshift(tx);
+list=list.slice(0,500);
+localStorage.setItem('boothpro_transaction_log',JSON.stringify(list));
+}
+function renderTransactionStatus(tx){
+const box=document.getElementById('transactionStatus');
+const idEl=document.getElementById('transactionIdDisplay');
+const amountEl=document.getElementById('transactionAmountDisplay');
+const badge=document.getElementById('transactionStatusBadge');
+if(!tx||!box)return;
+box.classList.remove('hidden');
+idEl.innerText=tx.id;
+amountEl.innerText=`${tx.paymentMethod} • Rp ${Number(tx.amount).toLocaleString('id-ID')}`;
+badge.innerText=tx.paymentStatus;
+badge.className='text-[8px] font-bold px-2 py-0.5 rounded-full '+(tx.paymentStatus==='PAID'||tx.paymentStatus==='VOUCHER'?'bg-emerald-950 text-emerald-300':'bg-amber-950 text-amber-300');
+const bar=document.getElementById('activeTransactionBar');
+const text=document.getElementById('activeTransactionText');
+if(bar&&text){bar.classList.remove('hidden');text.innerText=`${tx.id} • ${tx.paymentMethod} • Rp ${Number(tx.amount).toLocaleString('id-ID')}`}
+}
+function selectPackage(name,key,def,shots,prints,printLayout='AUTO'){
+const price=parseInt(localStorage.getItem(key)||def);
+currentPackage={name,price,shots,prints,printLayout};
+const tx=createTransaction('QRIS','PENDING');
+renderTransactionStatus(tx);
+document.getElementById('payAmountDisplay').innerText=`Rp ${price.toLocaleString('id-ID')}`;
+const q=document.getElementById('qrisContainer');q.innerHTML='';
+new QRCode(q,{text:`00020101021126580016ID.CO.QRIS.WWW5145000000000${price}`,width:160,height:160});
+const voucherInput=document.getElementById('voucherInput');if(voucherInput)voucherInput.value='';
+goToStep('payment');
+}
+function switchPayTab(tab){
+const q=document.getElementById('payContentQris'),v=document.getElementById('payContentVoucher');
+q.classList.toggle('hidden',tab!=='qris');v.classList.toggle('hidden',tab!=='voucher');
+const qtab=document.getElementById('payTabQris'),vtab=document.getElementById('payTabVoucher');
+qtab.className=tab==='qris'?'flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white':'flex-1 py-1.5 rounded-lg font-bold text-slate-400';
+vtab.className=tab==='voucher'?'flex-1 py-1.5 rounded-lg font-bold bg-indigo-600 text-white':'flex-1 py-1.5 rounded-lg font-bold text-slate-400';
+const tx=getCurrentTransaction();if(tx){tx.paymentMethod=tab==='voucher'?'VOUCHER':'QRIS';tx.paymentStatus='PENDING';localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));renderTransactionStatus(tx)}
+}
+function redeemVoucher(){
+const input=document.getElementById('voucherInput');
+const code=(input?.value||'').trim().toUpperCase();
+if(code.length<3){showToast('Masukkan kode voucher yang valid!','error');return}
+const configured=getVoucherList();
+if(configured.length && !findVoucher(code)){showToast('Voucher tidak ditemukan atau tidak aktif.','error');return}
+if(!configured.length){showToast('Belum ada daftar voucher di Dashboard. Kode voucher belum dapat diverifikasi.','error');return}
+const tx=getCurrentTransaction()||createTransaction('VOUCHER','PENDING',code);
+tx.paymentMethod='VOUCHER';tx.paymentStatus='VOUCHER';tx.voucherCode=code;tx.amount=0;tx.paidAmount=0;tx.sessionStatus='CREATED';
+localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));saveTransactionToLog(tx);renderTransactionStatus(tx);confirmPaymentAndStartSession('VOUCHER',code);
+}
+function confirmPaymentAndStartSession(methodOverride='',voucherCode=''){
+if(!currentPackage.name){showToast('Pilih paket terlebih dahulu.','error');return}
+let tx=getCurrentTransaction();
+const method=methodOverride||tx?.paymentMethod||'QRIS';
+if(!tx||tx.packageName!==currentPackage.name||Number(tx.amount)!==Number(currentPackage.price))tx=createTransaction(method,'PENDING',voucherCode);
+if(method==='QRIS'){
+tx.paymentMethod='QRIS';tx.paymentStatus='PAID';tx.paidAmount=Number(currentPackage.price);tx.voucherCode='';
+}else{
+tx.paymentMethod='VOUCHER';tx.paymentStatus='VOUCHER';tx.voucherCode=voucherCode||tx.voucherCode;tx.amount=0;tx.paidAmount=0;
+}
+tx.sessionStatus='ACTIVE';tx.sessionStartedAt=new Date().toISOString();
+localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));saveTransactionToLog(tx);renderTransactionStatus(tx);
+sessionFinishing=false;clearInterval(timerInterval);retakesLeft=parseInt(localStorage.getItem('max_retake_quota'))||3;sessionSecondsLeft=(parseInt(localStorage.getItem('session_timer_minutes'))||7)*60;
+document.getElementById('sessionTimerContainer').classList.remove('hidden');document.getElementById('retakeCount').innerText=retakesLeft;document.getElementById('shotCounter').innerText=`Foto 0 dari ${currentPackage.shots}`;document.getElementById('printQuota').innerText=currentPackage.prints;updatePrintQuotaLabel();capturedPhotos=[];retakeTargetIndex=null;renderInstantGallery();startSessionTimer();goToStep('booth');
+}
+function startSessionTimer(){clearInterval(timerInterval);updateSessionTimer();timerInterval=setInterval(()=>{sessionSecondsLeft--;updateSessionTimer();if(sessionSecondsLeft<=0){clearInterval(timerInterval);if(capturedPhotos.length){finishSessionEarly(true)}else{showToast('Waktu sesi habis. Tidak ada foto yang diambil. Sesi direset.','error');resetKiosk()}}},1000)}
+function updateSessionTimer(){const m=Math.floor(Math.max(0,sessionSecondsLeft)/60),s=Math.max(0,sessionSecondsLeft)%60;document.getElementById('sessionTimer').innerText=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function setCameraStatus(type,title,msg,actions=''){const p=document.getElementById('cameraStatusPanel');p.classList.remove('camera-status-ready','camera-status-error','camera-status-warn');p.classList.add('camera-status-'+(type==='error'?'error':type==='warn'?'warn':'ready'));p.style.display='flex';document.getElementById('cameraStatusTitle').innerText=title;document.getElementById('cameraStatusText').innerText=msg;document.getElementById('cameraStatusIcon').innerText=type==='error'?'⚠️':type==='warn'?'⏳':'📷';document.getElementById('cameraStatusActions').innerHTML=actions}
+function hideCameraStatus(){const p=document.getElementById('cameraStatusPanel');p.style.display='none';p.classList.remove('camera-status-ready','camera-status-error','camera-status-warn')}
+function showCameraHelp(){setCameraStatus('warn','Cara mengaktifkan kamera','iPhone: izinkan Camera untuk website ini di pengaturan Safari, lalu kembali ke halaman dan tekan Coba Lagi. Gunakan HTTPS. Jangan buka kamera di tab lain.')}
+function cameraError(err){const n=err?.name||'';if(!window.isSecureContext)return'Kamera membutuhkan HTTPS. Gunakan URL https://.';if(!navigator.mediaDevices?.getUserMedia)return'Browser tidak menyediakan akses kamera. Gunakan Safari/Chrome terbaru.';if(n==='NotAllowedError'||n==='PermissionDeniedError')return'Akses kamera ditolak atau playback diblokir. Izinkan Camera untuk website ini di Safari lalu tekan Aktifkan Kamera.';if(n==='NotFoundError'||n==='DevicesNotFoundError')return'Kamera tidak ditemukan pada perangkat.';if(n==='NotReadableError'||n==='TrackStartError')return'Kamera sedang digunakan aplikasi/tab lain, atau stream sebelumnya belum dilepas. BoothPro akan melepas stream lalu mencoba lagi.';if(n==='OverconstrainedError'||n==='TypeError')return'Konfigurasi kamera tidak cocok. BoothPro akan memakai konfigurasi kamera paling aman.';if(n==='AbortError')return'Proses kamera dibatalkan oleh Safari/perangkat. Tekan Coba Lagi.';if(n==='NoVideoFrame')return'Kamera sudah diberi izin tetapi Safari belum mengirim frame video. Tekan Aktifkan Kamera.';return'Kamera belum dapat diakses. Tekan Coba Lagi.'}
+function buildConstraints(id){if(id)return{audio:false,video:{deviceId:{exact:id}}};return{audio:false,video:{facingMode:{ideal:'user'}}}}
+async function waitVideo(video,ms=6000){if(video.readyState>=2&&video.videoWidth&&video.videoHeight)return true;return await new Promise(r=>{let done=false;const finish=()=>{if(done)return;done=true;video.removeEventListener('loadedmetadata',finish);video.removeEventListener('canplay',finish);video.removeEventListener('playing',finish);r(!!(video.videoWidth&&video.videoHeight))};video.addEventListener('loadedmetadata',finish);video.addEventListener('canplay',finish);video.addEventListener('playing',finish);setTimeout(finish,ms)})}
+async function ensureVideoPlaying(video){
+ video.autoplay=true;video.muted=true;video.playsInline=true;
+ video.setAttribute('autoplay','');video.setAttribute('muted','');video.setAttribute('playsinline','');video.setAttribute('webkit-playsinline','');video.setAttribute('disablepictureinpicture','');
+ try{const p=video.play();if(p&&typeof p.then==='function')await p;return true}catch(e){console.warn('BoothPro video.play() blocked:',e);return false}
+}
+async function waitForCameraReady(video,ms=7000){
+ const start=Date.now();
+ while(Date.now()-start<ms){
+   if(video.videoWidth>0&&video.videoHeight>0&&video.readyState>=2)return true;
+   await new Promise(r=>setTimeout(r,120));
+ }
+ return !!(video.videoWidth&&video.videoHeight);
+}
+async function resumeCameraPlayback(){const video=document.getElementById('kioskCameraStream');if(!video||!kioskStream)return false;const ok=await ensureVideoPlaying(video);if(!ok){setCameraStatus('warn','Aktifkan kamera','Safari belum mengizinkan preview video. Tekan tombol ini sekali lagi setelah tetap berada di halaman BoothPro.',`<button onclick="resumeCameraPlayback()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Aktifkan Kamera</button>`);return false}const ready=await waitForCameraReady(video,3000);if(ready){cameraReady=true;document.getElementById('cameraReadyBadge').classList.remove('hidden');hideCameraStatus();return true}setCameraStatus('warn','Preview belum tampil','Stream kamera sudah aktif tetapi Safari belum mengirim frame video. Tekan Aktifkan Kamera sekali lagi.',`<button onclick="resumeCameraPlayback()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Aktifkan Kamera</button>`);return false}
+function stopStreamTracks(stream){try{stream?.getTracks?.().forEach(t=>{try{t.onended=null;t.onmute=null;t.onunmute=null;t.stop()}catch(_){}})}catch(_){} }
+async function requestCameraStream(preferredId=''){const attempts=[];if(preferredId)attempts.push({audio:false,video:{deviceId:{exact:preferredId}}});attempts.push({audio:false,video:{facingMode:{ideal:'user'}}});attempts.push({audio:false,video:true});let last=null;for(const c of attempts){try{return await navigator.mediaDevices.getUserMedia(c)}catch(e){last=e;if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError')throw e}}throw last||new Error('CameraUnavailable')}
+async function initKioskCamera(opts={}){
+ const video=document.getElementById('kioskCameraStream');
+ if(!video)return false;
+ if(cameraStarting)return false;
+ cameraStarting=true;cameraReady=false;
+ document.getElementById('cameraReadyBadge').classList.add('hidden');
+ setCameraStatus('warn','Menyiapkan kamera...','Mohon tunggu, BoothPro sedang mengaktifkan kamera.');
+ let stream=null;
+ try{
+   if(!window.isSecureContext)throw Object.assign(new Error(),{name:'SecureContextError'});
+   if(!navigator.mediaDevices?.getUserMedia)throw Object.assign(new Error(),{name:'NoCameraAPI'});
+   video.autoplay=true;video.muted=true;video.playsInline=true;
+   video.setAttribute('autoplay','');video.setAttribute('muted','');video.setAttribute('playsinline','');video.setAttribute('webkit-playsinline','');
+
+   if(kioskStream&&kioskStream.getTracks().some(t=>t.readyState==='live')){
+     video.srcObject=kioskStream;
+     const played=await ensureVideoPlaying(video);
+     if(!played){
+       setCameraStatus('warn','Aktifkan kamera','Izin kamera sudah ada. Safari belum menjalankan preview. Tekan tombol di bawah.',`<button onclick="resumeCameraPlayback()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Aktifkan Kamera</button>`);
+       return false;
+     }
+     const ready=await waitForCameraReady(video,4000);
+     if(!ready)throw Object.assign(new Error(),{name:'NoVideoFrame'});
+     cameraReady=true;document.getElementById('cameraReadyBadge').classList.remove('hidden');hideCameraStatus();return true;
+   }
+
+   stream=await requestCameraStream(opts.deviceId||'');
+   kioskStream=stream;
+   const track=stream.getVideoTracks()[0];
+   activeCameraDeviceId=track?.getSettings?.().deviceId||opts.deviceId||activeCameraDeviceId||'';
+   video.srcObject=stream;
+
+   // IMPORTANT FOR iOS: play FIRST, then wait for the actual video dimensions/frame.
+   // Waiting for a frame before play() can time out on Safari and falsely report the camera as not ready.
+   const played=await ensureVideoPlaying(video);
+   if(!played){
+     setCameraStatus('warn','Aktifkan kamera','Kamera sudah diberi izin tetapi Safari belum menjalankan preview. Tekan tombol di bawah.',`<button onclick="resumeCameraPlayback()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Aktifkan Kamera</button>`);
+     return false;
+   }
+   const ready=await waitForCameraReady(video,7000);
+   if(!ready)throw Object.assign(new Error(),{name:'NoVideoFrame'});
+
+   track?.addEventListener('ended',handleCameraTrackEnded);
+   track?.addEventListener('mute',handleCameraTrackMuted);
+   track?.addEventListener('unmute',handleCameraTrackUnmuted);
+   cameraReady=true;
+   document.getElementById('cameraReadyBadge').classList.remove('hidden');
+   hideCameraStatus();
+   await refreshCameraDevices();
+   return true;
+ }catch(e){
+   console.error('BoothPro camera init error:',e);
+   stopStreamTracks(stream||kioskStream);kioskStream=null;
+   try{video.pause()}catch(_){ }
+   video.srcObject=null;
+   cameraReady=false;document.getElementById('cameraReadyBadge').classList.add('hidden');
+   const msg=cameraError(e);
+   setCameraStatus('error','Kamera belum siap',msg,`<button onclick="retryKioskCamera()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Coba Lagi</button><button onclick="showCameraHelp()" class="px-3 py-2 bg-slate-800 rounded-lg text-[10px] font-bold">Bantuan</button>`);
+   return false;
+ }finally{cameraStarting=false}
+}
+
+function handleCameraTrackEnded(){cameraReady=false;document.getElementById('cameraReadyBadge').classList.add('hidden');if(document.getElementById('step-booth').classList.contains('active'))setCameraStatus('error','Kamera terputus','Kamera berhenti atau perangkat mengubah akses kamera.',`<button onclick="retryKioskCamera()" class="px-4 py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">Coba Lagi</button>`)}
+function handleCameraTrackMuted(){if(cameraReady)setCameraStatus('warn','Kamera sementara berhenti','Menunggu kamera kembali aktif...')}
+function handleCameraTrackUnmuted(){if(cameraReady)hideCameraStatus()}
+async function refreshCameraDevices(){if(!navigator.mediaDevices?.enumerateDevices)return;try{const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');const area=document.getElementById('cameraDeviceArea'),sel=document.getElementById('cameraDeviceSelect');if(ds.length<=1){area.classList.add('hidden');return}area.classList.remove('hidden');sel.innerHTML=ds.map((d,i)=>`<option value="${esc(d.deviceId)}">${esc(d.label||`Kamera ${i+1}`)}</option>`).join('');if(activeCameraDeviceId)sel.value=activeCameraDeviceId}catch(e){console.warn(e)}}
+async function switchCameraDevice(id){if(!id)return;activeCameraDeviceId=id;stopKioskCamera(false);await initKioskCamera({deviceId:id})}
+async function retryKioskCamera(){stopKioskCamera(false);activeCameraDeviceId='';await new Promise(r=>setTimeout(r,300));await initKioskCamera()}
+function stopKioskCamera(remove=true){if(kioskStream){stopStreamTracks(kioskStream);kioskStream=null}const v=document.getElementById('kioskCameraStream');if(v){try{v.pause()}catch(e){}v.srcObject=null}cameraReady=false;document.getElementById('cameraReadyBadge')?.classList.add('hidden');if(autoCaptureTimer){clearTimeout(autoCaptureTimer);autoCaptureTimer=null}if(remove&&cameraDeviceChangeHandler&&navigator.mediaDevices){navigator.mediaDevices.removeEventListener('devicechange',cameraDeviceChangeHandler);cameraDeviceChangeHandler=null}}
+function toggleMirror(){isMirror=!isMirror;document.getElementById('mirrorStatus').innerText=isMirror?'ON':'OFF';document.getElementById('kioskCameraStream').classList.toggle('-scale-x-100',isMirror)}
+function toggleOrientation(){isPortrait=!isPortrait;document.getElementById('orientationStatus').innerText=isPortrait?'Portrait':'Landscape';if(selectedFrameMeta){showToast('Orientasi template aktif: '+(selectedFrameMeta.orientation||frameOrientation(selectedFrameMeta.width,selectedFrameMeta.height))+'. Pilih template lain untuk mengubah layout.','warn');setTemplateStageAspect(selectedFrameMeta.width,selectedFrameMeta.height)}else{setTemplateStageAspect(isPortrait?2:3,isPortrait?3:2)}}
+function toggleCaptureMode(){captureMode=captureMode==='manual'?'auto':'manual';document.getElementById('captureModeStatus').innerText=captureMode==='manual'?'Manual':'Otomatis';if(captureMode==='manual'){clearTimeout(autoCaptureTimer);document.getElementById('snapBtn').classList.remove('hidden');document.getElementById('snapBtn').classList.add('flex')}else if(capturedPhotos.length<currentPackage.shots)document.getElementById('snapBtn').classList.add('hidden')}
+function loadDashboardFramesForBooth(){let frames=[];try{frames=JSON.parse(localStorage.getItem('saved_frames_gallery')||'[]')}catch(e){}const c=document.getElementById('kioskLiveFrameGallery');selectedFrameSrc='';selectedFrameMeta=null;slotAssignments=[];const overlay=document.getElementById('activeStaticFrameOverlay');if(overlay)overlay.src='';if(!c)return;if(!frames.length){c.innerHTML='<div class="text-[9px] text-slate-400 italic">Belum ada frame. Frame dapat dipilih setelah sesi foto selesai.</div>';return}c.innerHTML='<div class="text-[9px] text-emerald-400 font-bold">'+frames.length+' bingkai tersedia — pilih setelah foto selesai.</div>'}
+async function fitCameraBoxToFrame(url,meta=null){const box=document.getElementById('cameraBox'),overlay=document.getElementById('activeStaticFrameOverlay');if(!box||!overlay)return;try{const img=await loadImage(url,true);const fw=img.naturalWidth||img.width,fh=img.naturalHeight||img.height;if(fw>0&&fh>0){if(!meta)meta={width:fw,height:fh,orientation:frameOrientation(fw,fh),slots:[]};setTemplateStageAspect(meta.width||fw,meta.height||fh);overlay.style.objectFit='fill';overlay.style.width='100%';overlay.style.height='100%';}}catch(e){console.warn('Frame preview sizing failed',e)}}
+function resetCameraBoxAspect(){const box=document.getElementById('cameraBox');if(box){box.style.aspectRatio=isPortrait?'2 / 3':'3 / 2';box.classList.remove('cam-portrait','cam-landscape');box.classList.add(isPortrait?'cam-portrait':'cam-landscape')}}
+async function selectKioskFrame(index,el){let frames=[];try{frames=JSON.parse(localStorage.getItem('saved_frames_gallery')||'[]')}catch(e){}const f=frames[index];if(!f)return;document.querySelectorAll('.kiosk-frame-item').forEach(e=>e.classList.remove('border-indigo-500','bg-indigo-950/40'));el?.classList.add('border-indigo-500','bg-indigo-950/40');selectedFrameSrc=f.url;selectedFrameMeta=normalizeFrameMeta(f);frameSlotCache.clear();slotAssignments=[];const img=await loadImage(f.url,true).catch(()=>null);if(img){const fw=img.naturalWidth||img.width,fh=img.naturalHeight||img.height;if(!selectedFrameMeta)selectedFrameMeta={name:f.name||'Frame',width:fw,height:fh,orientation:frameOrientation(fw,fh),slots:[],slotSource:'auto'};else{selectedFrameMeta.width=selectedFrameMeta.width||fw;selectedFrameMeta.height=selectedFrameMeta.height||fh}const status=document.getElementById('editorFrameStatus');if(status)status.innerText=(selectedFrameMeta.name||f.name||'Frame')+' • '+selectedFrameMeta.orientation;await updateCompositeCanvas();await renderSlotMoverButtons()} }
+async function startPhotoSessionAction(){if(!cameraReady){if(cameraStarting){setCameraStatus('warn','Menyiapkan kamera...','Safari sedang mengaktifkan preview kamera. Tunggu sebentar lalu tekan tombol ini lagi.');return}const ok=await initKioskCamera();if(!ok)return}if(!cameraReady){showToast('Kamera belum siap. Tekan Coba Lagi setelah preview muncul.','error');return}document.getElementById('startPhotoSessionBtn').classList.add('hidden');if(captureMode==='manual'){document.getElementById('snapBtn').classList.remove('hidden');document.getElementById('snapBtn').classList.add('flex')}else{startAutoCaptureSequence()}}
+function countdown(seconds){return new Promise(resolve=>{let n=seconds;const o=document.getElementById('countdownOverlay');o.classList.remove('hidden');o.innerText=n;const t=setInterval(()=>{n--;if(n>0)o.innerText=n;else{clearInterval(t);o.classList.add('hidden');resolve()}},1000)})}
+async function startAutoCaptureSequence(){if(autoCaptureTimer||capturedPhotos.length>=currentPackage.shots)return;await countdown(3);if(!document.getElementById('step-booth').classList.contains('active'))return;const ok=takeKioskSnapshot();if(ok&&capturedPhotos.length<currentPackage.shots){autoCaptureTimer=setTimeout(()=>{autoCaptureTimer=null;startAutoCaptureSequence()},900)}else if(ok&&capturedPhotos.length>=currentPackage.shots){finishSessionEarly()}}
+async function triggerManualSnap(){if(capturedPhotos.length>=currentPackage.shots||!cameraReady)return;const btn=document.getElementById('snapBtn');btn.disabled=true;await countdown(3);const ok=takeKioskSnapshot();btn.disabled=false;if(ok&&capturedPhotos.length>=currentPackage.shots)finishSessionEarly()}
+function takeKioskSnapshot(){const v=document.getElementById('kioskCameraStream');if(!cameraReady||!kioskStream||v.readyState<2||!v.videoWidth||!v.videoHeight){showToast('Kamera belum siap.','error');return false}const c=document.getElementById('photoCanvas');const vw=v.videoWidth,vh=v.videoHeight;if(isPortrait&&vh<vw){c.width=vh;c.height=vw}else{c.width=vw;c.height=vh}const ctx=c.getContext('2d');ctx.save();if(isPortrait&&vh<vw){ctx.translate(c.width/2,c.height/2);ctx.rotate(Math.PI/2);ctx.translate(-vw/2,-vh/2)}if(isMirror){ctx.translate(vw,0);ctx.scale(-1,1)}ctx.drawImage(v,0,0,vw,vh);ctx.restore();const flash=document.getElementById('cameraFlash');flash.style.transition='none';flash.style.opacity='0.9';setTimeout(()=>{flash.style.transition='opacity .25s';flash.style.opacity='0'},20);const photoData=c.toDataURL('image/jpeg',.92);if(retakeTargetIndex!==null&&retakeTargetIndex>=0&&retakeTargetIndex<capturedPhotos.length){capturedPhotos[retakeTargetIndex]=photoData;retakeTargetIndex=null}else{capturedPhotos.push(photoData)}updateShotCounter();renderInstantGallery();return true}
+function updateShotCounter(){document.getElementById('shotCounter').innerText=`Foto ${capturedPhotos.length} dari ${currentPackage.shots}`}
+function renderInstantGallery(){const g=document.getElementById('instantPhotoGallery');if(!capturedPhotos.length){g.innerHTML='<div class="text-[10px] text-slate-600 italic py-2 px-2">Belum ada foto diambil</div>';return}g.innerHTML=capturedPhotos.map((p,i)=>`<div class="relative shrink-0 w-20 h-20 bg-slate-950 rounded border ${retakeTargetIndex===i?'border-rose-500':'border-slate-700'} overflow-hidden"><img src="${p}" class="w-full h-full object-cover"><div class="absolute top-0 left-0 right-0 flex justify-between p-1"><button onclick="retakePhotoIndex(${i})" class="w-6 h-6 bg-rose-600/90 text-white rounded-md flex items-center justify-center text-[10px]" title="Retake Foto Ini"><i class="fa-solid fa-rotate"></i></button><button onclick="deletePhotoIndex(${i})" class="w-6 h-6 bg-slate-950/90 text-white rounded-md flex items-center justify-center text-[10px]" title="Hapus Foto Ini"><i class="fa-solid fa-trash"></i></button></div><span class="absolute bottom-0 left-0 right-0 text-center bg-black/65 text-[8px]">Foto ${i+1}</span></div>`).join('')}
+function retakePhotoIndex(i){if(retakesLeft<=0){showToast('Kuota retake sudah habis.','error');return}if(i<0||i>=capturedPhotos.length)return;retakesLeft--;retakeTargetIndex=i;document.getElementById('retakeCount').innerText=retakesLeft;renderInstantGallery();if(captureMode==='manual'){document.getElementById('snapBtn').classList.remove('hidden');document.getElementById('snapBtn').classList.add('flex')}else startAutoCaptureSequence()}
+function deletePhotoIndex(i){if(i<0||i>=capturedPhotos.length)return;capturedPhotos.splice(i,1);if(retakeTargetIndex===i)retakeTargetIndex=null;else if(retakeTargetIndex!==null&&retakeTargetIndex>i)retakeTargetIndex--;slotAssignments=slotAssignments.map(v=>v===i?null:v>i?v-1:v);updateShotCounter();renderInstantGallery();renderSlotMoverButtons();showToast('Foto dihapus. Anda bisa mengambil foto pengganti.','info')}
+function takeReplacementSnapshot(){const v=document.getElementById('kioskCameraStream');if(!cameraReady||!v.videoWidth)return false;const c=document.getElementById('photoCanvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');x.save();if(isMirror){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(v,0,0,c.width,c.height);x.restore();capturedPhotos[retakeTargetIndex]=c.toDataURL('image/jpeg',.92);retakeTargetIndex=null;updateShotCounter();renderInstantGallery();return true}
+async function finishSessionEarly(force=false){if(sessionFinishing)return;if(!capturedPhotos.length){if(!force)showToast('Harap ambil minimal 1 foto terlebih dahulu!','error');return}sessionFinishing=true;clearInterval(timerInterval);clearTimeout(autoCaptureTimer);autoCaptureTimer=null;stopKioskCamera();const tx=updateTransaction({sessionStatus:'EDITOR',photoCount:capturedPhotos.length,sessionEndedAt:new Date().toISOString()});saveTransactionToLog(tx);renderSlotMoverButtons();await updateCompositeCanvas();goToStep('print');sessionFinishing=false}
+function startEditorCountdownTimer(){clearInterval(editorTimerInterval);editorSecondsLeft=60;const e=document.getElementById('editorCountdownTimer');const tick=()=>{const s=Math.max(0,editorSecondsLeft),m=Math.floor(s/60);e.innerText=`${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`};tick();editorTimerInterval=setInterval(()=>{editorSecondsLeft--;tick();if(editorSecondsLeft<=0){clearInterval(editorTimerInterval);executePrint()}},1000)}
+function renderEditorFrameGallery(){const c=document.getElementById('editorFrameGallery');if(!c)return;let frames=[];try{frames=JSON.parse(localStorage.getItem('saved_frames_gallery')||'[]')}catch(e){}if(!frames.length){c.innerHTML='<div class="text-[9px] text-slate-500 italic py-2">Belum ada frame dari Dashboard.</div>';return}c.innerHTML=frames.map((f,i)=>`<button type="button" onclick="selectKioskFrame(${i},this)" class="editor-frame-card kiosk-frame-item shrink-0 w-20 p-1 rounded-lg border ${selectedFrameSrc===f.url?'border-indigo-500 bg-indigo-950/40':'border-slate-700 bg-slate-950'} text-left"><img src="${esc(f.url)}" class="w-full h-14 object-contain rounded bg-black"><span class="block text-[7px] text-slate-300 truncate mt-1">${esc(f.name||'Frame '+(i+1))}</span><span class="block text-[6px] text-slate-500">${f.width&&f.height?f.width+'×'+f.height:'Auto'}</span></button>`).join('')}
+function prepareFinalOutput(){if(!selectedFrameSrc){showToast('Pilih bingkai terlebih dahulu.','error');return}const btn=document.getElementById('prepareFinalBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan...'};updateCompositeCanvas().then(()=>generateCloudinaryQRCodeAndUpload()).finally(()=>{finalOutputReady=true;const b=document.getElementById('finalOutputBadge');if(b)b.innerText='Siap / diproses';if(btn){btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-cloud-arrow-up"></i> Perbarui Soft File & QR'}})}
+function applyFilter(t){activeFilterClass='filter-'+t;document.querySelectorAll('[onclick^="applyFilter("]').forEach(b=>{b.classList.remove('ring-2','ring-indigo-400');if(b.getAttribute('onclick')==="applyFilter('"+t+"')")b.classList.add('ring-2','ring-indigo-400')});updateCompositeCanvas()}
+async function renderSlotMoverButtons(){const box=document.getElementById('slotMoverContainer');if(!box)return;if(!capturedPhotos.length){box.innerHTML='<div class="col-span-2 text-[9px] text-slate-500 italic">Belum ada foto.</div>';return}if(!selectedFrameSrc){box.innerHTML='<div class="col-span-2 text-[9px] text-slate-500 italic">Pilih bingkai terlebih dahulu.</div>';return}let frame=null;try{frame=await loadImage(selectedFrameSrc,true)}catch(e){}if(!frame){box.innerHTML='';return}const W=Number(selectedFrameMeta?.width)||frame.naturalWidth||frame.width||1200,H=Number(selectedFrameMeta?.height)||frame.naturalHeight||frame.height||1800;const slots=await detectSlots(frame,Math.min(1200,W),Math.max(400,Math.round(Math.min(1200,W)*H/W)));if(!slots.length){box.innerHTML='<div class="col-span-2 text-[9px] text-amber-300">Slot transparan belum terdeteksi. Pilih template PNG transparan.</div>';return}if(!slotAssignments.length||slotAssignments.length!==slots.length)slotAssignments=Array.from({length:slots.length},(_,i)=>i<capturedPhotos.length?i:null);const mismatch=slots.length!==capturedPhotos.length?`<div class="col-span-2 text-[8px] ${slots.length<capturedPhotos.length?'text-amber-300':'text-slate-400'}">Template memiliki ${slots.length} kotak, sesi memiliki ${capturedPhotos.length} foto. Pilih foto yang ingin dipakai di setiap kotak.</div>`:'';box.innerHTML=mismatch+slotAssignments.map((photoIndex,slotIndex)=>{const opts=Array.from({length:capturedPhotos.length},(_,i)=>`<option value="${i}" ${Number(photoIndex)===i?'selected':''}>Foto #${i+1}</option>`).join('');return `<div class="bg-slate-950 border border-slate-700 rounded-lg p-1.5"><div class="flex items-center justify-between mb-1"><span class="text-[8px] text-slate-400 font-bold">Kotak ${slotIndex+1}</span><span class="text-[8px] text-indigo-300">${photoIndex===null?'Kosong':'Foto #'+(photoIndex+1)}</span></div><select class="layout-select" onchange="setSlotAssignment(${slotIndex},this.value)"><option value="-1" ${photoIndex===null?'selected':''}>Kosong</option>${opts}</select></div>`}).join('')}
+function setSlotAssignment(slotIndex,value){const v=Number(value);slotAssignments[slotIndex]=v>=0?v:null;updateCompositeCanvas();renderSlotMoverButtons()}
+function autoArrangeTemplatePhotos(){slotAssignments=Array.from({length:Math.max(slotAssignments.length,capturedPhotos.length)},(_,i)=>i<capturedPhotos.length?i:null);updateCompositeCanvas();renderSlotMoverButtons()}
+function movePhotoSlot(i,d){const t=i+d;if(t<0||t>=capturedPhotos.length)return;[capturedPhotos[i],capturedPhotos[t]]=[capturedPhotos[t],capturedPhotos[i]];slotAssignments=slotAssignments.map(v=>v===i?t:v===t?i:v);renderSlotMoverButtons();updateCompositeCanvas()}
+function selectQuickText(t){document.getElementById('customTextInput').value=t;updateCompositeCanvas()}
+function loadImage(src,cors=true){return new Promise((res,rej)=>{const i=new Image();if(cors)i.crossOrigin='anonymous';i.onload=()=>res(i);i.onerror=()=>rej(new Error('Image load failed'));i.src=src})}
+function filterValue(){return activeFilterClass==='filter-grayscale'?'grayscale(100%) contrast(110%)':activeFilterClass==='filter-sepia'?'sepia(85%) contrast(105%)':activeFilterClass==='filter-vintage'?'contrast(125%) brightness(95%) sepia(35%)':activeFilterClass==='filter-vivid'?'saturate(160%) contrast(110%) brightness(105%)':activeFilterClass==='filter-cool'?'hue-rotate(180deg) saturate(120%) brightness(102%)':activeFilterClass==='filter-warm'?'sepia(40%) saturate(140%) brightness(105%)':activeFilterClass==='filter-matte'?'contrast(90%) brightness(110%) saturate(85%)':'none'}
+function drawCover(ctx,img,x,y,w,h){const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height,s=Math.max(w/iw,h/ih),dw=iw*s,dh=ih*s;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
+async function detectSlots(img,W,H){
+ const meta=normalizeFrameMeta(selectedFrameMeta);
+ if(meta&&meta.slots.length){
+  const mw=meta.width||W,mh=meta.height||H;
+  return meta.slots.map(s=>({x:(Number(s.x)||0)/mw*W,y:(Number(s.y)||0)/mh*H,width:(Number(s.width)||0)/mw*W,height:(Number(s.height)||0)/mh*H})).filter(s=>s.width>20&&s.height>20);
+ }
+ const key=selectedFrameSrc+'|'+W+'x'+H;
+ if(frameSlotCache.has(key))return frameSlotCache.get(key);
+ try{
+  const sw=320,sh=Math.max(160,Math.round(sw*H/W)),p=document.createElement('canvas');p.width=sw;p.height=sh;
+  const x=p.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,sw,sh);x.drawImage(img,0,0,sw,sh);
+  const d=x.getImageData(0,0,sw,sh).data,vis=new Uint8Array(sw*sh),out=[];
+  const transparent=i=>d[i*4+3]<=40;
+  for(let sy=0;sy<sh;sy++)for(let sx=0;sx<sw;sx++){
+   const st=sy*sw+sx;if(vis[st]||!transparent(st))continue;
+   const q=[st];let qi=0,area=0,minX=sx,maxX=sx,minY=sy,maxY=sy,edge=false;vis[st]=1;
+   while(qi<q.length){const id=q[qi++],xx=id%sw,yy=Math.floor(id/sw);area++;minX=Math.min(minX,xx);maxX=Math.max(maxX,xx);minY=Math.min(minY,yy);maxY=Math.max(maxY,yy);if(!xx||!yy||xx===sw-1||yy===sh-1)edge=true;
+    for(const ni of [id-1,id+1,id-sw,id+sw]){if(ni<0||ni>=sw*sh||vis[ni])continue;const nx=ni%sw,ny=Math.floor(ni/sw);if(Math.abs(nx-xx)+Math.abs(ny-yy)!==1||!transparent(ni))continue;vis[ni]=1;q.push(ni)}
+   }
+   const bw=maxX-minX+1,bh=maxY-minY+1,r=bw/bh,ratio=area/(sw*sh);
+   if(!edge&&ratio>=.008&&bw>=Math.max(24,sw*.08)&&bh>=Math.max(24,sh*.08)&&r>=.25&&r<=4.5)out.push({x:minX/sw*W,y:minY/sh*H,width:bw/sw*W,height:bh/sh*H,areaRatio:ratio});
+  }
+  out.sort((a,b)=>Math.abs(a.y-b.y)>Math.min(a.height,b.height)*.35?a.y-b.y:a.x-b.x);
+  const slots=out.filter(s=>s.width>W*.06&&s.height>H*.04&&s.width<W*.96&&s.height<H*.96).slice(0,12).map(({x,y,width,height})=>({x,y,width,height}));
+  frameSlotCache.set(key,slots);return slots;
+ }catch(e){console.warn('Slot detection failed',e);frameSlotCache.set(key,[]);return[]}
+}
+function frameAlphaStats(img){try{const sw=80,sh=Math.max(40,Math.round(sw*(img.naturalHeight||img.height)/(img.naturalWidth||img.width))),c=document.createElement('canvas');c.width=sw;c.height=sh;const x=c.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,sw,sh);x.drawImage(img,0,0,sw,sh);const d=x.getImageData(0,0,sw,sh).data;let t=0,o=0;for(let i=0;i<sw*sh;i++){if(d[i*4+3]<40)t++;else o++}return {transparentRatio:t/(sw*sh),opaqueRatio:o/(sw*sh)}}catch(e){return {transparentRatio:0,opaqueRatio:1}}}
+function saveDetectedFrameMeta(slots,fw,fh){if(!selectedFrameSrc)return;try{const frames=JSON.parse(localStorage.getItem('saved_frames_gallery')||'[]');const idx=frames.findIndex(f=>f.url===selectedFrameSrc);if(idx<0)return;frames[idx]={...frames[idx],width:fw,height:fh,orientation:frameOrientation(fw,fh),slots,slotSource:'auto'};localStorage.setItem('saved_frames_gallery',JSON.stringify(frames));selectedFrameMeta=normalizeFrameMeta(frames[idx]);}catch(e){console.warn('Could not persist frame metadata',e)}}
+function fallback(ctx,photos,W,H){if(photos.length===4){photos.forEach((p,i)=>drawCover(ctx,p,90,80+i*385,1020,360))}else if(photos.length===6){photos.forEach((p,i)=>drawCover(ctx,p,90,60+i*290,1020,265))}else{const hh=Math.max(300,Math.floor((H-160)/photos.length));photos.forEach((p,i)=>drawCover(ctx,p,90,80+i*hh,1020,hh-20))}}
+function drawPhotoCollage(ctx,photos,x,y,w,h){
+ if(!photos.length)return;
+ const gap=Math.max(8,Math.round(Math.min(w,h)*0.012));
+ let cols=photos.length<=2?photos.length:(photos.length<=4?2:3);
+ let rows=Math.ceil(photos.length/cols);
+ const cellW=(w-gap*(cols-1))/cols;
+ const cellH=(h-gap*(rows-1))/rows;
+ photos.forEach((p,i)=>{
+  const col=i%cols,row=Math.floor(i/cols);
+  const dx=x+col*(cellW+gap),dy=y+row*(cellH+gap);
+  ctx.save();ctx.beginPath();ctx.rect(dx,dy,cellW,cellH);ctx.clip();drawCover(ctx,p,dx,dy,cellW,cellH);ctx.restore();
+ });
+}
+function drawText(ctx,text){if(!text)return;const W=ctx.canvas.width,H=ctx.canvas.height;ctx.save();ctx.font=`bold ${Math.max(28,Math.round(W*.035))}px Inter, sans-serif`;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=Math.max(6,Math.round(W*.008));ctx.fillText(text,W/2,H-Math.max(45,Math.round(H*.045)));ctx.restore()}
+async function updateCompositeCanvas(){
+ const version=++compositeRenderVersion;
+ const task=(async()=>{
+  const c=document.getElementById('compositeCanvas');if(!c)return;
+  let frame=null;if(selectedFrameSrc){try{frame=await loadImage(selectedFrameSrc,true)}catch(e){try{frame=await loadImage(selectedFrameSrc,false)}catch(e2){console.warn('Frame gagal dimuat',e2)}}}
+  if(version!==compositeRenderVersion)return;
+  const fw=Number(selectedFrameMeta?.width)||(frame?.naturalWidth||frame?.width)||1200;
+  const fh=Number(selectedFrameMeta?.height)||(frame?.naturalHeight||frame?.height)||1800;
+  const scale=Math.min(1,1200/fw);const targetW=Math.max(600,Math.round(fw*scale));const targetH=Math.max(400,Math.round(fh*scale));
+  c.width=targetW;c.height=targetH;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+  customTextValue=document.getElementById('customTextInput').value;document.getElementById('overlayTextDisplay').innerText=customTextValue;
+  if(!capturedPhotos.length){if(frame){ctx.drawImage(frame,0,0,c.width,c.height)}drawText(ctx,customTextValue);return}
+  const photos=await Promise.all(capturedPhotos.map(p=>loadImage(p,false)));if(version!==compositeRenderVersion)return;
+  const stats=frame?frameAlphaStats(frame):{transparentRatio:0,opaqueRatio:1};let slots=frame?await detectSlots(frame,c.width,c.height):[];if(version!==compositeRenderVersion)return;
+  if(frame&&(!selectedFrameMeta?.slots?.length)&&slots.length)saveDetectedFrameMeta(slots.map(s=>({x:s.x/ c.width*fw,y:s.y/c.height*fh,width:s.width/c.width*fw,height:s.height/c.height*fh})),fw,fh);
+  ctx.save();ctx.filter=filterValue();
+  if(slots.length>1){if(!slotAssignments.length||slotAssignments.length!==slots.length)slotAssignments=Array.from({length:slots.length},(_,i)=>i<photos.length?i:null);slots.forEach((sl,i)=>{const pi=Number(slotAssignments[i]);if(!Number.isInteger(pi)||pi<0||pi>=photos.length)return;const p=photos[pi];ctx.save();ctx.beginPath();ctx.rect(sl.x,sl.y,sl.width,sl.height);ctx.clip();drawCover(ctx,p,sl.x,sl.y,sl.width,sl.height);ctx.restore()})}
+  else if(slots.length===1){drawPhotoCollage(ctx,photos,slots[0].x,slots[0].y,slots[0].width,slots[0].height)}
+  else if(frame&&stats.transparentRatio>=.02){drawPhotoCollage(ctx,photos,0,0,c.width,c.height)}
+  else{fallback(ctx,photos,c.width,c.height)}
+  ctx.restore();
+  if(frame){ctx.save();ctx.globalAlpha=1;ctx.filter='none';ctx.drawImage(frame,0,0,c.width,c.height);ctx.restore();if(stats.transparentRatio<.02)showToast('Frame ini tidak memiliki area transparan. Gunakan PNG transparan untuk layout foto.','error')}
+  drawText(ctx,customTextValue);
+ })();compositeRenderPromise=task.catch(e=>console.error(e));return compositeRenderPromise;
+}
+async function generateCloudinaryQRCodeAndUpload(){const q=document.getElementById('cloudinaryQrCode');q.innerHTML='<div class="text-[8px] text-slate-500 animate-pulse">Menyiapkan...</div>';try{await compositeRenderPromise;const dataUrl=document.getElementById('compositeCanvas').toDataURL('image/jpeg',.9);const fd=new FormData();fd.append('file',dataUrl);fd.append('upload_preset',PRESET_NAME);q.innerHTML='<div class="text-[8px] text-slate-500 animate-pulse">Uploading...</div>';const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});const data=await res.json();q.innerHTML='';if(data.secure_url){new QRCode(q,{text:data.secure_url,width:60,height:60});document.getElementById('uploadStatus').innerText='Foto berhasil diupload • Membuat GIF...';generateGifAndUpload()}else q.innerHTML='<span class="text-[7px] text-red-500">Gagal Cloud</span>'}catch(e){console.error(e);q.innerHTML='<span class="text-[7px] text-red-500">Gagal upload</span>'}}
+function buildBoothPro4RPrintDataUrl(){
+ const src=document.getElementById('compositeCanvas');
+ if(!src||!src.width||!src.height)throw new Error('Canvas hasil belum siap');
+ const sheet=document.createElement('canvas');
+ // 4R portrait @300dpi = 1200 x 1800. Standard strip = 2 x 6 inch = 600 x 1800.
+ sheet.width=1200;sheet.height=1800;
+ const ctx=sheet.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,sheet.width,sheet.height);
+ const stripCount=Math.max(1,Math.min(2,Number(currentPackage?.prints)||1));
+ const stripW=600,stripH=1800;
+ // Fit the edited final image into a 2x6 photobooth strip without changing its aspect ratio.
+ const scale=Math.min(stripW/src.width,stripH/src.height);
+ const dw=Math.max(1,Math.round(src.width*scale)),dh=Math.max(1,Math.round(src.height*scale));
+ const xFor=(i)=>stripCount===1?Math.round((sheet.width-stripW)/2)+Math.round((stripW-dw)/2):i*stripW+Math.round((stripW-dw)/2);
+ const y=Math.round((stripH-dh)/2);
+ for(let i=0;i<stripCount;i++)ctx.drawImage(src,xFor(i),y,dw,dh);
+ return sheet.toDataURL('image/jpeg',0.96);
+}
+function updatePrintQuotaLabel(){const el=document.getElementById('printQuota');if(el)el.innerText=Math.max(1,Number(currentPackage?.prints)||1)}
+
+function executePrint(){
+ clearInterval(editorTimerInterval);
+ const canvas=document.getElementById('compositeCanvas');
+ if(!canvas||!canvas.width||!canvas.height){showToast('Hasil foto belum siap untuk dicetak.','error');return}
+ if(!finalOutputReady){showToast('Siapkan Soft File & QR terlebih dahulu.','error');return}
+ const printImg=document.getElementById('boothproPrintImage');
+ if(!printImg){showToast('Area print belum siap.','error');return}
+ try{
+   printImg.src=buildBoothPro4RPrintDataUrl();
+   updatePrintQuotaLabel();
+   const tx=updateTransaction({sessionStatus:'PRINTING',printRequestedAt:new Date().toISOString(),photoCount:capturedPhotos.length,printCount:Math.max(1,Number(currentPackage?.prints)||1),printLayout:'4R_PHOTOSTRIP'});
+   saveTransactionToLog(tx);
+   const cleanup=()=>{window.removeEventListener('afterprint',cleanup);setTimeout(()=>{printImg.removeAttribute('src')},500)};
+   window.addEventListener('afterprint',cleanup);
+   setTimeout(()=>window.print(),150);
+ }catch(e){console.error(e);showToast('Gagal menyiapkan layout print: '+(e.message||'error'),'error')}
+}
+function showToast(msg,type='info'){let t=document.getElementById('boothToast');if(!t){t=document.createElement('div');t.id='boothToast';t.className='fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] max-w-xs w-[90%] px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 shadow-2xl text-center text-[11px] font-bold';document.body.appendChild(t)}t.classList.toggle('border-rose-500',type==='error');t.innerText=msg;t.style.display='block';clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.display='none',3500)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function completeCurrentTransaction(){const tx=updateTransaction({sessionStatus:'COMPLETED',completedAt:new Date().toISOString(),photoCount:capturedPhotos.length});saveTransactionToLog(tx);return tx}
+function resetKiosk(){completeCurrentTransaction();clearInterval(timerInterval);clearInterval(editorTimerInterval);clearTimeout(autoCaptureTimer);timerInterval=editorTimerInterval=autoCaptureTimer=null;stopKioskCamera();capturedPhotos=[];selectedFrameSrc='';selectedFrameMeta=null;slotAssignments=[];activeFilterClass='filter-none';customTextValue='';finalOutputReady=false;sessionFinishing=false;document.getElementById('sessionTimerContainer').classList.add('hidden');document.getElementById('startPhotoSessionBtn').classList.remove('hidden');document.getElementById('snapBtn').classList.add('hidden');document.getElementById('customTextInput').value='';document.getElementById('cloudinaryQrCode').innerHTML='';renderInstantGallery();goToStep('welcome')}
+
+let kioskProtectionEnabled=true;
+function enableKioskProtection(){
+ if(!kioskProtectionEnabled)return;
+ try{history.pushState({boothproKiosk:true},'',location.href)}catch(e){}
+}
+window.addEventListener('popstate',()=>{
+ if(kioskProtectionEnabled){try{history.pushState({boothproKiosk:true},'',location.href)}catch(e){}showToast('Mode kiosk aktif. Gunakan tombol di layar untuk berpindah halaman.','info')}
+});
+
+window.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('step-booth')?.classList.contains('active')&&!cameraReady)setTimeout(()=>initKioskCamera(),250)});window.addEventListener('pagehide',()=>stopKioskCamera());window.addEventListener('beforeunload',()=>stopKioskCamera());
+window.addEventListener('DOMContentLoaded',()=>{enableKioskProtection();if(navigator.mediaDevices?.addEventListener){cameraDeviceChangeHandler=()=>{if(document.getElementById('step-booth')?.classList.contains('active'))refreshCameraDevices()};navigator.mediaDevices.addEventListener('devicechange',cameraDeviceChangeHandler)}renderInstantGallery()});
+</script><script>
+/* =========================================================
+   BOOTHPRO PHASE B — CLOUD QUEUE ENGINE v2
+   Persistent IndexedDB queue + offline recovery + retry backoff.
+   Cloudinary unsigned upload only. Never expose API Secret in Kiosk.
+   ========================================================= */
+const BP4_DB='BoothProCloudDB',BP4_STORE='cloud_jobs',BP4_DB_VERSION=2;
+const BP4_CHANNEL_NAME='booth_sync_channel';
+const BP4_MAX_ATTEMPTS=5;
+const BP4_RETRY_BASE_MS=5000;
+const bp4Channel=('BroadcastChannel' in window)?new BroadcastChannel(BP4_CHANNEL_NAME):null;
+const BP4_CLOUD_NAME=localStorage.getItem('boothpro_cloud_name')||'risakil1';
+const BP4_PRESET_NAME=localStorage.getItem('boothpro_upload_preset')||'risakil';
+let bp4Processing=false,bp4RetryTimer=null;
+
+function bp4_openDB(){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(BP4_DB,BP4_DB_VERSION);r.onupgradeneeded=()=>{const db=r.result;let st;if(!db.objectStoreNames.contains(BP4_STORE))st=db.createObjectStore(BP4_STORE,{keyPath:'jobId'});else st=r.transaction.objectStore(BP4_STORE);if(!st.indexNames.contains('status'))st.createIndex('status','status');if(!st.indexNames.contains('transactionId'))st.createIndex('transactionId','transactionId');if(!st.indexNames.contains('createdAt'))st.createIndex('createdAt','createdAt');if(!st.indexNames.contains('nextRetryAt'))st.createIndex('nextRetryAt','nextRetryAt')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+function bp4_tx(store,mode,work){return bp4_openDB().then(db=>new Promise((res,rej)=>{let out;try{const tx=db.transaction(BP4_STORE,mode);out=work(tx.objectStore(BP4_STORE));tx.oncomplete=()=>{db.close();res(out)};tx.onerror=()=>{const e=tx.error;db.close();rej(e)}}catch(e){db.close();rej(e)}}))}
+function bp4_put(job){return bp4_tx(BP4_STORE,'readwrite',st=>{st.put(job);return job})}
+function bp4_get(jobId){return bp4_openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction(BP4_STORE,'readonly');const r=tx.objectStore(BP4_STORE).get(jobId);r.onsuccess=()=>{db.close();res(r.result||null)};r.onerror=()=>{db.close();rej(r.error)}}))}
+function bp4_getAll(){return bp4_openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction(BP4_STORE,'readonly');const r=tx.objectStore(BP4_STORE).getAll();r.onsuccess=()=>{db.close();res(r.result||[])};r.onerror=()=>{db.close();rej(r.error)}}))}
+function bp4_delete(jobId){return bp4_tx(BP4_STORE,'readwrite',st=>{st.delete(jobId);return true})}
+function bp4_broadcast(type,data={}){try{bp4Channel?.postMessage({type,...data,timestamp:new Date().toISOString()})}catch(e){}}
+function bp4_uuid(){return 'CJ-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,9).toUpperCase()}
+function bp4_getTx(){try{return JSON.parse(localStorage.getItem('boothpro_current_transaction')||'null')}catch(e){return null}}
+function bp4_saveTx(tx){if(tx)localStorage.setItem('boothpro_current_transaction',JSON.stringify(tx));return tx}
+function bp4_updateTxCloud(job,fields={}){const tx=bp4_getTx();if(!tx||tx.id!==job.transactionId)return;Object.assign(tx,fields);bp4_saveTx(tx);try{if(typeof saveTransactionToLog==='function')saveTransactionToLog(tx)}catch(e){}bp4_broadcast('CLOUD_QUEUE_UPDATED',{jobId:job.jobId,transactionId:job.transactionId})}
+function bp4_setUploadUI(msg){const st=document.getElementById('uploadStatus');if(st)st.innerText=msg}
+function bp4_renderQR(type,url){const id=type==='gif'?'gifQrCode':'cloudinaryQrCode',el=document.getElementById(id);if(!el||!window.QRCode)return;el.innerHTML='';const mobileSafeUrl=String(url).replace('/image/upload/','/image/upload/f_auto,q_auto/');new QRCode(el,{text:mobileSafeUrl,width:60,height:60});if(type==='gif')document.getElementById('gifQrArea')?.classList.remove('hidden');bp4_setUploadUI(type==='gif'?'Foto & GIF berhasil diupload • QR siap':'Foto berhasil diupload • GIF masuk antrean cloud')}
+function bp4_isRetryDue(job){return !job.nextRetryAt||Date.now()>=new Date(job.nextRetryAt).getTime()}
+function bp4_retryDelay(attempt){return Math.min(120000,BP4_RETRY_BASE_MS*Math.pow(2,Math.max(0,attempt-1)))}
+function bp4_markFailed(job,error){job.status=(job.attempts||0)>=BP4_MAX_ATTEMPTS?'DEAD':'FAILED';job.updatedAt=new Date().toISOString();job.error=error?.message||String(error)||'Upload gagal';job.nextRetryAt=job.status==='FAILED'?new Date(Date.now()+bp4_retryDelay(job.attempts||1)).toISOString():null;return job}
+function bp4_createJob(type,data,transactionId){const now=new Date().toISOString();const job={jobId:bp4_uuid(),transactionId:transactionId||'UNKNOWN',type,status:'PENDING',createdAt:now,updatedAt:now,attempts:0,nextRetryAt:null,data,cloudName:localStorage.getItem('boothpro_cloud_name')||BP4_CLOUD_NAME,uploadPreset:localStorage.getItem('boothpro_upload_preset')||BP4_PRESET_NAME};return bp4_put(job).then(j=>{bp4_broadcast('CLOUD_UPLOAD_REQUEST',{jobId:j.jobId,transactionId:j.transactionId,type:j.type});return j})}
+async function bp4_blob(data){if(data instanceof Blob)return data;if(data instanceof ArrayBuffer)return new Blob([data]);if(typeof data==='string'){if(data.startsWith('data:')){const r=await fetch(data);return r.blob()}const r=await fetch(data);if(!r.ok)throw new Error('Data source HTTP '+r.status);return r.blob()}throw new Error('Format data upload tidak didukung')}
+async function bp4_upload(job){const blob=await bp4_blob(job.data);const fd=new FormData();fd.append('file',blob,job.type==='gif'?'boothpro.gif':'boothpro.jpg');fd.append('upload_preset',job.uploadPreset||BP4_PRESET_NAME);const cloud=job.cloudName||BP4_CLOUD_NAME;const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);try{const res=await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloud)}/image/upload`,{method:'POST',body:fd,signal:controller.signal});let data={};try{data=await res.json()}catch(e){}if(!res.ok||!data.secure_url)throw new Error(data.error?.message||`Cloudinary HTTP ${res.status}`);return data}finally{clearTimeout(timeout)}}
+async function bp4_processJob(job){if(!navigator.onLine||!job||job.status==='UPLOADED'||job.status==='DEAD')return job;if(job.status==='FAILED'&&!bp4_isRetryDue(job))return job;if((job.attempts||0)>=BP4_MAX_ATTEMPTS){job.status='DEAD';await bp4_put(job);return job}job.status='UPLOADING';job.updatedAt=new Date().toISOString();job.attempts=(job.attempts||0)+1;job.nextRetryAt=null;await bp4_put(job);bp4_broadcast('CLOUD_QUEUE_UPDATED',{jobId:job.jobId,status:'UPLOADING',attempts:job.attempts});try{const data=await bp4_upload(job);job.status='UPLOADED';job.updatedAt=new Date().toISOString();job.uploadedAt=job.updatedAt;job.resultUrl=data.secure_url;job.publicId=data.public_id||'';job.error='';job.nextRetryAt=null;await bp4_put(job);const fields=job.type==='gif'?{gifUploadStatus:'UPLOADED',gifResultUrl:data.secure_url,gifPublicId:data.public_id||'',gifUploadedAt:job.uploadedAt,gifCloudJobId:job.jobId,gifCloudError:''}:{cloudUploadStatus:'UPLOADED',cloudResultUrl:data.secure_url,cloudPublicId:data.public_id||'',cloudUploadedAt:job.uploadedAt,cloudJobId:job.jobId,cloudError:''};bp4_updateTxCloud(job,fields);bp4_broadcast('CLOUD_UPLOAD_COMPLETE',{jobId:job.jobId,transactionId:job.transactionId,type:job.type,url:data.secure_url,publicId:data.public_id||''});bp4_renderQR(job.type,data.secure_url);return job}catch(e){job=bp4_markFailed(job,e);await bp4_put(job);const fields=job.type==='gif'?{gifUploadStatus:job.status==='DEAD'?'DEAD':'FAILED',gifCloudJobId:job.jobId,gifCloudError:job.error}:{cloudUploadStatus:job.status==='DEAD'?'DEAD':'FAILED',cloudJobId:job.jobId,cloudError:job.error};bp4_updateTxCloud(job,fields);bp4_broadcast('CLOUD_UPLOAD_FAILED',{jobId:job.jobId,transactionId:job.transactionId,type:job.type,error:job.error,status:job.status,nextRetryAt:job.nextRetryAt});return job}}
+async function bp4_processQueue(){if(bp4Processing||!navigator.onLine)return;bp4Processing=true;try{const jobs=(await bp4_getAll()).sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));for(const job of jobs){if(!navigator.onLine)break;if(job.status==='UPLOADING'){job.status='PENDING';job.updatedAt=new Date().toISOString();await bp4_put(job)}if(job.status==='PENDING'||(job.status==='FAILED'&&bp4_isRetryDue(job)))await bp4_processJob(job)}}catch(e){console.error('BoothPro cloud queue:',e)}finally{bp4Processing=false;bp4_scheduleRetry();bp4_broadcast('CLOUD_QUEUE_UPDATED')}}
+async function bp4_retryJob(jobId){const j=await bp4_get(jobId);if(!j)return null;j.status='PENDING';j.error='';j.nextRetryAt=null;j.updatedAt=new Date().toISOString();j.attempts=Math.max(0,(j.attempts||0)-1);await bp4_put(j);bp4_broadcast('CLOUD_RETRY_JOB',{jobId});await bp4_processQueue();return bp4_get(jobId)}
+async function bp4_retryAllFailed(){const jobs=await bp4_getAll();for(const j of jobs){if((j.status==='FAILED'||j.status==='DEAD')&&j.status!=='UPLOADED'){j.status='PENDING';j.error='';j.nextRetryAt=null;await bp4_put(j)}}await bp4_processQueue()}
+function bp4_scheduleRetry(){clearTimeout(bp4RetryTimer);if(!navigator.onLine)return;bp4_getAll().then(jobs=>{const due=jobs.filter(j=>j.status==='FAILED'&&j.nextRetryAt).map(j=>new Date(j.nextRetryAt).getTime()).filter(Number.isFinite);if(!due.length)return;const delay=Math.max(500,Math.min(...due)-Date.now());bp4RetryTimer=setTimeout(()=>bp4_processQueue(),delay)}).catch(()=>{})}
+async function bp4_queueStats(){const jobs=await bp4_getAll();return jobs.reduce((a,j)=>{a.total++;a[j.status]=(a[j.status]||0)+1;return a},{total:0})}
+async function generateCloudinaryQRCodeAndUpload(){const q=document.getElementById('cloudinaryQrCode');if(q)q.innerHTML='<div class="text-[8px] text-slate-500 animate-pulse">Menyiapkan antrean...</div>';try{await compositeRenderPromise;const tx=bp4_getTx();if(!tx)throw new Error('Transaction ID tidak ditemukan');tx.cloudUploadStatus='PENDING';tx.cloudResultUrl='';tx.cloudError='';bp4_saveTx(tx);const canvas=document.getElementById('compositeCanvas');if(!canvas)throw new Error('Canvas hasil tidak ditemukan');const dataUrl=canvas.toDataURL('image/jpeg',.9);const job=await bp4_createJob('image',dataUrl,tx.id);bp4_updateTxCloud(job,{cloudUploadStatus:'PENDING',cloudJobId:job.jobId,cloudError:''});bp4_setUploadUI(navigator.onLine?'Foto masuk antrean • Upload otomatis...':'Offline • Foto disimpan, menunggu koneksi');if(q)q.innerHTML='<div class="text-[8px] text-indigo-400">QUEUE</div>';await bp4_processQueue();if(typeof bp4_generateGifJob==='function')bp4_generateGifJob(tx.id)}catch(e){console.error(e);if(q)q.innerHTML='<span class="text-[7px] text-red-500">Queue gagal</span>';bp4_setUploadUI('Cloud queue error • '+(e.message||'Unknown error'))}}
+async function bp4_generateGifJob(transactionId){try{const frames=capturedPhotos.map(x=>x);if(!frames.length)return;bp4_setUploadUI('Foto antrean • Membuat GIF...');const blob=await new Promise((resolve,reject)=>{try{const gif=new GIF({workers:2,quality:10,width:480,height:720,workerScript:'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'});let added=0;let failed=false;frames.forEach(src=>{const im=new Image();im.onload=()=>{if(failed)return;const c=document.createElement('canvas');c.width=480;c.height=720;const ctx=c.getContext('2d');ctx.drawImage(im,0,0,480,720);gif.addFrame(c,{delay:650,copy:true});added++;if(added===frames.length)gif.render()};im.onerror=()=>{failed=true;reject(new Error('Gagal memuat frame GIF'))};im.src=src});gif.on('finished',b=>resolve(b));gif.on('abort',()=>reject(new Error('GIF dibatalkan')))}catch(e){reject(e)}});const job=await bp4_createJob('gif',blob,transactionId);bp4_updateTxCloud(job,{gifUploadStatus:'PENDING',gifCloudJobId:job.jobId,gifCloudError:''});await bp4_processQueue()}catch(e){const tx=bp4_getTx();if(tx&&tx.id===transactionId){tx.gifUploadStatus='FAILED';tx.gifCloudError=e.message||'GIF gagal dibuat';bp4_saveTx(tx)}bp4_setUploadUI('Foto queue aktif • GIF gagal dibuat: '+(e.message||'error'))}}
+window.addEventListener('online',()=>{bp4_broadcast('CLOUD_QUEUE_UPDATED',{online:true});bp4_processQueue()});
+window.addEventListener('offline',()=>{bp4_broadcast('CLOUD_QUEUE_UPDATED',{online:false});bp4_setUploadUI('Offline • Upload cloud menunggu koneksi')});
+if(bp4Channel)bp4Channel.onmessage=e=>{const m=e.data||{};if(m.type==='CLOUD_RETRY_JOB'&&m.jobId)bp4_retryJob(m.jobId);if(m.type==='CLOUD_SYNC_REQUEST')bp4_processQueue()};
+window.addEventListener('DOMContentLoaded',()=>{bp4_getAll().catch(()=>[]).then(()=>bp4_processQueue())});
+</script>
+
+<script>
+/* =========================================================
+   BOOTHPRO PHASE 5 — HARDWARE ABSTRACTION LAYER
+   Browser-safe hardware control: camera, fullscreen, wake lock,
+   printer/print workflow, device heartbeat and admin monitoring.
+   No API secret and no native driver is exposed here.
+   ========================================================= */
+const BP5_CHANNEL='booth_sync_channel';
+const bp5Channel=('BroadcastChannel' in window)?new BroadcastChannel(BP5_CHANNEL):null;
+let bp5WakeLock=null;
+let bp5HardwareState={camera:'UNKNOWN',printer:'BROWSER_PRINT',fullscreen:false,wakeLock:false,online:navigator.onLine,updatedAt:null};
+function bp5_emit(type,data={}){const msg={type,...data,timestamp:new Date().toISOString()};try{bp5Channel?.postMessage(msg)}catch(e){};try{localStorage.setItem('boothpro_hardware_state',JSON.stringify({...bp5HardwareState,updatedAt:msg.timestamp}))}catch(e){}}
+function bp5_setCameraState(state,detail=''){bp5HardwareState.camera=state;bp5_emit('HARDWARE_STATUS',{hardware:'camera',state,detail})}
+async function bp5_refreshCamera(){
+ try{
+  if(!navigator.mediaDevices?.enumerateDevices){bp5_setCameraState('UNSUPPORTED','enumerateDevices tidak tersedia');return}
+  const ds=await navigator.mediaDevices.enumerateDevices();
+  const cams=ds.filter(d=>d.kind==='videoinput');
+  bp5_setCameraState(cams.length?'READY':'NOT_FOUND',cams.length+' kamera terdeteksi');
+ }catch(e){bp5_setCameraState('ERROR',e.message||'Gagal membaca kamera')}
+}
+async function bp5_toggleFullscreen(){
+ try{
+  if(!document.fullscreenElement){await document.documentElement.requestFullscreen?.();bp5HardwareState.fullscreen=!!document.fullscreenElement}
+  else{await document.exitFullscreen?.();bp5HardwareState.fullscreen=false}
+ }catch(e){bp5_emit('HARDWARE_ERROR',{hardware:'fullscreen',error:e.message||'Fullscreen tidak tersedia'})}
+ bp5_emit('HARDWARE_STATUS',{hardware:'fullscreen',state:bp5HardwareState.fullscreen?'ON':'OFF'});
+}
+async function bp5_requestWakeLock(){
+ try{
+  if(!('wakeLock' in navigator)){bp5HardwareState.wakeLock=false;bp5_emit('HARDWARE_STATUS',{hardware:'wakeLock',state:'UNSUPPORTED'});return false}
+  bp5WakeLock=await navigator.wakeLock.request('screen');
+  bp5HardwareState.wakeLock=true;bp5_emit('HARDWARE_STATUS',{hardware:'wakeLock',state:'ON'});
+  bp5WakeLock.addEventListener?.('release',()=>{bp5HardwareState.wakeLock=false;bp5_emit('HARDWARE_STATUS',{hardware:'wakeLock',state:'OFF'})});
+  return true;
+ }catch(e){bp5HardwareState.wakeLock=false;bp5_emit('HARDWARE_STATUS',{hardware:'wakeLock',state:'ERROR',detail:e.message||'Wake Lock gagal'});return false}
+}
+async function bp5_resumeWakeLock(){if(document.visibilityState==='visible'&&!bp5WakeLock)await bp5_requestWakeLock()}
+function bp5_print(){
+ bp5HardwareState.printer='BROWSER_PRINT';bp5_emit('HARDWARE_STATUS',{hardware:'printer',state:'READY',detail:'window.print / AirPrint / system printer'});
+ try{window.print()}catch(e){bp5_emit('HARDWARE_ERROR',{hardware:'printer',error:e.message||'Print gagal'})}
+}
+function bp5_heartbeat(){bp5HardwareState.online=navigator.onLine;bp5HardwareState.updatedAt=new Date().toISOString();bp5_emit('HARDWARE_HEARTBEAT',{state:bp5HardwareState,page:'KIOSK',url:location.href})}
+window.addEventListener('online',()=>{bp5HardwareState.online=true;bp5_heartbeat()});
+window.addEventListener('offline',()=>{bp5HardwareState.online=false;bp5_heartbeat()});
+document.addEventListener('fullscreenchange',()=>{bp5HardwareState.fullscreen=!!document.fullscreenElement;bp5_emit('HARDWARE_STATUS',{hardware:'fullscreen',state:bp5HardwareState.fullscreen?'ON':'OFF'})});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')bp5_resumeWakeLock()});
+window.addEventListener('DOMContentLoaded',async()=>{await bp5_refreshCamera();await bp5_requestWakeLock();bp5_heartbeat();setInterval(bp5_heartbeat,15000)});
+</script>
+<script>
+if(bp5Channel)bp5Channel.addEventListener('message',e=>{const m=e.data||{};if(m.type==='HARDWARE_FULLSCREEN_REQUEST')bp5_toggleFullscreen();if(m.type==='HARDWARE_WAKELOCK_REQUEST')bp5_requestWakeLock();if(m.type==='HARDWARE_PRINT_TEST')bp5_print();if(m.type==='HARDWARE_REQUEST_STATUS')bp5_heartbeat()});
+
+window.addEventListener('storage',e=>{if(e.key==='saved_frames_gallery'){if(document.getElementById('step-booth')?.classList.contains('active'))loadDashboardFramesForBooth()}});
+</script>
+</body></html>
