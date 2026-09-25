@@ -3,101 +3,577 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BoothPro Admin - Phase 3</title>
+<title>BoothPro Dashboard v3.0</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body{font-family:Inter,sans-serif}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#0f172a}::-webkit-scrollbar-thumb{background:#334155;border-radius:6px}.panel{background:#0f172a;border:1px solid #1e293b;border-radius:20px}.input{width:100%;background:#020617;border:1px solid #334155;color:#fff;border-radius:10px;padding:10px 12px;font-size:12px;outline:none}.input:focus{border-color:#6366f1}.btn{border-radius:10px;padding:9px 13px;font-size:12px;font-weight:700;transition:.2s}.btn-primary{background:#4f46e5;color:#fff}.btn-primary:hover{background:#6366f1}.btn-dark{background:#1e293b;color:#cbd5e1;border:1px solid #334155}.btn-dark:hover{background:#334155}.btn-danger{background:#4c0519;color:#fda4af;border:1px solid #881337}.tab.active{background:#4f46e5;color:#fff}
+body{font-family:Inter,sans-serif}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#0f172a}::-webkit-scrollbar-thumb{background:#334155;border-radius:6px}
+.panel{background:#0f172a;border:1px solid #1e293b;border-radius:20px}
+.input{width:100%;background:#020617;border:1px solid #1e293b;border-radius:12px;padding:10px 12px;font-size:13px;color:#e2e8f0;margin-top:4px}
+.btn{padding:10px 14px;border-radius:12px;font-size:13px;font-weight:700;background:#1e293b;color:#e2e8f0}
+.btn:hover{background:#334155}
+.btn-primary{background:#4f46e5}.btn-primary:hover{background:#6366f1}
+.btn-danger{background:#b91c1c}.btn-danger:hover{background:#dc2626}
+.tab.active{background:#4f46e5;color:#fff}
+.lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;font-weight:700}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
-<header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 md:px-8 py-4"><div class="max-w-7xl mx-auto flex flex-wrap gap-3 justify-between items-center"><div class="flex items-center gap-3"><div class="bg-indigo-600 p-2.5 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div><div><h1 id="brandTitle" class="font-black tracking-wide">BOOTHPro ADMIN</h1><p class="text-[10px] text-slate-400">Phase 5 • Hardware, Cloud & Kiosk Control</p></div></div><div class="flex items-center gap-2"><span id="syncStatus" class="px-3 py-1.5 rounded-xl text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">● LOCAL SYNC</span><a href="index.html" target="_blank" class="btn btn-primary">Buka Kiosk</a></div></div></header>
+<header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 md:px-8 py-4">
+  <div class="max-w-7xl mx-auto flex flex-wrap gap-3 justify-between items-center">
+    <div>
+      <h1 class="font-black text-lg">BoothPro Dashboard <span class="text-indigo-400">v3.0</span></h1>
+      <p class="text-[11px] text-slate-500">Terhubung ke kiosk lewat localStorage <code>boothpro_config_v300</code> + BroadcastChannel (harus satu origin/browser).</p>
+    </div>
+    <div class="flex gap-2 items-center">
+      <span id="syncBadge" class="text-[10px] px-2 py-1 rounded-full bg-slate-800 text-slate-400">IDLE</span>
+      <button onclick="reloadAll()" class="btn">Muat Ulang</button>
+      <button onclick="saveAll()" class="btn btn-primary">Simpan &amp; Kirim ke Kiosk</button>
+    </div>
+  </div>
+</header>
+
 <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
-<section class="grid grid-cols-2 lg:grid-cols-5 gap-3"><div class="panel p-4"><p class="text-[10px] text-slate-400 uppercase font-bold">Sesi Hari Ini</p><p id="statSessions" class="text-2xl font-black mt-1">0</p></div><div class="panel p-4"><p class="text-[10px] text-slate-400 uppercase font-bold">Pendapatan Hari Ini</p><p id="statRevenue" class="text-xl font-black text-emerald-400 mt-1">Rp 0</p></div><div class="panel p-4"><p class="text-[10px] text-slate-400 uppercase font-bold">QRIS</p><p id="statQris" class="text-xl font-black text-indigo-400 mt-1">Rp 0</p></div><div class="panel p-4"><p class="text-[10px] text-slate-400 uppercase font-bold">Voucher</p><p id="statVoucher" class="text-xl font-black text-amber-400 mt-1">Rp 0</p></div><div class="panel p-4"><p class="text-[10px] text-slate-400 uppercase font-bold">Selesai</p><p id="statCompleted" class="text-2xl font-black text-cyan-400 mt-1">0</p></div></section>
-<nav class="panel p-1.5 flex gap-1 overflow-x-auto"><button class="tab active btn whitespace-nowrap" onclick="showTab('overview',this)">Overview</button><button class="tab btn whitespace-nowrap" onclick="showTab('transactions',this)">Transaksi</button><button class="tab btn whitespace-nowrap" onclick="showTab('packages',this)">Paket</button><button class="tab btn whitespace-nowrap" onclick="showTab('vouchers',this)">Voucher</button><button class="tab btn whitespace-nowrap" onclick="showTab('frames',this)">Frame</button><button class="tab btn whitespace-nowrap" onclick="showTab('settings',this)">Pengaturan</button><button class="tab btn whitespace-nowrap" onclick="showTab('backup',this)">Backup</button><button class="tab btn whitespace-nowrap" onclick="showTab('hardware',this)">Hardware</button></nav>
-<section id="tab-overview" class="space-y-6"><div class="grid lg:grid-cols-2 gap-6"><div class="panel p-5 space-y-4"><div class="flex justify-between items-center"><h2 class="font-bold">Status Kiosk</h2><span id="kioskHeartbeat" class="text-[10px] text-slate-500">Menunggu...</span></div><div class="grid grid-cols-2 gap-3"><div class="bg-slate-950 rounded-xl p-3"><p class="text-[10px] text-slate-500">Brand</p><p id="overviewBrand" class="font-bold text-sm mt-1">-</p></div><div class="bg-slate-950 rounded-xl p-3"><p class="text-[10px] text-slate-500">Durasi Sesi</p><p id="overviewTimer" class="font-bold text-sm mt-1">-</p></div><div class="bg-slate-950 rounded-xl p-3"><p class="text-[10px] text-slate-500">Max Retake</p><p id="overviewRetake" class="font-bold text-sm mt-1">-</p></div><div class="bg-slate-950 rounded-xl p-3"><p class="text-[10px] text-slate-500">Total Transaksi</p><p id="overviewTotal" class="font-bold text-sm mt-1">0</p></div></div></div><div class="panel p-5 space-y-4"><h2 class="font-bold">Kontrol Cepat</h2><div class="grid grid-cols-2 gap-3"><button class="btn btn-dark" onclick="broadcastReset()">Reset Kiosk</button><button class="btn btn-dark" onclick="refreshAll()">Refresh Data</button><button class="btn btn-dark" onclick="exportCSV()">Export CSV</button><button class="btn btn-danger" onclick="clearTransactions()">Hapus Riwayat</button></div><p class="text-[10px] text-slate-500">Reset Kiosk mengirim sinyal ke tab Kiosk. Respons reset otomatis membutuhkan handler pada Kiosk.</p></div></div></section>
-<section id="tab-transactions" class="hidden space-y-4"><div class="panel p-5"><div class="flex flex-wrap gap-2 justify-between items-center mb-4"><div><h2 class="font-bold">Riwayat Transaksi</h2><p class="text-[10px] text-slate-500">Membaca transaction log Phase 2 dan format riwayat lama.</p></div><div class="flex gap-2"><input id="searchTx" oninput="renderTransactions()" class="input max-w-xs" placeholder="Cari ID / paket..."><select id="statusFilter" onchange="renderTransactions()" class="input w-auto"><option value="">Semua Status</option><option>COMPLETED</option><option>ACTIVE</option><option>PAID</option><option>PENDING</option><option>CANCELLED</option></select></div></div><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="text-[10px] uppercase text-slate-500 border-b border-slate-800"><tr><th class="p-3">ID / Waktu</th><th class="p-3">Paket</th><th class="p-3">Bayar</th><th class="p-3">Nominal</th><th class="p-3">Foto/Cetak</th><th class="p-3">Status</th></tr></thead><tbody id="txBody" class="divide-y divide-slate-800"></tbody></table></div></div></section>
-<section id="tab-packages" class="hidden"><div class="grid lg:grid-cols-2 gap-6"><div class="panel p-5 space-y-3"><h2 class="font-bold">Harga Paket Kiosk</h2><div><label class="text-[10px] text-slate-400">Paket 1</label><input id="pkg1" class="input" type="number"></div><div><label class="text-[10px] text-slate-400">Paket 2</label><input id="pkg2" class="input" type="number"></div><div><label class="text-[10px] text-slate-400">Paket 3</label><input id="pkg3" class="input" type="number"></div><div><label class="text-[10px] text-slate-400">Extra Print</label><input id="extraPrint" class="input" type="number"></div><button onclick="savePrices()" class="btn btn-primary w-full">Simpan Harga & Sinkronkan</button></div><div class="panel p-5 space-y-3"><h2 class="font-bold">Referensi Paket Aktif</h2><div class="bg-slate-950 rounded-xl p-4 text-xs space-y-2"><p><b>Paket 1:</b> 4 Foto • 1 Strip</p><p><b>Paket 2:</b> 6 Foto • 2 Strip</p><p><b>Paket 3:</b> 2 Foto • 1 Mini</p></div><p class="text-[10px] text-slate-500">Struktur paket mengikuti Kiosk saat ini.</p></div></div></section>
-<section id="tab-vouchers" class="hidden"><div class="grid lg:grid-cols-3 gap-6"><div class="panel p-5 space-y-3"><h2 class="font-bold">Tambah Voucher</h2><input id="voucherCode" class="input uppercase" placeholder="CONTOH: EVENT2026"><input id="voucherValue" class="input" type="number" placeholder="Nilai nominal (opsional)"><button onclick="addVoucher()" class="btn btn-primary w-full">Tambah Voucher</button></div><div class="panel p-5 lg:col-span-2"><h2 class="font-bold mb-3">Voucher Tersedia</h2><div id="voucherList" class="grid md:grid-cols-2 gap-2"></div></div></div></section>
-<section id="tab-frames" class="hidden"><div class="grid lg:grid-cols-3 gap-6"><div class="panel p-5 space-y-3"><h2 class="font-bold">Template Engine V1</h2><p class="text-[10px] text-slate-400">Upload PNG transparan. BoothPro akan membaca ukuran canvas, orientasi, dan mencoba mendeteksi lubang foto secara otomatis.</p><input id="frameName" class="input" placeholder="Nama template"><input id="frameFile" type="file" accept="image/png,image/jpeg,image/webp" class="input"><button onclick="addFrame()" class="btn btn-primary w-full">Simpan & Analisis Template</button><div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[10px] text-slate-500 space-y-1"><p><b class="text-slate-300">Aturan:</b> foto ditempatkan di belakang PNG, lalu overlay template dirender paling akhir.</p><p>Portrait dan landscape mengikuti rasio template, bukan ukuran layar iPhone.</p><p>Jika deteksi slot gagal, gunakan <b class="text-slate-300">Atur Slot</b> untuk memasukkan posisi manual.</p></div></div><div class="panel p-5 lg:col-span-2"><div class="flex items-center justify-between gap-2 mb-3"><div><h2 class="font-bold">Template Gallery</h2><p class="text-[10px] text-slate-500">Metadata slot tersimpan bersama frame di <code>saved_frames_gallery</code>.</p></div><button onclick="analyzeAllFrames()" class="btn btn-dark">Analisis Semua</button></div><div id="frameList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div></div></div></section>
-<section id="tab-settings" class="hidden"><div class="grid lg:grid-cols-2 gap-6"><div class="panel p-5 space-y-3"><h2 class="font-bold">Brand & Tampilan</h2><label class="text-[10px] text-slate-400">Nama Studio</label><input id="brandName" class="input"><label class="text-[10px] text-slate-400">Welcome Message</label><input id="welcomeMsg" class="input"><label class="text-[10px] text-slate-400">Font</label><select id="fontName" class="input"><option>Inter</option><option>Poppins</option><option>Montserrat</option><option>Playfair Display</option><option>Courier New</option><option>Comic Sans MS</option></select><label class="text-[10px] text-slate-400">Warna Background</label><input id="bgColor" type="color" class="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl"><label class="text-[10px] text-slate-400">Background Image</label><input id="bgFile" type="file" accept="image/*" class="input"><button onclick="saveVisualSettings()" class="btn btn-primary w-full">Simpan Tampilan</button></div><div class="panel p-5 space-y-3"><h2 class="font-bold">Timer & Operasional</h2><label class="text-[10px] text-slate-400">Durasi sesi (menit)</label><input id="sessionMinutes" class="input" type="number" min="1"><label class="text-[10px] text-slate-400">Max retake</label><input id="maxRetake" class="input" type="number" min="0"><label class="text-[10px] text-slate-400">Countdown foto</label><select id="countdown" class="input"><option value="3">3 detik</option><option value="5">5 detik</option><option value="10">10 detik</option></select><label class="text-[10px] text-slate-400">Layout default</label><select id="layout" class="input"><option value="strip">Classic Strip</option><option value="grid2x2">Modern Grid 2x2</option></select><button onclick="saveOperationalSettings()" class="btn btn-primary w-full">Simpan Operasional</button></div></div></section>
-<section id="tab-hardware" class="hidden space-y-4">
-<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-<div class="panel p-4"><p class="text-[10px] text-slate-500">KAMERA</p><b id="hwCamera" class="text-lg text-emerald-400">-</b></div>
-<div class="panel p-4"><p class="text-[10px] text-slate-500">PRINTER</p><b id="hwPrinter" class="text-lg text-indigo-400">-</b></div>
-<div class="panel p-4"><p class="text-[10px] text-slate-500">SCREEN / FULLSCREEN</p><b id="hwFullscreen" class="text-lg">-</b></div>
-<div class="panel p-4"><p class="text-[10px] text-slate-500">WAKE LOCK</p><b id="hwWake" class="text-lg">-</b></div>
-</div>
-<div class="grid lg:grid-cols-2 gap-6">
-<div class="panel p-5 space-y-4"><div><h2 class="font-bold">Hardware Control</h2><p class="text-[10px] text-slate-500 mt-1">Lapisan kontrol browser untuk kiosk. Printer fisik menggunakan dialog printer sistem/AirPrint pada perangkat yang mendukung.</p></div><div class="grid grid-cols-2 gap-2"><button class="btn btn-primary" onclick="hwOpenKiosk()">Buka Kiosk</button><button class="btn btn-dark" onclick="hwRefresh()">Refresh Hardware</button><button class="btn btn-dark" onclick="hwFullscreenRequest()">Minta Fullscreen</button><button class="btn btn-dark" onclick="hwWakeRequest()">Aktifkan Wake Lock</button></div><button class="btn btn-primary w-full" onclick="hwTestPrint()">Test Print</button></div>
-<div class="panel p-5 space-y-3"><h2 class="font-bold">Kesiapan Hardware</h2><div class="bg-slate-950 rounded-xl p-4 text-xs space-y-2"><p><b>Kamera:</b> <span id="hwCameraDetail" class="text-slate-400">-</span></p><p><b>Printer:</b> <span id="hwPrinterDetail" class="text-slate-400">Browser Print / AirPrint / system printer</span></p><p><b>Jaringan:</b> <span id="hwNetwork" class="text-slate-400">-</span></p><p><b>Heartbeat:</b> <span id="hwHeartbeat" class="text-slate-400">-</span></p></div><p class="text-[10px] text-amber-400">Catatan: iPhone/iPad tidak memberikan akses browser langsung ke printer USB/Bluetooth. Untuk printer USB/serial dedicated, Phase 5B dapat memakai aplikasi native/bridge pada Android, Windows atau Raspberry Pi.</p></div>
-</div></section>
-<section id="tab-backup" class="hidden"><div class="grid md:grid-cols-2 gap-6"><div class="panel p-5 space-y-3"><h2 class="font-bold">Backup</h2><p class="text-xs text-slate-400">Simpan konfigurasi dan transaksi sebagai satu file JSON.</p><button onclick="exportBackup()" class="btn btn-primary w-full">Download Backup JSON</button></div><div class="panel p-5 space-y-3"><h2 class="font-bold">Restore</h2><input id="restoreFile" type="file" accept=".json,application/json" class="input"><button onclick="restoreBackup()" class="btn btn-dark w-full">Restore Backup</button><p class="text-[10px] text-amber-400">Restore mengganti data konfigurasi dan riwayat yang sama.</p></div></div></section>
-<section id="tab-cloud" class="hidden space-y-4"><div class="grid md:grid-cols-4 gap-3"><div class="panel p-4"><p class="text-[10px] text-slate-500">TOTAL JOB</p><b id="cloudTotal" class="text-xl">0</b></div><div class="panel p-4"><p class="text-[10px] text-slate-500">UPLOADED</p><b id="cloudUploaded" class="text-xl text-emerald-400">0</b></div><div class="panel p-4"><p class="text-[10px] text-slate-500">PENDING / UPLOADING</p><b id="cloudPending" class="text-xl text-amber-400">0</b></div><div class="panel p-4"><p class="text-[10px] text-slate-500">FAILED</p><b id="cloudFailed" class="text-xl text-red-400">0</b></div></div><div class="panel p-5 space-y-4"><div class="flex flex-wrap gap-2 justify-between items-center"><div><h2 class="font-bold">Cloud Monitor</h2><p id="cloudOnline" class="text-[10px] text-slate-500">Checking...</p></div><div class="flex gap-2"><button onclick="cloudSyncNow()" class="btn btn-primary">Sync Now</button><button onclick="clearUploadedCloudJobs()" class="btn btn-dark">Clear Uploaded</button></div></div><div class="grid md:grid-cols-2 gap-3"><div><label class="text-[10px] text-slate-400">Cloud Name</label><input id="cloudNameInput" class="input" value="risakil1"></div><div><label class="text-[10px] text-slate-400">Upload Preset</label><input id="cloudPresetInput" class="input" value="risakil"></div></div><button onclick="saveCloudConfig()" class="btn btn-primary">Simpan Cloud Config</button><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="text-[9px] uppercase text-slate-500 border-b border-slate-800"><tr><th class="p-2">Job</th><th class="p-2">Transaction</th><th class="p-2">Type</th><th class="p-2">Status</th><th class="p-2">Upload Time</th><th class="p-2">Result URL</th><th class="p-2">Error</th><th class="p-2">Action</th></tr></thead><tbody id="cloudBody" class="divide-y divide-slate-800"></tbody></table></div></div></section></main>
-<footer class="border-t border-slate-800 bg-slate-900 p-5 text-center text-[10px] text-slate-500">BoothPro Admin • Phase 3 • Same-Origin Local Sync</footer>
+<section class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+  <div class="panel p-4"><p class="lbl">Sesi Hari Ini</p><p id="statSessions" class="text-2xl font-black mt-1">0</p></div>
+  <div class="panel p-4"><p class="lbl">Omzet Hari Ini</p><p id="statRevenue" class="text-2xl font-black mt-1">Rp 0</p></div>
+  <div class="panel p-4"><p class="lbl">Total Sesi</p><p id="statAll" class="text-2xl font-black mt-1">0</p></div>
+  <div class="panel p-4"><p class="lbl">Frame Tersimpan</p><p id="statFrames" class="text-2xl font-black mt-1">0</p></div>
+  <div class="panel p-4"><p class="lbl">Stiker Custom</p><p id="statStickers" class="text-2xl font-black mt-1">0</p></div>
+</section>
+
+<nav class="panel p-1.5 flex gap-1 overflow-x-auto">
+  <button class="tab btn active whitespace-nowrap" onclick="showTab('brand',this)">Brand &amp; Paket</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('theme',this)">Tema &amp; Background</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('features',this)">Fitur &amp; Timer</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('effects',this)">Efek</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('stickers',this)">Stiker</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('frames',this)">Frame</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('print',this)">Print</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('payment',this)">Pembayaran</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('tx',this)">Transaksi</button>
+  <button class="tab btn whitespace-nowrap" onclick="showTab('backup',this)">Backup</button>
+</nav>
+
+<!-- BRAND & PAKET -->
+<section id="tab-brand" class="grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-2">
+    <h2 class="font-bold">Brand Kiosk</h2>
+    <label class="lbl">Nama Studio</label><input id="brandName" class="input">
+    <label class="lbl">Tagline</label><input id="brandTagline" class="input">
+    <label class="lbl">Judul Home</label><input id="brandHomeTitle" class="input">
+    <label class="lbl">Subjudul Home</label><input id="brandHomeSubtitle" class="input">
+    <label class="lbl">Logo (URL / data URI)</label><input id="brandLogo" class="input" placeholder="kosongkan jika tidak pakai">
+    <label class="lbl">Upload Logo</label><input type="file" accept="image/*" class="input" onchange="uploadTo(event,'brandLogo')">
+    <div class="grid grid-cols-2 gap-2">
+      <div><label class="lbl">Watermark Footer</label><input id="footerWatermark" class="input"></div>
+      <div><label class="lbl">Format Tanggal</label>
+        <select id="footerDateFormat" class="input"><option value="id-short">id-short</option><option value="id-long">id-long</option><option value="iso">iso</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <div class="flex justify-between items-center"><h2 class="font-bold">Paket Kiosk</h2><button class="btn" onclick="addPackage()">+ Paket</button></div>
+    <div id="packageList" class="space-y-3"></div>
+    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+      <div><label class="lbl">Harga cetak tambahan</label><input id="extraPrintPrice" type="number" class="input"></div>
+      <div><label class="lbl">Maks cetak tambahan</label><input id="extraPrintMax" type="number" class="input"></div>
+    </div>
+    <div>
+      <label class="lbl">Voucher (KODE=diskon, satu per baris)</label>
+      <textarea id="voucherText" rows="4" class="input font-mono text-[12px]" placeholder="DEMO=0&#10;EVENT2026=10000"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- TEMA -->
+<section id="tab-theme" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Palet Warna</h2>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="lbl">Background</label><input id="themeBg" type="color" class="input h-11"></div>
+      <div><label class="lbl">Accent</label><input id="themeAccent" type="color" class="input h-11"></div>
+      <div><label class="lbl">Kartu / Panel</label><input id="themeCard" type="color" class="input h-11"></div>
+      <div><label class="lbl">Teks</label><input id="themeText" type="color" class="input h-11"></div>
+    </div>
+    <label class="lbl">Style</label>
+    <select id="themeStyle" class="input"><option value="solid">Solid</option><option value="gradient">Gradient</option></select>
+    <label class="lbl">Redup background foto (<span id="dimLabel">35</span>%)</label>
+    <input id="themeDim" type="range" min="0" max="90" class="w-full" oninput="document.getElementById('dimLabel').innerText=this.value">
+    <div class="grid grid-cols-2 gap-2">
+      <button class="btn btn-primary" onclick="saveAll()">Simpan Tema</button>
+      <button class="btn btn-danger" onclick="clearBackgroundImage()">Hapus Background Foto</button>
+    </div>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Background Foto Home</h2>
+    <input type="file" accept="image/*" class="input" onchange="uploadBackground(event)">
+    <p class="text-[11px] text-slate-500">Gambar otomatis dikecilkan maks 1600px agar hemat storage browser.</p>
+    <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 aspect-video flex items-center justify-center">
+      <img id="bgPreview" class="max-h-full max-w-full object-contain" alt="preview">
+      <span id="bgEmpty" class="text-xs text-slate-600">Belum ada background</span>
+    </div>
+    <h3 class="font-bold pt-2">Preset Tema</h3>
+    <div id="presetGrid" class="grid grid-cols-2 gap-2"></div>
+  </div>
+</section>
+
+<!-- FITUR -->
+<section id="tab-features" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Saklar Fitur Kiosk</h2>
+    <div id="featureGrid" class="grid sm:grid-cols-2 gap-2"></div>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Timer &amp; Sesi</h2>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="lbl">Durasi sesi (menit)</label><input id="cfgDuration" type="number" min="1" max="60" class="input"></div>
+      <div><label class="lbl">Countdown shutter (detik)</label><input id="cfgCountdown" type="number" min="1" max="15" class="input"></div>
+      <div><label class="lbl">Interval tick countdown (ms)</label><input id="cfgTick" type="number" min="300" max="3000" step="50" class="input"></div>
+      <div><label class="lbl">Idle ke attract (detik)</label><input id="cfgIdle" type="number" min="15" max="600" class="input"></div>
+      <div><label class="lbl">Maks retake</label><input id="cfgRetakeMax" type="number" min="0" max="20" class="input"></div>
+      <div><label class="lbl">PIN Admin kiosk</label><input id="cfgAdminPin" class="input" placeholder="kosong = tanpa PIN"></div>
+    </div>
+    <button class="btn btn-primary w-full" onclick="saveAll()">Simpan Pengaturan</button>
+  </div>
+</section>
+
+<!-- EFEK -->
+<section id="tab-effects" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Daftar Efek Foto</h2>
+    <p class="text-[11px] text-slate-500">Nonaktifkan efek agar tidak muncul di editor kiosk.</p>
+    <div id="effectList" class="space-y-2"></div>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Tambah Efek Custom</h2>
+    <label class="lbl">Nama</label><input id="fxName" class="input" placeholder="Pastel Dream">
+    <label class="lbl">Deskripsi</label><input id="fxDesc" class="input" placeholder="Lembut pastel">
+    <label class="lbl">CSS filter</label><input id="fxCss" class="input font-mono" placeholder="contrast(110%) saturate(120%) sepia(15%)">
+    <div class="rounded-xl bg-slate-950 border border-slate-800 p-3">
+      <p class="lbl mb-2">Preview</p>
+      <div id="fxPreview" class="h-24 rounded-lg" style="background:linear-gradient(120deg,#f59e0b,#ec4899,#6366f1)"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <button class="btn" onclick="previewEffect()">Coba Preview</button>
+      <button class="btn btn-primary" onclick="addEffect()">Tambah Efek</button>
+    </div>
+    <button class="btn btn-danger w-full" onclick="resetEffects()">Reset ke Efek Bawaan</button>
+  </div>
+</section>
+
+<!-- STIKER -->
+<section id="tab-stickers" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Upload Stiker Photobooth</h2>
+    <label class="lbl">Kategori</label><input id="stickerCat" class="input" value="Custom">
+    <label class="lbl">File PNG transparan / SVG (bisa banyak)</label>
+    <input type="file" accept="image/png,image/svg+xml,image/webp" multiple class="input" onchange="uploadStickers(event)">
+    <p class="text-[11px] text-slate-500">Stiker bawaan (bunga, donat, pita, mahkota, dll) sudah tersedia di kiosk. Upload di sini untuk menambah koleksi.</p>
+    <button class="btn btn-danger w-full" onclick="clearStickers()">Hapus Semua Stiker Custom</button>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Stiker Custom (<span id="stickerCount">0</span>)</h2>
+    <div id="stickerList" class="grid grid-cols-5 sm:grid-cols-8 gap-2"></div>
+  </div>
+</section>
+
+<!-- FRAME -->
+<section id="tab-frames" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Upload Frame Gallery</h2>
+    <input type="file" accept="image/png,image/webp" multiple class="input" onchange="uploadFrames(event)">
+    <p class="text-[11px] text-slate-500">PNG transparan direkomendasikan. Maksimal 24 frame tersimpan (dibagikan ke kiosk lewat <code>boothpro_frames_v212</code>).</p>
+    <button class="btn btn-danger w-full" onclick="clearFrames()">Hapus Semua Frame</button>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Frame Tersimpan (<span id="frameCount">0</span>)</h2>
+    <div id="frameList" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+  </div>
+</section>
+
+<!-- PRINT -->
+<section id="tab-print" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Ukuran &amp; Mode Cetak</h2>
+    <label class="lbl">Ukuran kertas</label>
+    <select id="printSize" class="input" onchange="toggleCustomSize()">
+      <option value="4x6">4R / 4x6 inci (102×152mm)</option>
+      <option value="2x6">Strip 2x6 inci (51×152mm)</option>
+      <option value="5x7">5x7 inci (127×178mm)</option>
+      <option value="6x8">6x8 inci (152×203mm)</option>
+      <option value="A4">A4 (210×297mm)</option>
+      <option value="A5">A5 (148×210mm)</option>
+      <option value="custom">Custom (mm)</option>
+    </select>
+    <div id="customSizeWrap" class="grid grid-cols-2 gap-2 hidden">
+      <div><label class="lbl">Lebar (mm)</label><input id="printCustomW" type="number" class="input"></div>
+      <div><label class="lbl">Tinggi (mm)</label><input id="printCustomH" type="number" class="input"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div><label class="lbl">Orientasi</label><select id="printOrientation" class="input"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div>
+      <div><label class="lbl">Mode isi</label><select id="printFit" class="input"><option value="contain">Contain (utuh)</option><option value="cover">Cover (penuh, terpotong)</option></select></div>
+      <div><label class="lbl">Jumlah copy default</label><input id="printCopies" type="number" min="1" max="10" class="input"></div>
+      <div><label class="lbl">Nama printer (bridge)</label><input id="printerName" class="input" placeholder="DS-RX1HS"></div>
+    </div>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Hardware Bridge</h2>
+    <label class="lbl">Bridge URL</label><input id="bridgeUrl" class="input" placeholder="http://localhost:8787">
+    <label class="flex items-center gap-2 text-xs mt-2"><input id="autoPrint" type="checkbox" class="h-4 w-4"> Auto print setelah sesi selesai</label>
+    <label class="lbl">Mode kamera</label>
+    <select id="cameraMode" class="input"><option value="browser">Browser (getUserMedia)</option><option value="bridge">Bridge (DSLR/gPhoto)</option></select>
+    <div class="grid grid-cols-2 gap-2">
+      <div><label class="lbl">Resolusi kamera</label><select id="camResolution" class="input"><option>1280x720</option><option>1920x1080</option><option>640x480</option></select></div>
+      <div><label class="lbl">Facing mode</label><select id="camFacing" class="input"><option value="user">User</option><option value="environment">Environment</option></select></div>
+    </div>
+    <button class="btn w-full" onclick="pingBridge()">Tes Koneksi Bridge</button>
+    <p id="bridgeStatus" class="text-[11px] text-slate-500">Belum dites.</p>
+    <p class="text-[11px] text-slate-500">Tes cetak dilakukan dari kiosk (Dashboard kiosk → Print → Test Print) agar memakai printer yang terpasang di mesin kiosk.</p>
+  </div>
+</section>
+
+<!-- PEMBAYARAN -->
+<section id="tab-payment" class="hidden grid lg:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-2">
+    <h2 class="font-bold">Midtrans / QRIS</h2>
+    <label class="lbl">Mode</label><select id="mtMode" class="input"><option value="manual">Manual (QRIS statis)</option><option value="api">API Midtrans</option></select>
+    <label class="lbl">Environment</label><select id="mtEnv" class="input"><option value="production">Production</option><option value="sandbox">Sandbox</option></select>
+    <label class="lbl">API Base (proxy backend)</label><input id="mtApiBase" class="input" placeholder="https://api.domain.com">
+    <label class="lbl">QRIS statis (URL gambar)</label><input id="qrisUrl" class="input">
+    <p class="text-[11px] text-amber-400">Server key Midtrans tidak boleh disimpan di browser kiosk. Gunakan proxy backend melalui API Base.</p>
+  </div>
+  <div class="panel p-5 space-y-2">
+    <h2 class="font-bold">Cloud &amp; Soft File</h2>
+    <label class="lbl">Cloudinary cloud name</label><input id="cldName" class="input">
+    <label class="lbl">Cloudinary upload preset</label><input id="cldPreset" class="input">
+    <label class="lbl">Soft file base URL</label><input id="softBase" class="input">
+    <label class="lbl">Share base URL</label><input id="shareBase" class="input">
+  </div>
+</section>
+
+<!-- TRANSAKSI -->
+<section id="tab-tx" class="hidden panel p-5 space-y-3">
+  <div class="flex justify-between items-center flex-wrap gap-2">
+    <h2 class="font-bold">Riwayat Sesi Kiosk</h2>
+    <div class="flex gap-2"><button class="btn" onclick="exportCsv()">Export CSV</button><button class="btn btn-danger" onclick="clearHistory()">Hapus Riwayat</button></div>
+  </div>
+  <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 text-left"><tr><th class="py-2">Waktu</th><th>ID</th><th>Paket</th><th>Foto</th><th>Cetak</th><th>Metode</th><th class="text-right">Harga</th></tr></thead><tbody id="txBody"></tbody></table></div>
+</section>
+
+<!-- BACKUP -->
+<section id="tab-backup" class="hidden grid md:grid-cols-2 gap-6">
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Backup</h2>
+    <p class="text-xs text-slate-400">Menyimpan config, stiker custom, frame, dan riwayat ke satu file JSON.</p>
+    <button class="btn btn-primary w-full" onclick="exportBackup()">Download Backup</button>
+  </div>
+  <div class="panel p-5 space-y-3">
+    <h2 class="font-bold">Restore</h2>
+    <input type="file" accept="application/json" class="input" onchange="importBackup(event)">
+    <p class="text-[11px] text-amber-400">Restore menimpa konfigurasi kiosk pada browser ini.</p>
+  </div>
+</section>
+</main>
+<footer class="border-t border-slate-800 bg-slate-900 p-5 text-center text-[10px] text-slate-500">BoothPro Dashboard v3.0 · sinkron satu origin dengan index.html</footer>
+
 <script>
-const CHANNEL_NAME='booth_sync_channel',syncChannel=('BroadcastChannel'in window)?new BroadcastChannel(CHANNEL_NAME):null,TX_KEY='boothpro_transaction_log',OLD_TX_KEY='booth_history_sessions',FRAME_KEY='saved_frames_gallery';
-function money(n){return'Rp '+(Number(n)||0).toLocaleString('id-ID')}function safe(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function getJSON(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch(e){return f}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
-function normalizeTransactions(){let modern=getJSON(TX_KEY,[]),old=getJSON(OLD_TX_KEY,[]);if(!Array.isArray(modern))modern=[];if(!Array.isArray(old))old=[];const legacy=old.map((x,i)=>({transactionId:x.transactionId||x.id||'LEGACY-'+i,id:x.id||x.transactionId||'LEGACY-'+i,timestamp:x.timestamp||x.time||new Date().toISOString(),packageName:x.packageName||x.package||'Paket',price:Number(x.price)||0,paymentMethod:x.paymentMethod||x.payment||'unknown',paymentStatus:x.paymentStatus||'PAID',status:x.status||'COMPLETED',photoCount:Number(x.photoCount||x.shots||0),printCount:Number(x.printCount||x.prints||0),voucherCode:x.voucherCode||''}));const merged=[...modern,...legacy],seen=new Set();return merged.filter(x=>{const id=x.transactionId||x.id;if(seen.has(id))return false;seen.add(id);return true}).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))}
+const CONFIG_KEY='boothpro_config_v300',LEGACY_CONFIG_KEY='boothpro_config_v212',STICKER_KEY='boothpro_stickers_v300',FRAME_KEY='boothpro_frames_v212',HISTORY_KEY='boothpro_history_v212',SYNC_CHANNEL='boothpro_sync_v300';
+const defaultFeatures={stickers:true,text:true,effects:true,adjustments:true,frameColor:true,frameGallery:true,customerFrameUpload:true,gif:true,qr:true,cloudUpload:true,extraPrint:true,retake:true,retakeMax:3,mirror:true,zoom:true,flash:true,countdownTick:700,sessionReport:true,attract:true,history:true,watermark:true,showDate:true};
+const featureLabels={stickers:'Stiker',text:'Teks custom',effects:'Efek foto',adjustments:'Penyesuaian warna',frameColor:'Warna frame',frameGallery:'Galeri frame',customerFrameUpload:'Upload frame oleh customer',gif:'GIF / boomerang',qr:'QR soft file',cloudUpload:'Upload cloud',extraPrint:'Cetak tambahan berbayar',retake:'Retake foto',mirror:'Mirror kamera',zoom:'Zoom kamera',flash:'Flash layar',sessionReport:'Session report',attract:'Attract screen',history:'Riwayat lokal',watermark:'Watermark footer',showDate:'Tanggal di footer'};
+const defaultEffects=[{id:'none',name:'Original',desc:'Tanpa efek',css:'none',on:true},{id:'bw',name:'Retro B&W',desc:'Hitam putih',css:'grayscale(100%)',on:true},{id:'vintage',name:'Vintage Warm',desc:'Klasik',css:'sepia(60%) brightness(95%) contrast(105%)',on:true},{id:'cyber',name:'Cyberpunk',desc:'Neon',css:'hue-rotate(180deg) saturate(140%)',on:true},{id:'soft',name:'Soft Glow',desc:'Lembut cerah',css:'brightness(110%) saturate(115%) contrast(95%)',on:true},{id:'film',name:'Film Fade',desc:'Ala analog',css:'contrast(90%) saturate(85%) sepia(25%) brightness(105%)',on:true},{id:'cool',name:'Cool Tone',desc:'Nuansa biru',css:'hue-rotate(-15deg) saturate(120%) brightness(103%)',on:true},{id:'drama',name:'Dramatic',desc:'Kontras tinggi',css:'contrast(135%) saturate(110%) brightness(95%)',on:true}];
+const defaultConfig={duration:7,countdown:3,printSize:'4x6',print:{size:'4x6',orientation:'portrait',fit:'contain',copies:1,customW:102,customH:152},features:JSON.parse(JSON.stringify(defaultFeatures)),effects:JSON.parse(JSON.stringify(defaultEffects)),adminPin:'',idleSeconds:90,softBase:'',shareBase:'',qris:'',extraPrintPrice:10000,extraPrintMax:3,brand:{name:'BOOTH PRO',tagline:'SELF PHOTOBOOTH',logo:'',homeTitle:'Capture Your Best Moments Instantly.',homeSubtitle:'Pilih paket, bayar, berpose, pilih frame, edit, lalu cetak dan ambil soft file.'},cloudinary:{cloudName:'',uploadPreset:''},camera:{facingMode:'user',deviceId:'',resolution:'1280x720'},midtrans:{mode:'manual',env:'production',apiBase:'',serverKey:''},hardware:{bridgeUrl:'',autoPrint:false,printerName:'',cameraMode:'browser'},theme:{bg:'#09090b',accent:'#818cf8',card:'#18181b',text:'#fafafa',dim:35,style:'solid',backgroundImage:''},vouchers:{DEMO:0},footer:{watermark:'⚡ BOOTHPRO',showDate:true,dateFormat:'id-short'},packages:[{id:'basic',name:'1 Strip Basic',price:25000,photos:4,prints:1,layout:'strip',desc:'4 foto · 1 strip'},{id:'dual',name:'2 Strip Duo',price:40000,photos:4,prints:2,layout:'strip',desc:'4 foto · 2 strip'},{id:'six',name:'6 Pose',price:45000,photos:6,prints:1,layout:'6-grid',desc:'6 foto · 1 strip'}]};
+const THEME_PRESETS=[{id:'midnight',name:'Midnight',bg:'#09090b',accent:'#818cf8',card:'#18181b',text:'#fafafa'},{id:'rose',name:'Rose Studio',bg:'#1c0f14',accent:'#fb7185',card:'#2a151c',text:'#fff1f2'},{id:'mint',name:'Mint Fresh',bg:'#06231f',accent:'#34d399',card:'#0b3129',text:'#ecfdf5'},{id:'sunset',name:'Sunset',bg:'#1b1006',accent:'#fb923c',card:'#2a1a0b',text:'#fff7ed'},{id:'ocean',name:'Ocean',bg:'#04121f',accent:'#38bdf8',card:'#0a1e30',text:'#e0f2fe'},{id:'light',name:'Light Studio',bg:'#f4f4f5',accent:'#6366f1',card:'#ffffff',text:'#18181b'}];
+
+const $=id=>document.getElementById(id);
+const money=n=>'Rp '+(Number(n)||0).toLocaleString('id-ID');
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function getJSON(k,f){try{const v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
+let syncChannel=null;try{if('BroadcastChannel'in window){syncChannel=new BroadcastChannel(SYNC_CHANNEL);syncChannel.onmessage=ev=>{if(ev.data&&ev.data.type==='config'){config=loadConfig();fillForm();flash('KIOSK UPDATE')}}}}catch(e){}
+function flash(t){const b=$('syncBadge');b.textContent=t;b.className='text-[10px] px-2 py-1 rounded-full bg-emerald-600 text-white';setTimeout(()=>{b.textContent='IDLE';b.className='text-[10px] px-2 py-1 rounded-full bg-slate-800 text-slate-400'},1800)}
+
+function loadConfig(){
+  const saved=getJSON(CONFIG_KEY,null)||getJSON(LEGACY_CONFIG_KEY,null)||{};
+  const c=JSON.parse(JSON.stringify(defaultConfig));
+  Object.assign(c,saved);
+  ['brand','cloudinary','camera','midtrans','hardware','theme','footer','print'].forEach(k=>{c[k]=Object.assign({},defaultConfig[k],saved[k]||{})});
+  c.features=Object.assign({},defaultFeatures,saved.features||{});
+  c.effects=Array.isArray(saved.effects)&&saved.effects.length?saved.effects:JSON.parse(JSON.stringify(defaultEffects));
+  if(!Array.isArray(c.packages)||!c.packages.length)c.packages=JSON.parse(JSON.stringify(defaultConfig.packages));
+  if(saved.auth)c.auth=saved.auth;
+  return c;
+}
+let config=loadConfig();
+let stickers=getJSON(STICKER_KEY,[])||[];
+let frameItems=getJSON(FRAME_KEY,[])||[];
+
+function persist(){
+  try{localStorage.setItem(CONFIG_KEY,JSON.stringify(config))}catch(e){alert('Storage browser penuh. Hapus frame/stiker lama dulu.');return false}
+  try{syncChannel&&syncChannel.postMessage({type:'config',at:Date.now()})}catch(e){}
+  flash('TERSIMPAN');return true;
+}
+function persistStickers(){try{localStorage.setItem(STICKER_KEY,JSON.stringify(stickers))}catch(e){alert('Storage penuh.')}try{syncChannel&&syncChannel.postMessage({type:'config',at:Date.now()})}catch(e){}}
+function persistFrames(){try{localStorage.setItem(FRAME_KEY,JSON.stringify(frameItems.slice(-24)))}catch(e){alert('Storage penuh.')}try{syncChannel&&syncChannel.postMessage({type:'config',at:Date.now()})}catch(e){}}
+
+function showTab(id,btn){document.querySelectorAll('main > section[id^="tab-"]').forEach(s=>s.classList.add('hidden'));$('tab-'+id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn&&btn.classList.add('active')}
+
+/* ---------- FORM FILL / COLLECT ---------- */
+function fillForm(){
+  const b=config.brand;brandName.value=b.name||'';brandTagline.value=b.tagline||'';brandHomeTitle.value=b.homeTitle||'';brandHomeSubtitle.value=b.homeSubtitle||'';brandLogo.value=b.logo||'';
+  footerWatermark.value=config.footer.watermark||'';footerDateFormat.value=config.footer.dateFormat||'id-short';
+  extraPrintPrice.value=config.extraPrintPrice||0;extraPrintMax.value=config.extraPrintMax||0;
+  voucherText.value=Object.entries(config.vouchers||{}).map(([k,v])=>k+'='+v).join('\n');
+  renderPackages();
+  const t=config.theme;themeBg.value=hex(t.bg,'#09090b');themeAccent.value=hex(t.accent,'#818cf8');themeCard.value=hex(t.card,'#18181b');themeText.value=hex(t.text,'#fafafa');themeStyle.value=t.style||'solid';themeDim.value=Number(t.dim)||0;$('dimLabel').innerText=themeDim.value;
+  renderBgPreview();renderPresets();
+  renderFeatures();
+  cfgDuration.value=config.duration||7;cfgCountdown.value=config.countdown||3;cfgTick.value=config.features.countdownTick||700;cfgIdle.value=config.idleSeconds||90;cfgRetakeMax.value=config.features.retakeMax??3;cfgAdminPin.value=config.adminPin||'';
+  renderEffects();
+  renderStickers();renderFrames();
+  const p=config.print;printSize.value=p.size||'4x6';printOrientation.value=p.orientation||'portrait';printFit.value=p.fit||'contain';printCopies.value=p.copies||1;printCustomW.value=p.customW||102;printCustomH.value=p.customH||152;toggleCustomSize();
+  const h=config.hardware;bridgeUrl.value=h.bridgeUrl||'';autoPrint.checked=h.autoPrint===true;printerName.value=h.printerName||'';cameraMode.value=h.cameraMode||'browser';
+  camResolution.value=config.camera.resolution||'1280x720';camFacing.value=config.camera.facingMode||'user';
+  mtMode.value=config.midtrans.mode||'manual';mtEnv.value=config.midtrans.env||'production';mtApiBase.value=config.midtrans.apiBase||'';qrisUrl.value=config.qris||'';
+  cldName.value=config.cloudinary.cloudName||'';cldPreset.value=config.cloudinary.uploadPreset||'';softBase.value=config.softBase||'';shareBase.value=config.shareBase||'';
+  renderStats();renderTx();
+}
+function hex(v,f){return/^#[0-9a-fA-F]{6}$/.test(v||'')?v:f}
+
+function collectForm(){
+  config.brand={...config.brand,name:brandName.value.trim()||'BOOTH PRO',tagline:brandTagline.value.trim(),homeTitle:brandHomeTitle.value.trim(),homeSubtitle:brandHomeSubtitle.value.trim(),logo:brandLogo.value.trim()};
+  config.footer={...config.footer,watermark:footerWatermark.value,dateFormat:footerDateFormat.value,showDate:config.features.showDate!==false};
+  config.extraPrintPrice=Number(extraPrintPrice.value)||0;config.extraPrintMax=Number(extraPrintMax.value)||0;
+  const v={};voucherText.value.split('\n').forEach(line=>{const[a,bb]=line.split('=');if(a&&a.trim())v[a.trim().toUpperCase()]=Number(bb)||0});config.vouchers=v;
+  collectPackages();
+  config.theme={...config.theme,bg:themeBg.value,accent:themeAccent.value,card:themeCard.value,text:themeText.value,style:themeStyle.value,dim:Number(themeDim.value)||0};
+  const f=Object.assign({},config.features);
+  document.querySelectorAll('#featureGrid [data-feat]').forEach(el=>{f[el.dataset.feat]=el.checked===true});
+  f.countdownTick=Math.max(300,Math.min(3000,Number(cfgTick.value)||700));
+  f.retakeMax=Math.max(0,Math.min(20,Number(cfgRetakeMax.value)||0));
+  config.features=f;
+  config.duration=Math.max(1,Number(cfgDuration.value)||7);config.countdown=Math.max(1,Number(cfgCountdown.value)||3);config.idleSeconds=Math.max(15,Number(cfgIdle.value)||90);config.adminPin=cfgAdminPin.value.trim();
+  document.querySelectorAll('#effectList [data-fx]').forEach(el=>{const fx=config.effects.find(x=>x.id===el.dataset.fx);if(fx)fx.on=el.checked===true});
+  config.print={size:printSize.value,orientation:printOrientation.value,fit:printFit.value,copies:Math.max(1,Math.min(10,Number(printCopies.value)||1)),customW:Number(printCustomW.value)||102,customH:Number(printCustomH.value)||152};
+  config.printSize=config.print.size;
+  config.hardware={...config.hardware,bridgeUrl:bridgeUrl.value.trim(),autoPrint:autoPrint.checked,printerName:printerName.value.trim(),cameraMode:cameraMode.value};
+  config.camera={...config.camera,resolution:camResolution.value,facingMode:camFacing.value};
+  config.midtrans={...config.midtrans,mode:mtMode.value,env:mtEnv.value,apiBase:mtApiBase.value.trim()};
+  config.qris=qrisUrl.value.trim();
+  config.cloudinary={cloudName:cldName.value.trim(),uploadPreset:cldPreset.value.trim()};
+  config.softBase=softBase.value.trim();config.shareBase=shareBase.value.trim();
+}
+function saveAll(){collectForm();if(persist())fillForm()}
+function reloadAll(){config=loadConfig();stickers=getJSON(STICKER_KEY,[])||[];frameItems=getJSON(FRAME_KEY,[])||[];fillForm();flash('DIMUAT')}
+
+/* ---------- PACKAGES ---------- */
+function renderPackages(){
+  packageList.innerHTML='';
+  config.packages.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='rounded-xl bg-slate-950 border border-slate-800 p-3 grid grid-cols-2 gap-2';
+    d.innerHTML=`<input data-p="${i}" data-k="name" value="${esc(p.name)}" class="input col-span-2 mt-0" placeholder="Nama paket">
+      <input data-p="${i}" data-k="price" type="number" value="${Number(p.price)||0}" class="input mt-0" placeholder="Harga">
+      <input data-p="${i}" data-k="photos" type="number" min="1" value="${Number(p.photos)||4}" class="input mt-0" placeholder="Jumlah foto">
+      <input data-p="${i}" data-k="prints" type="number" min="1" value="${Number(p.prints)||1}" class="input mt-0" placeholder="Jumlah cetak">
+      <select data-p="${i}" data-k="layout" class="input mt-0"><option value="strip"${p.layout==='strip'?' selected':''}>Strip</option><option value="4-grid"${p.layout==='4-grid'?' selected':''}>4 Grid</option><option value="6-grid"${p.layout==='6-grid'?' selected':''}>6 Grid</option></select>
+      <input data-p="${i}" data-k="desc" value="${esc(p.desc||'')}" class="input col-span-2 mt-0" placeholder="Deskripsi">
+      <button class="btn btn-danger col-span-2" onclick="removePackage(${i})">Hapus paket</button>`;
+    packageList.appendChild(d);
+  });
+}
+function collectPackages(){
+  document.querySelectorAll('#packageList [data-p]').forEach(el=>{
+    const i=Number(el.dataset.p),k=el.dataset.k;if(!config.packages[i])return;
+    config.packages[i][k]=['price','photos','prints'].includes(k)?Number(el.value)||0:el.value;
+  });
+}
+function addPackage(){collectPackages();config.packages.push({id:'pkg'+Date.now().toString(36),name:'Paket Baru',price:25000,photos:4,prints:1,layout:'strip',desc:'4 foto · 1 strip'});renderPackages()}
+function removePackage(i){if(config.packages.length<=1)return alert('Minimal satu paket.');if(!confirm('Hapus paket ini?'))return;collectPackages();config.packages.splice(i,1);renderPackages()}
+
+/* ---------- THEME ---------- */
+function renderPresets(){
+  presetGrid.innerHTML='';
+  THEME_PRESETS.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='rounded-xl p-3 text-left border border-slate-800';
+    b.style.background=p.bg;b.style.color=p.text;
+    b.innerHTML=`<span class="text-xs font-bold">${esc(p.name)}</span><span style="background:${p.accent}" class="block h-2 w-10 rounded-full mt-2"></span>`;
+    b.onclick=()=>{themeBg.value=p.bg;themeAccent.value=p.accent;themeCard.value=p.card;themeText.value=p.text;saveAll()};
+    presetGrid.appendChild(b);
+  });
+}
+function renderBgPreview(){
+  const src=config.theme.backgroundImage||'';
+  bgPreview.src=src;bgPreview.classList.toggle('hidden',!src);bgEmpty.classList.toggle('hidden',!!src);
+}
+function downscale(file,max,cb){
+  const r=new FileReader();
+  r.onload=()=>{
+    if(file.type==='image/svg+xml')return cb(r.result);
+    const im=new Image();
+    im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL(file.type==='image/png'?'image/png':'image/jpeg',.9))};
+    im.onerror=()=>cb(r.result);
+    im.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+function uploadBackground(e){const f=e.target.files&&e.target.files[0];if(!f)return;downscale(f,1600,d=>{config.theme.backgroundImage=d;collectForm();persist();renderBgPreview()});e.target.value=''}
+function clearBackgroundImage(){config.theme.backgroundImage='';collectForm();persist();renderBgPreview()}
+function uploadTo(e,targetId){const f=e.target.files&&e.target.files[0];if(!f)return;downscale(f,512,d=>{$(targetId).value=d;saveAll()});e.target.value=''}
+
+/* ---------- FEATURES ---------- */
+function renderFeatures(){
+  featureGrid.innerHTML='';
+  Object.keys(featureLabels).forEach(k=>{
+    const l=document.createElement('label');
+    l.className='flex items-center justify-between gap-2 rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs';
+    l.innerHTML=`<span>${esc(featureLabels[k])}</span>`;
+    const i=document.createElement('input');i.type='checkbox';i.className='h-4 w-4';i.dataset.feat=k;i.checked=config.features[k]!==false;
+    l.appendChild(i);featureGrid.appendChild(l);
+  });
+}
+
+/* ---------- EFFECTS ---------- */
+function renderEffects(){
+  effectList.innerHTML='';
+  config.effects.forEach((fx,i)=>{
+    const row=document.createElement('div');
+    row.className='flex items-center gap-3 rounded-xl bg-slate-950 border border-slate-800 p-3';
+    row.innerHTML=`<div class="h-10 w-10 rounded-lg shrink-0" style="background:linear-gradient(120deg,#f59e0b,#ec4899,#6366f1);filter:${fx.css==='none'?'none':esc(fx.css)}"></div>
+      <div class="flex-1 min-w-0"><p class="text-xs font-bold truncate">${esc(fx.name)}</p><p class="text-[10px] text-slate-500 truncate">${esc(fx.css)}</p></div>`;
+    const cb=document.createElement('input');cb.type='checkbox';cb.className='h-4 w-4';cb.dataset.fx=fx.id;cb.checked=fx.on!==false;
+    row.appendChild(cb);
+    if(!defaultEffects.some(d=>d.id===fx.id)){
+      const del=document.createElement('button');del.className='btn btn-danger py-1 px-2 text-[10px]';del.textContent='Hapus';del.onclick=()=>{config.effects.splice(i,1);renderEffects()};row.appendChild(del);
+    }
+    effectList.appendChild(row);
+  });
+}
+function previewEffect(){fxPreview.style.filter=fxCss.value.trim()||'none'}
+function addEffect(){
+  const name=fxName.value.trim(),css=fxCss.value.trim();
+  if(!name||!css)return alert('Nama dan CSS filter wajib diisi.');
+  config.effects.push({id:'fx'+Date.now().toString(36),name,desc:fxDesc.value.trim(),css,on:true});
+  fxName.value='';fxDesc.value='';fxCss.value='';
+  renderEffects();saveAll();
+}
+function resetEffects(){if(!confirm('Kembalikan daftar efek ke bawaan?'))return;config.effects=JSON.parse(JSON.stringify(defaultEffects));renderEffects();saveAll()}
+
+/* ---------- STICKERS ---------- */
+function renderStickers(){
+  stickerCount.textContent=stickers.length;statStickers.textContent=stickers.length;
+  stickerList.innerHTML=stickers.length?'':'<p class="text-[11px] text-slate-500 col-span-8">Belum ada stiker custom. Stiker bawaan photobooth sudah tersedia di kiosk.</p>';
+  stickers.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='relative h-14 w-14 rounded-lg bg-slate-950 border border-slate-800 p-1';
+    d.innerHTML=`<img src="${s.src}" class="h-full w-full object-contain" alt="${esc(s.name||'')}">`;
+    const del=document.createElement('button');del.className='absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-600 text-white text-[10px] font-bold';del.textContent='×';
+    del.onclick=()=>{stickers.splice(i,1);persistStickers();renderStickers()};
+    d.appendChild(del);stickerList.appendChild(d);
+  });
+}
+function uploadStickers(e){
+  const files=Array.from(e.target.files||[]);if(!files.length)return;
+  const cat=(stickerCat.value||'Custom').trim()||'Custom';let pending=files.length;
+  files.forEach(f=>downscale(f,512,src=>{
+    stickers.push({id:'cst'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:f.name.replace(/\.[^.]+$/,'').slice(0,20),cat,src});
+    if(--pending===0){persistStickers();renderStickers();flash('STIKER DIKIRIM')}
+  }));
+  e.target.value='';
+}
+function clearStickers(){if(!confirm('Hapus semua stiker custom?'))return;stickers=[];persistStickers();renderStickers()}
+
+/* ---------- FRAMES ---------- */
+function renderFrames(){
+  frameCount.textContent=frameItems.length;statFrames.textContent=frameItems.length;
+  frameList.innerHTML=frameItems.length?'':'<p class="text-[11px] text-slate-500 col-span-4">Belum ada frame upload. Kiosk tetap punya frame polos bawaan.</p>';
+  frameItems.forEach((f,i)=>{
+    const d=document.createElement('div');
+    d.className='relative rounded-xl bg-slate-950 border border-slate-800 p-1 aspect-[2/3] flex items-center justify-center overflow-hidden';
+    d.innerHTML=`<img src="${f.src}" class="max-h-full max-w-full object-contain" alt="${esc(f.name||'')}">`;
+    const del=document.createElement('button');del.className='absolute top-1 right-1 h-6 w-6 rounded-full bg-red-600 text-white text-xs font-bold';del.textContent='×';
+    del.onclick=()=>{frameItems.splice(i,1);persistFrames();renderFrames()};
+    d.appendChild(del);frameList.appendChild(d);
+  });
+}
+function uploadFrames(e){
+  const files=Array.from(e.target.files||[]);if(!files.length)return;
+  let pending=files.length;
+  files.forEach(f=>downscale(f,1600,src=>{
+    frameItems.push({id:'upload-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),name:f.name.replace(/\.[^.]+$/,'').slice(0,18),src});
+    if(--pending===0){persistFrames();renderFrames();flash('FRAME DIKIRIM')}
+  }));
+  e.target.value='';
+}
+function clearFrames(){if(!confirm('Hapus semua frame upload?'))return;frameItems=[];persistFrames();renderFrames()}
+
+/* ---------- PRINT ---------- */
+function toggleCustomSize(){customSizeWrap.classList.toggle('hidden',printSize.value!=='custom')}
+async function pingBridge(){
+  const url=bridgeUrl.value.trim();
+  if(!url)return bridgeStatus.textContent='Bridge URL kosong — kiosk akan pakai print browser.';
+  bridgeStatus.textContent='Menghubungi bridge...';
+  try{
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch(url.replace(/\/$/,'')+'/status',{signal:ctl.signal});
+    clearTimeout(t);
+    bridgeStatus.textContent=r.ok?'Bridge online ('+r.status+').':'Bridge merespons '+r.status+'.';
+  }catch(e){bridgeStatus.textContent='Bridge tidak terjangkau: '+e.message+'. Kiosk otomatis fallback ke print browser.'}
+}
+
+/* ---------- TRANSAKSI ---------- */
+function getHistory(){const h=getJSON(HISTORY_KEY,[]);return Array.isArray(h)?h:[]}
 function isToday(ts){const d=new Date(ts),n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate()}
-function refreshStats(){const all=normalizeTransactions(),today=all.filter(x=>isToday(x.timestamp));let revenue=0,qris=0,voucher=0,completed=0;today.forEach(x=>{const pm=String(x.paymentMethod).toLowerCase(),ps=String(x.paymentStatus||'').toUpperCase();if(String(x.status).toUpperCase()==='COMPLETED')completed++;if(pm==='qris')qris+=Number(x.price)||0;if(pm==='voucher')voucher+=Number(x.price)||0;if(['PAID','ACTIVE','EDITOR','PRINTING','COMPLETED'].includes(ps))revenue+=Number(x.price)||0});statSessions.textContent=today.length;statRevenue.textContent=money(revenue);statQris.textContent=money(qris);statVoucher.textContent=money(voucher);statCompleted.textContent=completed;overviewTotal.textContent=all.length}
-function renderTransactions(){const body=txBody,q=(searchTx.value||'').toLowerCase(),st=statusFilter.value;const data=normalizeTransactions().filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!st||String(x.status).toUpperCase()===st));if(!data.length){body.innerHTML='<tr><td colspan="6" class="p-8 text-center text-slate-500">Belum ada transaksi.</td></tr>';return}body.innerHTML=data.map(x=>`<tr class="hover:bg-slate-950"><td class="p-3"><div class="font-mono text-indigo-300">${safe(x.transactionId||x.id)}</div><div class="text-[9px] text-slate-500">${new Date(x.timestamp).toLocaleString('id-ID')}</div></td><td class="p-3 font-bold">${safe(x.packageName)}</td><td class="p-3 uppercase text-indigo-300">${safe(x.paymentMethod||'-')}</td><td class="p-3 font-bold text-emerald-400">${money(x.price)}</td><td class="p-3">${Number(x.photoCount)||0} / ${Number(x.printCount)||0}</td><td class="p-3"><span class="px-2 py-1 rounded-lg text-[9px] font-bold bg-slate-800">${safe(x.status||'-')}</span></td></tr>`).join('')}
-function loadSettings(){pkg1.value=localStorage.getItem('pkg1_price')||15000;pkg2.value=localStorage.getItem('pkg2_price')||25000;pkg3.value=localStorage.getItem('pkg3_price')||10000;extraPrint.value=localStorage.getItem('extra_print_price')||10000;brandName.value=localStorage.getItem('app_brand_name')||'PHOTOBOOTH STUDIO';welcomeMsg.value=localStorage.getItem('app_welcome_msg')||'Welcome to PHOTOBOOTH STUDIO';fontName.value=localStorage.getItem('app_kiosk_font')||'Inter';bgColor.value=localStorage.getItem('app_custom_bg_color')||'#07090e';sessionMinutes.value=localStorage.getItem('session_timer_minutes')||7;maxRetake.value=localStorage.getItem('max_retake_quota')||3;countdown.value=localStorage.getItem('capture_countdown_seconds')||3;layout.value=localStorage.getItem('default_layout')||'strip';overviewBrand.textContent=brandName.value;overviewTimer.textContent=sessionMinutes.value+' menit';overviewRetake.textContent=maxRetake.value;brandTitle.textContent=(brandName.value||'BOOTHPro')+' ADMIN'}
-function broadcast(type,data={}){if(syncChannel)syncChannel.postMessage({type,...data})}
-function savePrices(){[['pkg1_price','pkg1'],['pkg2_price','pkg2'],['pkg3_price','pkg3'],['extra_print_price','extraPrint']].forEach(([k,id])=>localStorage.setItem(k,String(Number(document.getElementById(id).value)||0)));broadcast('CONFIG_UPDATE');refreshAll();alert('Harga berhasil disimpan.')}
-function saveVisualSettings(){localStorage.setItem('app_brand_name',brandName.value.trim()||'PHOTOBOOTH STUDIO');localStorage.setItem('app_welcome_msg',welcomeMsg.value.trim());localStorage.setItem('app_kiosk_font',fontName.value);localStorage.setItem('app_custom_bg_color',bgColor.value);const file=bgFile.files[0];if(file){const r=new FileReader();r.onload=()=>{localStorage.setItem('app_custom_bg_image',r.result);broadcast('CONFIG_UPDATE');refreshAll();alert('Tampilan disimpan.')};r.readAsDataURL(file)}else{broadcast('CONFIG_UPDATE');refreshAll();alert('Tampilan disimpan.')}}
-function saveOperationalSettings(){localStorage.setItem('session_timer_minutes',sessionMinutes.value);localStorage.setItem('max_retake_quota',maxRetake.value);localStorage.setItem('capture_countdown_seconds',countdown.value);localStorage.setItem('default_layout',layout.value);save('booth_config',{brandName:brandName.value,timerCount:Number(countdown.value),layoutStyle:layout.value});broadcast('CONFIG_UPDATE');refreshAll();alert('Pengaturan operasional disimpan.')}
-function getVouchers(){return getJSON('voucher_codes',[])}function renderVouchers(){const list=voucherList,v=getVouchers();if(!v.length){list.innerHTML='<p class="text-xs text-slate-500">Belum ada voucher.</p>';return}list.innerHTML=v.map((x,i)=>{const o=typeof x==='string'?{code:x,active:true}:x;return`<div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex justify-between items-center"><div><b class="text-sm">${safe(o.code)}</b><p class="text-[9px] text-slate-500">${o.value?money(o.value):'Nilai mengikuti paket'} • ${o.active!==false?'Aktif':'Nonaktif'}</p></div><div class="flex gap-1"><button class="btn btn-dark" onclick="toggleVoucher(${i})">${o.active===false?'Aktifkan':'Nonaktifkan'}</button><button class="btn btn-danger" onclick="deleteVoucher(${i})">Hapus</button></div></div>`}).join('')}
-function addVoucher(){const code=voucherCode.value.trim().toUpperCase();if(code.length<3)return alert('Kode minimal 3 karakter.');let v=getVouchers();if(v.some(x=>(typeof x==='string'?x:x.code)===code))return alert('Kode sudah ada.');v.push({code,value:Number(voucherValue.value)||0,active:true});save('voucher_codes',v);voucherCode.value='';voucherValue.value='';renderVouchers();broadcast('CONFIG_UPDATE')}
-function toggleVoucher(i){let v=getVouchers();if(typeof v[i]==='string')v[i]={code:v[i],active:false};else v[i].active=v[i].active===false;save('voucher_codes',v);renderVouchers();broadcast('CONFIG_UPDATE')}
-function deleteVoucher(i){let v=getVouchers();v.splice(i,1);save('voucher_codes',v);renderVouchers();broadcast('CONFIG_UPDATE')}
-function getFrames(){return getJSON(FRAME_KEY,[])}
-function frameOrientation(w,h){return Number(h)>Number(w)?'portrait':'landscape'}
-function renderFrames(){const list=frameList,f=getFrames();if(!f.length){list.innerHTML='<p class="text-xs text-slate-500">Belum ada frame.</p>';return}list.innerHTML=f.map((x,i)=>{const slots=Array.isArray(x.slots)?x.slots:[];const meta=x.width&&x.height?`${x.width}×${x.height} • ${x.orientation||frameOrientation(x.width,x.height)}`:'Ukuran belum dianalisis';const slotMeta=slots.length?`${slots.length} slot otomatis`:'Slot belum terdeteksi';return `<div class="bg-slate-950 border border-slate-800 rounded-xl p-2"><img src="${safe(x.url)}" class="w-full h-28 object-contain bg-black rounded-lg"><p class="text-[9px] font-bold mt-2 truncate">${safe(x.name||'Frame '+(i+1))}</p><p class="text-[8px] text-slate-500">${safe(meta)}</p><p class="text-[8px] ${slots.length?'text-emerald-400':'text-amber-400'}">${slotMeta}</p><div class="grid grid-cols-2 gap-1 mt-2"><button onclick="analyzeSavedFrame(${i})" class="btn btn-dark">Analisis</button><button onclick="editFrameSlots(${i})" class="btn btn-dark">Atur Slot</button></div><button onclick="deleteFrame(${i})" class="btn btn-danger w-full mt-1">Hapus</button></div>`}).join('')}
-function readImageDimensions(url){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Gambar gagal dibaca'));img.src=url})}
-async function detectTemplateSlots(img){const fw=img.naturalWidth||img.width,fh=img.naturalHeight||img.height;const sw=320,sh=Math.max(160,Math.round(sw*fh/fw));const c=document.createElement('canvas');c.width=sw;c.height=sh;const x=c.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,sw,sh);x.drawImage(img,0,0,sw,sh);const d=x.getImageData(0,0,sw,sh).data,vis=new Uint8Array(sw*sh),out=[];const transparent=i=>d[i*4+3]<=40;for(let sy=0;sy<sh;sy++)for(let sx=0;sx<sw;sx++){const st=sy*sw+sx;if(vis[st]||!transparent(st))continue;const q=[st];let qi=0,area=0,minX=sx,maxX=sx,minY=sy,maxY=sy,edge=false;vis[st]=1;while(qi<q.length){const id=q[qi++],xx=id%sw,yy=Math.floor(id/sw);area++;minX=Math.min(minX,xx);maxX=Math.max(maxX,xx);minY=Math.min(minY,yy);maxY=Math.max(maxY,yy);if(!xx||!yy||xx===sw-1||yy===sh-1)edge=true;for(const ni of [id-1,id+1,id-sw,id+sw]){if(ni<0||ni>=sw*sh||vis[ni])continue;const nx=ni%sw,ny=Math.floor(ni/sw);if(Math.abs(nx-xx)+Math.abs(ny-yy)!==1||!transparent(ni))continue;vis[ni]=1;q.push(ni)}}const bw=maxX-minX+1,bh=maxY-minY+1,r=bw/bh,ratio=area/(sw*sh);if(!edge&&ratio>=.008&&bw>=Math.max(24,sw*.08)&&bh>=Math.max(24,sh*.08)&&r>=.25&&r<=4.5)out.push({x:minX/sw*fw,y:minY/sh*fh,width:bw/sw*fw,height:bh/sh*fh})}out.sort((a,b)=>Math.abs(a.y-b.y)>Math.min(a.height,b.height)*.35?a.y-b.y:a.x-b.x);return out.filter(s=>s.width>fw*.06&&s.height>fh*.04&&s.width<fw*.96&&s.height<fh*.96).slice(0,12)}
-async function analyzeSavedFrame(i){const f=getFrames()[i];if(!f)return;try{const img=await readImageDimensions(f.url);const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,slots=await detectTemplateSlots(img);const all=getFrames();all[i]={...f,width:w,height:h,orientation:frameOrientation(w,h),slots,slotSource:'auto',analyzedAt:new Date().toISOString()};save(FRAME_KEY,all);renderFrames();broadcast('FRAMES_UPDATE');alert(`${f.name||'Template'}\nUkuran: ${w}×${h}\nOrientasi: ${frameOrientation(w,h)}\nSlot terdeteksi: ${slots.length}${slots.length?'':'\nTidak ditemukan slot transparan tertutup. Gunakan Atur Slot.'}`)}catch(e){alert('Analisis gagal: '+e.message)}}
-async function analyzeAllFrames(){const f=getFrames();for(let i=0;i<f.length;i++)await analyzeSavedFrame(i);}
-function editFrameSlots(i){const f=getFrames()[i];if(!f)return;const current=Array.isArray(f.slots)?f.slots:[];const raw=prompt('Masukkan JSON slot manual. Contoh: [{"x":100,"y":120,"width":1000,"height":500}]',JSON.stringify(current));if(raw===null)return;try{const slots=JSON.parse(raw);if(!Array.isArray(slots))throw Error();const cleaned=slots.map(s=>({x:Number(s.x)||0,y:Number(s.y)||0,width:Number(s.width)||0,height:Number(s.height)||0})).filter(s=>s.width>0&&s.height>0);const all=getFrames();all[i]={...f,slots:cleaned,slotSource:'manual',analyzedAt:new Date().toISOString()};save(FRAME_KEY,all);renderFrames();broadcast('FRAMES_UPDATE');alert('Slot manual tersimpan. Kiosk akan memakai slot ini.')}catch(e){alert('Format JSON tidak valid.')}}
-async function addFrame(){const file=frameFile.files[0],name=frameName.value.trim()||'Frame';if(!file)return alert('Pilih file gambar.');if(file.size>5*1024*1024&&!confirm('File lebih dari 5 MB. LocalStorage bisa penuh. Lanjutkan?'))return;const r=new FileReader();r.onload=async()=>{try{const img=await readImageDimensions(r.result),w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,slots=await detectTemplateSlots(img);let f=getFrames();f.push({id:'tpl_'+Date.now().toString(36),name,url:r.result,createdAt:new Date().toISOString(),width:w,height:h,orientation:frameOrientation(w,h),slots,slotSource:'auto',analyzedAt:new Date().toISOString()});save(FRAME_KEY,f);renderFrames();frameFile.value='';frameName.value='';broadcast('FRAMES_UPDATE');alert(`Template tersimpan.\nUkuran: ${w}×${h}\nOrientasi: ${frameOrientation(w,h)}\nSlot otomatis: ${slots.length}${slots.length?'':'\nJika ini memang template berlubang, gunakan Atur Slot.'}`)}catch(e){alert('Frame gagal disimpan: '+(e.message||e))}};r.readAsDataURL(file)}
-function deleteFrame(i){if(!confirm('Hapus frame ini?'))return;let f=getFrames();f.splice(i,1);save(FRAME_KEY,f);renderFrames();broadcast('FRAMES_UPDATE')}
-function downloadBlob(content,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function exportCSV(){const data=normalizeTransactions();if(!data.length)return alert('Belum ada transaksi.');let csv='Transaction ID,Paket,Harga,Metode,Status Pembayaran,Status Transaksi,Jumlah Foto,Jumlah Cetak,Waktu,Voucher\n';data.forEach(x=>csv+=`"${String(x.transactionId||x.id).replaceAll('"','""')}","${String(x.packageName||'').replaceAll('"','""')}",${Number(x.price)||0},"${x.paymentMethod||''}","${x.paymentStatus||''}","${x.status||''}",${Number(x.photoCount)||0},${Number(x.printCount)||0},"${x.timestamp||''}","${x.voucherCode||''}"\n`);downloadBlob(csv,'boothpro_transactions_'+Date.now()+'.csv','text/csv')}
-function exportBackup(){const keys=['boothpro_transaction_log','booth_history_sessions','boothpro_current_transaction','booth_config','pkg1_price','pkg2_price','pkg3_price','extra_print_price','voucher_codes','saved_frames_gallery','app_brand_name','app_welcome_msg','app_kiosk_font','app_custom_bg_color','app_custom_bg_image','session_timer_minutes','max_retake_quota','capture_countdown_seconds','default_layout'];const out={version:'BoothPro Phase 3',createdAt:new Date().toISOString(),data:{}};keys.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)out.data[k]=v});downloadBlob(JSON.stringify(out,null,2),'boothpro_backup_'+Date.now()+'.json','application/json')}
-function restoreBackup(){const file=restoreFile.files[0];if(!file)return alert('Pilih file backup JSON.');const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.data)throw Error();if(!confirm('Restore backup dan mengganti data terkait?'))return;Object.entries(o.data).forEach(([k,v])=>localStorage.setItem(k,v));refreshAll();alert('Backup berhasil direstore.')}catch(e){alert('Backup tidak valid.')}};r.readAsText(file)}
-function clearTransactions(){if(!confirm('Hapus seluruh riwayat transaksi?'))return;localStorage.removeItem(TX_KEY);localStorage.removeItem(OLD_TX_KEY);refreshAll()}
-function broadcastReset(){broadcast('KIOSK_RESET');localStorage.setItem('boothpro_admin_reset_at',Date.now());alert('Sinyal reset dikirim ke Kiosk.')}
-function showTab(name,btn){document.querySelectorAll('main section[id^="tab-"]').forEach(x=>x.classList.add('hidden'));document.getElementById('tab-'+name).classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(name==='transactions')renderTransactions();if(name==='vouchers')renderVouchers();if(name==='frames')renderFrames();if(name==='settings')loadSettings();if(name==='hardware')hwRefresh()}
-function refreshAll(){refreshStats();renderTransactions();renderVouchers();renderFrames();loadSettings();kioskHeartbeat.textContent='Data diperbarui '+new Date().toLocaleTimeString('id-ID')}
-if(syncChannel)syncChannel.onmessage=e=>{syncStatus.textContent='● SYNC EVENT';setTimeout(()=>syncStatus.textContent='● LOCAL SYNC',1200);refreshAll()};window.addEventListener('storage',refreshAll);window.addEventListener('DOMContentLoaded',()=>{refreshAll();hwRefresh()});
+function renderStats(){
+  const h=getHistory(),today=h.filter(x=>isToday(x.date||x.timestamp));
+  statSessions.textContent=today.length;
+  statRevenue.textContent=money(today.reduce((a,x)=>a+(Number(x.price)||0),0));
+  statAll.textContent=h.length;
+}
+function renderTx(){
+  const h=getHistory().slice().reverse();
+  txBody.innerHTML=h.length?'':'<tr><td colspan="7" class="py-4 text-slate-500">Belum ada transaksi.</td></tr>';
+  h.forEach(x=>{
+    const tr=document.createElement('tr');tr.className='border-t border-slate-800';
+    tr.innerHTML=`<td class="py-2">${esc(new Date(x.date||x.timestamp||Date.now()).toLocaleString('id-ID'))}</td><td>${esc(x.id||'')}</td><td>${esc(x.packageName||x.package||'')}</td><td>${esc(x.count||0)}</td><td>${esc(x.prints||0)}</td><td>${esc(x.method||'')}</td><td class="text-right">${money(x.price)}</td>`;
+    txBody.appendChild(tr);
+  });
+}
+function exportCsv(){
+  const rows=[['waktu','id','paket','foto','cetak','metode','harga'],...getHistory().map(x=>[new Date(x.date||x.timestamp||Date.now()).toISOString(),x.id||'',x.packageName||'',x.count||0,x.prints||0,x.method||'',x.price||0])];
+  download('boothpro-transaksi.csv',rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv');
+}
+function clearHistory(){if(!confirm('Hapus seluruh riwayat sesi di browser ini?'))return;localStorage.removeItem(HISTORY_KEY);renderStats();renderTx()}
+
+/* ---------- BACKUP ---------- */
+function download(name,content,type){const b=new Blob([content],{type:type||'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function exportBackup(){collectForm();download('boothpro-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({version:'3.0',config,stickers,frames:frameItems,history:getHistory()},null,2))}
+function importBackup(e){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d.config)throw new Error('File backup tidak valid.');
+      if(!confirm('Timpa konfigurasi kiosk di browser ini?'))return;
+      localStorage.setItem(CONFIG_KEY,JSON.stringify(d.config));
+      if(Array.isArray(d.stickers))localStorage.setItem(STICKER_KEY,JSON.stringify(d.stickers));
+      if(Array.isArray(d.frames))localStorage.setItem(FRAME_KEY,JSON.stringify(d.frames));
+      if(Array.isArray(d.history))localStorage.setItem(HISTORY_KEY,JSON.stringify(d.history));
+      reloadAll();alert('Restore selesai.');
+    }catch(err){alert('Gagal restore: '+err.message)}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+window.addEventListener('storage',ev=>{
+  if(ev.key===CONFIG_KEY){config=loadConfig();fillForm();flash('KIOSK UPDATE')}
+  else if(ev.key===STICKER_KEY){stickers=getJSON(STICKER_KEY,[])||[];renderStickers()}
+  else if(ev.key===FRAME_KEY){frameItems=getJSON(FRAME_KEY,[])||[];renderFrames()}
+  else if(ev.key===HISTORY_KEY){renderStats();renderTx()}
+});
+fillForm();
 </script>
-<script>
-/* BoothPro Phase 4 Admin Cloud Monitor */
-const BP4A_DB='BoothProCloudDB',BP4A_STORE='cloud_jobs',BP4A_VER=1;
-const bp4aChannel=('BroadcastChannel' in window)?new BroadcastChannel('booth_sync_channel'):null;
-function bp4a_open(){return new Promise((resolve,reject)=>{const r=indexedDB.open(BP4A_DB,BP4A_VER);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(BP4A_STORE))r.result.createObjectStore(BP4A_STORE,{keyPath:'jobId'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-function bp4a_all(){return bp4a_open().then(db=>new Promise((res,rej)=>{const t=db.transaction(BP4A_STORE,'readonly'),r=t.objectStore(BP4A_STORE).getAll();r.onsuccess=()=>{db.close();res(r.result||[])};r.onerror=()=>{db.close();rej(r.error)}}))}
-function bp4a_put(j){return bp4a_open().then(db=>new Promise((res,rej)=>{const t=db.transaction(BP4A_STORE,'readwrite');t.objectStore(BP4A_STORE).put(j);t.oncomplete=()=>{db.close();res()};t.onerror=()=>{db.close();rej(t.error)}}))}
-function bp4a_delete(id){return bp4a_open().then(db=>new Promise((res,rej)=>{const t=db.transaction(BP4A_STORE,'readwrite');t.objectStore(BP4A_STORE).delete(id);t.oncomplete=()=>{db.close();res()};t.onerror=()=>{db.close();rej(t.error)}}))}
-function bp4a_safe(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-async function refreshCloudMonitor(){try{const jobs=await bp4a_all();let up=0,pend=0,fail=0;jobs.forEach(j=>{if(j.status==='UPLOADED')up++;else if(j.status==='FAILED')fail++;else pend++});cloudTotal.textContent=jobs.length;cloudUploaded.textContent=up;cloudPending.textContent=pend;cloudFailed.textContent=fail;cloudOnline.textContent=navigator.onLine?'● ONLINE • Queue siap sinkron':'● OFFLINE • Job akan menunggu koneksi';cloudOnline.className=navigator.onLine?'text-[10px] text-emerald-400':'text-[10px] text-amber-400';cloudBody.innerHTML=jobs.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(j=>`<tr><td class="p-2 font-mono text-indigo-300">${bp4a_safe(j.jobId)}</td><td class="p-2 font-mono">${bp4a_safe(j.transactionId)}</td><td class="p-2 uppercase">${bp4a_safe(j.type)}</td><td class="p-2"><span class="px-2 py-1 rounded bg-slate-800">${bp4a_safe(j.status)}</span></td><td class="p-2 text-[9px]">${j.uploadedAt?new Date(j.uploadedAt).toLocaleString('id-ID'):'-'}</td><td class="p-2 max-w-[180px] truncate">${j.resultUrl?`<a class="text-indigo-400 underline" href="${bp4a_safe(j.resultUrl)}" target="_blank">Open URL</a>`:'-'}</td><td class="p-2 text-red-300 max-w-[180px]">${bp4a_safe(j.error||'-')}</td><td class="p-2">${j.status==='FAILED'?`<button class="btn btn-dark" onclick="retryCloudJob('${j.jobId}')">Retry</button>`:'-'}</td></tr>`).join('')||'<tr><td colspan="8" class="p-8 text-center text-slate-500">Belum ada cloud job.</td></tr>'}catch(e){console.error(e)}}
-async function retryCloudJob(id){const db=await bp4a_open();const j=await new Promise((res,rej)=>{const t=db.transaction(BP4A_STORE,'readonly'),r=t.objectStore(BP4A_STORE).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});db.close();if(!j)return;j.status='PENDING';j.error='';j.updatedAt=new Date().toISOString();await bp4a_put(j);if(bp4aChannel)bp4aChannel.postMessage({type:'CLOUD_RETRY_JOB',jobId:id});refreshCloudMonitor()}
-async function clearUploadedCloudJobs(){if(!confirm('Hapus job cloud yang sudah UPLOADED dari monitor?'))return;const jobs=await bp4a_all();for(const j of jobs)if(j.status==='UPLOADED')await bp4a_delete(j.jobId);refreshCloudMonitor()}
-function saveCloudConfig(){const n=cloudNameInput.value.trim(),p=cloudPresetInput.value.trim();if(!n||!p)return alert('Cloud Name dan Upload Preset wajib diisi.');localStorage.setItem('boothpro_cloud_name',n);localStorage.setItem('boothpro_upload_preset',p);if(bp4aChannel)bp4aChannel.postMessage({type:'CLOUD_SYNC_REQUEST'});alert('Cloud config disimpan.')}
-function cloudSyncNow(){if(bp4aChannel)bp4aChannel.postMessage({type:'CLOUD_SYNC_REQUEST'});refreshCloudMonitor()}
-const _bp4_original_showTab=window.showTab;window.showTab=function(name,btn){_bp4_original_showTab(name,btn);if(name==='cloud'){cloudNameInput.value=localStorage.getItem('boothpro_cloud_name')||'risakil1';cloudPresetInput.value=localStorage.getItem('boothpro_upload_preset')||'risakil';refreshCloudMonitor()}};
-if(bp4aChannel)bp4aChannel.onmessage=e=>{const m=e.data||{};if(['CLOUD_QUEUE_UPDATED','CLOUD_UPLOAD_COMPLETE','CLOUD_UPLOAD_FAILED','CLOUD_RETRY_JOB'].includes(m.type))refreshCloudMonitor()};window.addEventListener('online',refreshCloudMonitor);window.addEventListener('offline',refreshCloudMonitor);window.addEventListener('storage',refreshCloudMonitor);window.addEventListener('DOMContentLoaded',()=>{cloudNameInput.value=localStorage.getItem('boothpro_cloud_name')||'risakil1';cloudPresetInput.value=localStorage.getItem('boothpro_upload_preset')||'risakil';refreshCloudMonitor()});
-</script>
-<script>
-/* BoothPro Phase 5 Hardware Monitor */
-const bp5aChannel=('BroadcastChannel' in window)?new BroadcastChannel('booth_sync_channel'):null;
-function hwText(id,text,cls=''){const e=document.getElementById(id);if(e){e.textContent=text;e.className=cls}}
-function hwRender(state){if(!state)return;hwText('hwCamera',state.camera||'-',String(state.camera)==='READY'?'text-lg text-emerald-400':'text-lg text-amber-400');hwText('hwPrinter',state.printer||'BROWSER_PRINT','text-lg text-indigo-400');hwText('hwFullscreen',state.fullscreen?'ON':'OFF',state.fullscreen?'text-lg text-emerald-400':'text-lg text-slate-400');hwText('hwWake',state.wakeLock?'ON':'OFF',state.wakeLock?'text-lg text-emerald-400':'text-lg text-slate-400');hwText('hwNetwork',state.online?'ONLINE':'OFFLINE',state.online?'text-emerald-400':'text-red-400');hwText('hwHeartbeat',state.updatedAt?new Date(state.updatedAt).toLocaleTimeString('id-ID'):'-');}
-function hwRefresh(){try{const s=JSON.parse(localStorage.getItem('boothpro_hardware_state')||'null');if(s)hwRender(s)}catch(e){};if(bp5aChannel)bp5aChannel.postMessage({type:'HARDWARE_REQUEST_STATUS',timestamp:new Date().toISOString()})}
-function hwOpenKiosk(){window.open('index.html','_blank','noopener')}
-function hwFullscreenRequest(){if(bp5aChannel)bp5aChannel.postMessage({type:'HARDWARE_FULLSCREEN_REQUEST'})}
-function hwWakeRequest(){if(bp5aChannel)bp5aChannel.postMessage({type:'HARDWARE_WAKELOCK_REQUEST'})}
-function hwTestPrint(){if(bp5aChannel)bp5aChannel.postMessage({type:'HARDWARE_PRINT_TEST'});else alert('BroadcastChannel tidak tersedia. Buka Kiosk terlebih dahulu.');}
-if(bp5aChannel)bp5aChannel.onmessage=e=>{const m=e.data||{};if(m.type==='HARDWARE_STATUS'||m.type==='HARDWARE_HEARTBEAT')hwRender(m.state||{...m});if(m.type==='HARDWARE_HEARTBEAT'&&m.state)hwRender(m.state)};
-window.addEventListener('storage',e=>{if(e.key==='boothpro_hardware_state')hwRefresh()});
-</script></body></html>
+</body>
+</html>
